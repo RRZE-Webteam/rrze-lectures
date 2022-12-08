@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name:     RRZE DIP
+ * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Einbindung von Daten aus DIP
  * Version:         0.0.17
