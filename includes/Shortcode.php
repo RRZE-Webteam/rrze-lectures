@@ -1,6 +1,6 @@
 <?php
 
-namespace RRZE\DIP;
+namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 use function RRZE\DIP\Config\getShortcodeSettings;
@@ -101,13 +101,11 @@ class Shortcode
 
         if (empty($data)){
             $this->lecture = new DIPAPI($this->atts);
-// echo 'hier';
-// exit;
 
 
-            // $test = '63fe386185';
+            $this->atts['id'] = '63fe386185';
 
-            $data = $this->lecture->getResponse();
+            $data = $this->lecture->getResponse($this->atts['id']);
             Functions::setDataToCache($data, $this->atts);
         }
 
@@ -128,10 +126,7 @@ class Shortcode
             $data = $this->getData('lectureByLecturerID', $this->atts['lecturerID']);
         }else{
             // all lectures
-            if (empty($this->atts['DIPID'])){
-                $this->atts['DIPID'] = $this->options['basic_lectureID'];
-            }
-            $data = $this->getData('lectureByDIPID', $this->atts['DIPID']);
+            $data = $this->getData('lecture');
         }
 
         if ($data && is_array($data)) {

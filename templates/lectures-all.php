@@ -1,6 +1,6 @@
 <?php
 
-namespace RRZE\DIP;
+namespace RRZE\Lectures;
 
 $ret = '<div class="rrze-lectures">';
 if ($data) {

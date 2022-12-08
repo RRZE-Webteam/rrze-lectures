@@ -1,12 +1,12 @@
 <?php
 
-namespace RRZE\DIP;
+namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
 use function RRZE\DIP\Config\getConstants;
-use RRZE\DIP\Settings;
-use RRZE\DIP\Shortcode;
+use RRZE\Lectures\Settings;
+use RRZE\Lectures\Shortcode;
 
 /**
  * Hauptklasse (Main)

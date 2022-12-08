@@ -8,9 +8,9 @@
  * @since FAU 1.0
  */
 
-namespace RRZE\DIP;
+namespace RRZE\Lectures;
 
-use RRZE\DIP\Main;
+use RRZE\Lectures\Main;
 
 $thisThemeGroup = Main::getThemeGroup();
 

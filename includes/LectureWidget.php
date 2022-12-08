@@ -1,6 +1,6 @@
 <?php
 
-namespace RRZE\DIP;
+namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace RRZE\DIP;
+namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
@@ -84,10 +84,7 @@ class DIPAPI
 
     private function setAPI()
     {
-        // 6bcdd126-c044-4ad4-9880-bac1fa4182fb-d687146d-3f92-4fed-9201-4ef6cccbce91
-        // $this->api = 'https://api.fau.de/pub/v1/mschema/educationEvents';
-        // $this->api = 'https://api.fau.de/pub/v1/vz/educationEvents';
-        $this->api = 'https://api.fau.de/pub/v1/vz/educationEvents/63fe386185';
+        $this->api = 'https://api.fau.de/pub/v1/vz/educationEvents/'; // 2DO: use from settings
     }
 
     private static function log(string $method, string $logType = 'error', string $msg = '')
