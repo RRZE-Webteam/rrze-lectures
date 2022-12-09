@@ -103,28 +103,33 @@ class Shortcode
         if (empty($data)){
             $this->lecture = new DIPAPI($this->atts);
 
-
-            $this->atts['id'] = 'e782cf9b14';
-            // $this->atts['id'] = '';
+            // $this->atts['id'] = 'e782cf9b14';
 
             $data = $this->lecture->getResponse($this->atts['id']);
             Functions::setDataToCache($data, $this->atts);
         }
 
-
-
-        $atts['format'] = 'single';
-        
-        $template = 'shortcodes/' . $atts['format'] . '.html';
+        $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
         $data = $data['content'];
 
-        // echo '<pre>';
-        // var_dump($template);
-        // exit;
+        if (isset($_GET['debug'])){
+            echo '<pre>';
+            var_dump($data);
+            exit;
+        }
+
+        if (!empty($data['data'])){
+            $aData = $data['data'];
+            foreach($aData as $data){
 
 
-        $content = Template::getContent($template, $data);
+                $content .= Template::getContent($template, $data) . '<hr>';
+            }
+        }else{
+            $content = Template::getContent($template, $data);
+        }
+
 
         // $content = do_shortcode($content);
 

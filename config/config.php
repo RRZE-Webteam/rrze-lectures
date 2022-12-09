@@ -221,6 +221,12 @@ function getShortcodeSettings()
                 'label' => __('Headline\'s size', 'rrze-lectures'),
                 'type' => 'number',
             ],
+            'format' => [
+                'default' => 'single',
+                'field_type' => 'text',
+                'label' => __('Format', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'nodata' => [
                 'default' => __('No matching entries found.', 'rrze-lectures'),
                 'field_type' => 'text',
