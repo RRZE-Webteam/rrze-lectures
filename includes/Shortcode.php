@@ -113,21 +113,19 @@ class Shortcode
             return __('No lecture found with this ID', 'rrze-lectures') . ' ' . $atts['id'];
         }
 
-        if (isset($_GET['debug'])){
-            echo '<pre>';
-            var_dump($data);
-            exit;
-        }
 
         // $oSanitizer = new Sanitizer();
         // $data = $oSanitizer->sanitizeArray($response['content']);
 
         $data = $response['content'];
 
+        if (isset($_GET['debug'])){
+            echo '<pre>';
+            var_dump($data);
+            exit;
+        }
+
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
-
-
-
 
         if (empty($data['data'])){
             // = 1 lecture
