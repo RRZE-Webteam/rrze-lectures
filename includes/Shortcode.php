@@ -5,6 +5,7 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
+use RRZE\Lectures\Template;
 
 
 /**
@@ -103,61 +104,33 @@ class Shortcode
             $this->lecture = new DIPAPI($this->atts);
 
 
-            // $this->atts['id'] = '63fe386185';
-            $this->atts['id'] = '';
+            $this->atts['id'] = 'e782cf9b14';
+            // $this->atts['id'] = '';
 
             $data = $this->lecture->getResponse($this->atts['id']);
             Functions::setDataToCache($data, $this->atts);
         }
 
 
-        echo '<pre>';
-        var_dump($data);
-        exit;
 
-        if (!empty($this->atts['id'])){
-            // lectureByID
-            $data = $this->getData('lectureByID', $this->atts['id']);
-        }elseif (!empty($this->atts['name'])){
-            // lectureByLecturerName
-            $data = $this->getData('lectureByLecturer', $this->atts['name']);
-        }elseif (!empty($this->atts['lecturerID'])){
-            // lectureByLecturerID
-            $data = $this->getData('lectureByLecturerID', $this->atts['lecturerID']);
-        }else{
-            // all lectures
-            $data = $this->getData('lecture');
-        }
+        $atts['format'] = 'single';
+        
+        $template = 'shortcodes/' . $atts['format'] . '.html';
 
-        if ($data && is_array($data)) {
-            // $data = '<pre>' . json_encode($data, JSON_PRETTY_PRINT) . '</pre>';
-            // var_dump($data);
-            // exit;
+        $data = $data['content'];
 
-            // is it an enclosing shortcode?
-            if (preg_match_all('(\$\w+)', $content, $matches)) {
-                foreach($data as $entry){
-                    $ret .= str_replace(array_keys($entry), array_values($entry), $content);
-                }
-                return $ret;
-            }else{
-                if (count($data) > 1){
-                    $filename = trailingslashit(dirname(__FILE__)) . '../templates/lectures-all.php';
-                }else{
-                    $filename = trailingslashit(dirname(__FILE__)) . '../templates/lectures-single.php';
-                }
 
-                if (is_file($filename)) {
-                    ob_start();
-                    include $filename;
-                    return str_replace("\n", " ", ob_get_clean());
-                }
-            }
-    
+        $content = Template::getContent($template, $data);
 
-        } else {
-            return $this->atts['nodata'];
-        }
+        // echo '<pre>';
+        // var_dump($data['identifier']);
+        // exit;
+
+        // $content = do_shortcode($content);
+
+        return $content;
+
+
     }
 
     public function normalize($atts)

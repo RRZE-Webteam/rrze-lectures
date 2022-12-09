@@ -4,7 +4,7 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         0.0.21
+ * Version:         0.0.22
  * Author:          RRZE-Webteam
  * Author URI:      https://blogs.fau.de/webworking/
  * License:         GNU General Public License v3
@@ -109,6 +109,19 @@ function deactivation()
 }
 
 /**
+ * Instantiate Plugin class.
+ * @return object Plugin
+ */
+function plugin() {
+    static $instance;
+    if (null === $instance) {
+        $instance = new Plugin(__FILE__);
+    }
+
+    return $instance;
+}
+
+/**
  * Wird durchgeführt, nachdem das WP-Grundsystem hochgefahren
  * und alle Plugins eingebunden wurden.
  */
@@ -116,22 +129,26 @@ function loaded()
 {
     // Sprachdateien werden eingebunden.
     loadTextDomain();
+    plugin()->onLoaded();
 
-    // Überprüft die Systemvoraussetzungen.
     if ($error = systemRequirements()) {
         add_action('admin_init', function () use ($error) {
-            $pluginData = get_plugin_data(__FILE__);
-            $pluginName = $pluginData['Name'];
-            $tag = is_plugin_active_for_network(plugin_basename(__FILE__)) ? 'network_admin_notices' : 'admin_notices';
-            add_action($tag, function () use ($pluginName, $error) {
-                printf(
-                    '<div class="notice notice-error"><p>' . __('Plugins: %1$s: %2$s', 'rrze-univis') . '</p></div>',
-                    esc_html($pluginName),
-                    esc_html($error)
-                );
-            });
+            if (current_user_can('activate_plugins')) {
+                $pluginData = get_plugin_data(plugin()->getFile());
+                $pluginName = $pluginData['Name'];
+                $tag = is_plugin_active_for_network(plugin()->getBaseName()) ? 'network_admin_notices' : 'admin_notices';
+                add_action($tag, function () use ($pluginName, $error) {
+                    printf(
+                        '<div class="notice notice-error"><p>' .
+                            /* translators: 1: The plugin name, 2: The error string. */
+                            __('Plugins: %1$s: %2$s', 'rrze-newsletter') .
+                            '</p></div>',
+                        esc_html($pluginName),
+                        esc_html($error)
+                    );
+                });
+            }
         });
-        // Das Plugin wird nicht mehr ausgeführt.
         return;
     }
 

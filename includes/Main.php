@@ -7,6 +7,8 @@ defined('ABSPATH') || exit;
 // use function RRZE\Lectures\Config\getConstants;
 use RRZE\Lectures\Settings;
 use RRZE\Lectures\Shortcode;
+use RRZE\Lectures\Templates;
+
 
 /**
  * Hauptklasse (Main)
@@ -36,6 +38,9 @@ class Main
         $settings->onLoaded();
 
         $this->settings = $settings;
+
+        $templates = new Template($this->pluginFile, $settings);
+        $templates->onLoaded();
 
         $shortcode = new Shortcode($this->pluginFile, $settings);
         $shortcode->onLoaded();
