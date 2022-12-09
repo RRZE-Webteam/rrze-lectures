@@ -3,8 +3,8 @@
 namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
-use function RRZE\DIP\Config\getShortcodeSettings;
-use function RRZE\DIP\Config\getConstants;
+use function RRZE\Lectures\Config\getShortcodeSettings;
+use function RRZE\Lectures\Config\getConstants;
 
 
 /**
@@ -103,15 +103,15 @@ class Shortcode
             $this->lecture = new DIPAPI($this->atts);
 
 
-            $this->atts['id'] = '63fe386185';
+            // $this->atts['id'] = '63fe386185';
+            $this->atts['id'] = '';
 
             $data = $this->lecture->getResponse($this->atts['id']);
             Functions::setDataToCache($data, $this->atts);
         }
 
-// echo 'asdf';
-// exit;
 
+        echo '<pre>';
         var_dump($data);
         exit;
 

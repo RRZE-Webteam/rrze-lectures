@@ -4,10 +4,10 @@ namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
-use function RRZE\DIP\Config\getFields;
-use function RRZE\DIP\Config\getMenuSettings;
-use function RRZE\DIP\Config\getOptionName;
-use function RRZE\DIP\Config\getSections;
+use function RRZE\Lectures\Config\getFields;
+use function RRZE\Lectures\Config\getMenuSettings;
+use function RRZE\Lectures\Config\getOptionName;
+use function RRZE\Lectures\Config\getSections;
 
 /**
  * Settings-Klasse

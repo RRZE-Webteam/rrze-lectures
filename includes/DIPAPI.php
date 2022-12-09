@@ -69,12 +69,14 @@ class DIPAPI
             ];    
         }else{
             $content = json_decode($apiResponse['body'], true);
-            echo '<pre>';
-            var_dump($content);
-            exit;
+
+            // echo '<pre>';
+            // var_dump($content);
+            // exit;
+
             $aRet = [
                 'valid' => TRUE, 
-                'content' => $content['data']
+                'content' => $content
             ];
         }
 
