@@ -18,7 +18,6 @@ class Sanitizer
 
     public function sanitizeField($value, $type = 'string'){
         switch($type){
-            case 'string':
             case 'time':
                 return date("H:i:s", strtotime($value));
                 break;
