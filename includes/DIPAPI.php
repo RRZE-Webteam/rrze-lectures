@@ -22,13 +22,9 @@ class DIPAPI
     protected $gast;
 
     // public function __construct($api, $orgID, $atts)
-    public function __construct($atts)
+    public function __construct()
     {
         $this->setAPI();
-        // $this->orgID = $orgID;
-        $this->atts = $atts;
-        $this->sem = (!empty($this->atts['sem']) && self::checkSemester($this->atts['sem']) ? $this->atts['sem'] : '');
-        $this->gast = (!empty($this->atts['gast']) ? __('Allowed for guest students', 'rrze-univis') : '');
     }
 
 

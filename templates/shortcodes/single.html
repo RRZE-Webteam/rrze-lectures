@@ -19,9 +19,9 @@
         {{/providerValues.event_orgunit}}
 
 
-        Veranstaltungsart: {{=providerValues.event.eventtype}}
-        Turnus des Angebots: FEHLT
-        Semesterwochenstunden: FEHLT
+        <p>Veranstaltungsart: {{=providerValues.event.eventtype}}</p>
+        <p>Turnus des Angebots: FEHLT</p>
+        <p>Semesterwochenstunden: FEHLT</p>
 
 
 
@@ -34,13 +34,13 @@
         <ul>
             {{@providerValues.event_responsible}}
             <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">
-                <a href="hier fehlt der Link zu IdM oder DIP liefert ID für rrze-contact oder event_responsible hat unter location einen URL">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{:_val.surname}}| surname (schema: familyName) ist LEER |{{/_val.surname}}</a>
+                <a href="hier fehlt der Link zu IdM oder DIP liefert ID für rrze-contact oder event_responsible hat unter location einen URL">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{:_val.surname}}! surname (schema: familyName) ist LEER !{{/_val.surname}}</a>
             </li>
             {{/@providerValues.event_responsible}}
         </ul>
 
         {{description}}<h4>Inhalt</h4>
-        <p itemprop="description">{{=description}}</p>{{:description}}description ist LEER{{/description}}
+        <p itemprop="description">{{=description}}</p>{{:description}}<p>description ist LEER</p>{{/description}}
 
 
         {{maximumAttendeeCapacity}}<p>Maximale Anzahl Teilnehmer/-innen: {{=maximumAttendeeCapacity}}</p>{{/maximumAttendeeCapacity}}

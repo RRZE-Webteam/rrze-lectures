@@ -22,7 +22,7 @@ class Shortcode
     protected $show = [];
     protected $hide = [];
     protected $atts;
-    protected $lecture;
+    protected $oDIP;
     private $settings = '';
     private $aAllowedColors = [];
 
@@ -101,17 +101,17 @@ class Shortcode
         }
 
         if (empty($data)){
-            $this->lecture = new DIPAPI($this->atts);
+            $this->oDIP = new DIPAPI();
 
             // $this->atts['id'] = 'e782cf9b14';
 
-            $data = $this->lecture->getResponse($this->atts['id']);
-            Functions::setDataToCache($data, $this->atts);
+            $response = $this->oDIP->getResponse($this->atts['id']);
+            // Functions::setDataToCache($data, $this->atts);
         }
 
-        $template = 'shortcodes/' . $this->atts['format'] . '.html';
-
-        $data = $data['content'];
+        if (!$response['valid']){
+            return __('No lecture found with this ID', 'rrze-lectures') . ' ' . $atts['id'];
+        }
 
         if (isset($_GET['debug'])){
             echo '<pre>';
@@ -119,19 +119,28 @@ class Shortcode
             exit;
         }
 
-        if (!empty($data['data'])){
+        // $oSanitizer = new Sanitizer();
+        // $data = $oSanitizer->sanitizeArray($response['content']);
+
+        $data = $response['content'];
+
+        $template = 'shortcodes/' . $this->atts['format'] . '.html';
+
+
+
+
+        if (empty($data['data'])){
+            // = 1 lecture
+            $content = Template::getContent($template, $data);
+        }else{
+            // > 1 lecture
             $aData = $data['data'];
             foreach($aData as $data){
-
-
                 $content .= Template::getContent($template, $data) . '<hr>';
             }
-        }else{
-            $content = Template::getContent($template, $data);
         }
 
-
-        // $content = do_shortcode($content);
+        $content = do_shortcode($content);
 
         return $content;
 
@@ -261,7 +270,7 @@ class Shortcode
 
     public function fillGutenbergOptions($aSettings)
     {
-        $this->lecture = new DIPAPI($this->DIPURL, $this->DIPOrgNr, null);
+        $this->dip = new DIPAPI($this->DIPURL, $this->DIPOrgNr, null);
 
         foreach ($aSettings as $task => $settings) {
             $settings['number']['default'] = $this->DIPOrgNr;

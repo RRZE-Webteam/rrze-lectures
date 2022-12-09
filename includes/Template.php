@@ -25,8 +25,6 @@ class Template
     public function onLoaded()
     {
         $this->isFauTheme = self::isFAUTheme();
-        // add_filter('single_template', array($this, 'include_single_template'));
-        // add_filter('archive_template', array($this, 'include_archive_template'));
     }
 
     private static function isFAUTheme() {
@@ -34,7 +32,6 @@ class Template
         return in_array($active_theme->get('Name'), getConstants('fauthemes'));
     }
     
-
     public function include_single_template($template_path)
     {
         global $post;

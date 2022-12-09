@@ -7,8 +7,6 @@ defined('ABSPATH') || exit;
 // use function RRZE\Lectures\Config\getConstants;
 use RRZE\Lectures\Settings;
 use RRZE\Lectures\Shortcode;
-use RRZE\Lectures\Templates;
-
 
 /**
  * Hauptklasse (Main)
@@ -57,26 +55,17 @@ class Main
         register_widget($this->widget);
     }
 
-
     public function getSingleEntry()
     {
         global $wp_query;
 
         if (isset($wp_query->query_vars['lv_id'])) {
-            $data = do_shortcode('[lecture task="lectures-single" lv_id="' . $wp_query->query_vars['lv_id'] . '" ]');
-        } elseif (isset($wp_query->query_vars['lectureid'])) {
-            $sShortcodeParams = '';
-            $aParts = explode('_', $wp_query->query_vars['lectureid']);
-            if (!empty($aParts[1])) {
-                parse_str($aParts[1], $aParams);
-                $sShortcodeParams = 'show="' . $aParams['show'] . '" hide="' . $aParams['hide'] . '"';
-            }
+            $lectureContent = do_shortcode('[lectures id="' . $wp_query->query_vars['lv_id'] . '" ]');
+            include plugin_dir_path($this->pluginFile) . 'templates/single-lecture.php';
+            exit;
         } else {
             return;
         }
-
-        include plugin_dir_path($this->pluginFile) . 'templates/single-lecture.php';
-        exit;
     }
 
     public static function getThemeGroup()
