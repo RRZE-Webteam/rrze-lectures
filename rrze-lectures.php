@@ -4,7 +4,7 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         0.0.22
+ * Version:         0.0.23
  * Author:          RRZE-Webteam
  * Author URI:      https://blogs.fau.de/webworking/
  * License:         GNU General Public License v3

@@ -81,10 +81,9 @@ class Template
             return '';
         }
         if (empty($data)) {
-            echo 'data empty';
-            exit;
             return $content;
         }
+
         $parser = new Parser();
         return $parser->parse($content, $data);
     }

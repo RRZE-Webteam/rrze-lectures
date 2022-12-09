@@ -119,12 +119,12 @@ class Shortcode
 
         $data = $data['content'];
 
+        // echo '<pre>';
+        // var_dump($template);
+        // exit;
+
 
         $content = Template::getContent($template, $data);
-
-        // echo '<pre>';
-        // var_dump($data['identifier']);
-        // exit;
 
         // $content = do_shortcode($content);
 
