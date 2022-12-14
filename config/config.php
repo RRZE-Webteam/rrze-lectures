@@ -236,3 +236,12 @@ function getShortcodeSettings()
         ],
     ];
 }
+
+function getSanitizerMap(){
+    return [
+        'startdate' => 'date',
+        'enddate' => 'date',
+        'starttime' => 'time',
+        'endtime' => 'time',
+    ];
+}

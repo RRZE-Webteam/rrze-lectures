@@ -114,10 +114,10 @@ class Shortcode
         }
 
 
-        // $oSanitizer = new Sanitizer();
-        // $data = $oSanitizer->sanitizeArray($response['content']);
+        $oSanitizer = new Sanitizer();
+        $data = $oSanitizer->sanitizeArray($response['content']);
 
-        $data = $response['content'];
+        // $data = $response['content'];
 
         if (isset($_GET['debug'])){
             echo '<pre>';
