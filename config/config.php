@@ -222,7 +222,7 @@ function getShortcodeSettings()
                 'type' => 'number',
             ],
             'format' => [
-                'default' => 'single',
+                'default' => 'default',
                 'field_type' => 'text',
                 'label' => __('Format', 'rrze-lectures'),
                 'type' => 'string',

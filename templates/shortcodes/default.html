@@ -1,4 +1,12 @@
 <div class="rrze-lectures">
+    {{accordion}}
+    {{collapsibles_start}}
+        [collapsibles]
+    {{/collapsibles_start}}
+    {{collapse_start}}
+        [collapse title="{{=collapse_title}}"]
+    {{/collapse_start}}
+{{/accordion}}
     <div itemscope="" itemtype="https://schema.org/Course">
         <p><em>(Nur zum Debuggen: identifier = {{=identifier}})</em></p>
         <h2><span itemprop="name">{{=name}}</span></h2>
@@ -133,4 +141,12 @@
         {{/providerValues.module}}
 
     </div>
+    {{accordion}}
+    {{collapse_end}}
+        [/collapse]
+    {{/collapse_end}}
+    {{collapsibles_end}}
+        [/collapsibles]
+    {{/collapsibles_end}}
+{{/accordion}}    
 </div>

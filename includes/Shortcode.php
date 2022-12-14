@@ -132,9 +132,49 @@ class Shortcode
             $content = Template::getContent($template, $data);
         }else{
             // > 1 lecture
-            $aData = $data['data'];
-            foreach($aData as $data){
-                $content .= Template::getContent($template, $data) . '<hr>';
+            $aTmp = [];
+
+            // $this->atts['accordion'] = 'a-z';
+            $this->atts['accordion'] = '';
+
+            $iMax = 0;
+
+            foreach ($data['data'] as $data) {
+                $aTmp[Template::makeCollapseTitle($data, $this->atts['accordion'])][] = $data;
+                $iMax++;
+            }
+
+            $aData = $aTmp;
+
+            // let's sort independently to special chars
+            $aTmp = [];
+            foreach($aData as $name => $aEntries){
+                $name = preg_replace('/[a-z]+/', '', $name);
+                $aTmp[$name] = $aEntries;
+            }
+            $aData = $aTmp;
+
+            array_multisort(array_keys($aData), SORT_NATURAL | SORT_FLAG_CASE, $aData);
+
+            $aTmp = [];
+            foreach ($aData as $title => $aEntries) {
+                $i = 1;
+
+                foreach ($aEntries as $nr => $data) {
+                    $data['accordion'] = true;
+                    $data['collapsibles_start'] = ($nr == 0 ? true : false);
+                    $data['collapse_title'] = ($nr == 0 ? $data['name'] : false);
+                    $data['collapsibles_end'] = ($i < $iMax ? false : true);
+                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
+                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
+                    $aTmp[] = $data;
+                    $i++;
+                }
+            }
+            $aData = $aTmp;
+
+            foreach($aData as $nr => $data){
+                $content .= Template::getContent($template, $data);
             }
         }
 

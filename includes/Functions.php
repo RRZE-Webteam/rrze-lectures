@@ -9,7 +9,7 @@ class Functions
 
     protected $pluginFile;
     const TRANSIENT_PREFIX = 'rrze_lecture_cache_';
-    const TRANSIENT_OPTION = TRANSIENT_PREFIX . 'transients';
+    const TRANSIENT_OPTION = 'rrze_lecture_cache_transients';
     const TRANSIENT_EXPIRATION = DAY_IN_SECONDS;
 
 

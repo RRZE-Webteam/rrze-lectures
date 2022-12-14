@@ -105,4 +105,41 @@ class Template
         }
         return $content;
     }
+
+    public static function makeCollapseTitle(&$data, &$group)
+    {
+
+
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
+
+        // $ret = '?';
+
+        $name = htmlentities($data['name']);
+
+        switch ($group) {
+            case 'a-z':
+                $ret = strtoupper(substr($name, 0, 1));
+                break;
+            default:
+                $ret = $name;
+                break;
+        }
+
+        return $ret;
+    }
+
+    public static function makeAccordion(&$data, &$i, &$max, &$tite, &$group)
+    {
+        $data['accordion'] = true;
+        $data['collapsibles_start'] = ($i == 1 ? true : false);
+        $data['collapsibles_end'] = ($i < $max ? false : true);
+        $data['collapse_title'] = $this->makeCollapseTitle($data, $group);
+        $data['collapse_start'] = ($data['collapse_title'] ? true : false);
+        $data['collapse_end'] = ($data['collapse_start'] && $i > 1 ? true : false);
+
+        return $data;
+    }
+
 }
