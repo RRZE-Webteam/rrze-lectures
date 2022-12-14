@@ -9,6 +9,7 @@ class Functions
 
     protected $pluginFile;
     const TRANSIENT_PREFIX = 'rrze_lecture_cache_';
+    const TRANSIENT_OPTION = TRANSIENT_PREFIX . 'transients';
     const TRANSIENT_EXPIRATION = DAY_IN_SECONDS;
 
 
@@ -86,13 +87,37 @@ class Functions
     }
 
     public static function setDataToCache($data = '', $aAtts = []){
-        set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
+        $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
+
+        if ($ret){
+            // lets store $transient in an option to delete them on save using deleteTransients()
+            $aOptions = get_option(self::TRANSIENT_OPTION);
+
+            if (!empty($aOptions)) {
+                $aOptions[] = $transient;
+            } else {
+                $aOptions = [$transient];
+            }
+
+            update_option(self::TRANSIENT_OPTION, $aOptions);
+        }
     }
 
     public static function getDataFromCache($aAtts = [])
     {
         return get_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)));
     }
+
+
+    public function deleteTransients()
+    {
+        $aTransients = get_option(self::TRANSIENT_OPTION);
+        foreach ($aTransients as $transient) {
+            delete_transient($transient);
+        }
+        update_option(self::TRANSIENT_OPTION, '');
+    }
+
 
     public function ajaxGetLectureData()
     {
