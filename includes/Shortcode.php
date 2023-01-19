@@ -118,7 +118,7 @@ class Shortcode
             // $this->atts['id'] = 'e782cf9b14';
             // $response = $this->oDIP->getResponse($this->atts['id']);
 
-            $response = $this->oDIP->getResponse('?q=' . $this->atts['fauorgnr']);
+            $response = $this->oDIP->getResponse('?q=' . $this->atts['fauorgnr'] . '&attrs=url;name');
 
             // Functions::setDataToCache($data, $this->atts);
         }
