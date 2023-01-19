@@ -82,6 +82,18 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+        // set FAU Org Nr
+
+        if (empty($this->atts['fauorgnr'])){
+            // try to get it from the plugin's options
+            if (!empty($this->options['basic_FAUOrgNr'])){
+                $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+            }else{
+                return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+            }
+
+        }
+
         // dynamically generate hide vars
         $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
         foreach($aHide as $val){
@@ -95,17 +107,19 @@ class Shortcode
 
         // get data
         $data = '';
-        $this->hide = ['cache'];
-        if (!in_array('cache', $this->hide)){
-            $data = Functions::getDataFromCache($this->atts);
-        }
+        // $this->hide = ['cache'];
+        // if (!in_array('cache', $this->hide)){
+        //     $data = Functions::getDataFromCache($this->atts);
+        // }
 
         if (empty($data)){
             $this->oDIP = new DIPAPI();
 
             // $this->atts['id'] = 'e782cf9b14';
+            // $response = $this->oDIP->getResponse($this->atts['id']);
 
-            $response = $this->oDIP->getResponse($this->atts['id']);
+            $response = $this->oDIP->getResponse('?q=' . $this->atts['fauorgnr']);
+
             // Functions::setDataToCache($data, $this->atts);
         }
 
@@ -114,10 +128,10 @@ class Shortcode
         }
 
 
-        $oSanitizer = new Sanitizer();
-        $data = $oSanitizer->sanitizeArray($response['content']);
+        // $oSanitizer = new Sanitizer();
+        // $data = $oSanitizer->sanitizeArray($response['content']);
 
-        // $data = $response['content'];
+        $data = $response['content'];
 
         if (isset($_GET['debug'])){
             echo '<pre>';
@@ -126,6 +140,19 @@ class Shortcode
         }
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
+
+
+        // Link List only because data is missing returned from DIP
+        $data = (!empty($data['data']) ? $data['data'] : $data);
+
+        $ret = '<ul>';
+        foreach($data as $entry){
+            $ret .= '<li><a href="' . $entry['url'] . '" target="campo">' . $entry['name'] . '</a></li>';
+        }
+        $ret .= '</ul>';
+
+        return $ret;
+
 
         if (empty($data['data'])){
             // = 1 lecture

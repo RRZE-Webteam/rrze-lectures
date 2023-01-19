@@ -56,11 +56,11 @@ function getConstants()
 function getMenuSettings()
 {
     return [
-        'page_title' => __('RRZE DIP', 'rrze-lectures'),
-        'menu_title' => __('RRZE DIP', 'rrze-lectures'),
+        'page_title' => __('RRZE Lectures', 'rrze-lectures'),
+        'menu_title' => __('RRZE Lectures', 'rrze-lectures'),
         'capability' => 'manage_options',
         'menu_slug' => 'rrze-lectures',
-        'title' => __('RRZE DIP Settings', 'rrze-lectures'),
+        'title' => __('RRZE Lectures Settings', 'rrze-lectures'),
     ];
 }
 
@@ -74,7 +74,7 @@ function getSections()
     return [
         [
             'id' => 'basic',
-            'title' => __('DIP Settings', 'rrze-lectures'),
+            'title' => __('Lectures Settings', 'rrze-lectures'),
         ],
     ];
 }
@@ -114,26 +114,26 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
-            // [
-            //     'name' => 'DIPID',
-            //     'label' => __('DIP ID', 'rrze-lectures'),
-            //     'desc' => __('To receive lectures from another department use the attribute <strong>DIPID</strong> in the shortcode. F.e. [lectures DIPID="123"]', 'rrze-lectures'),
-            //     'placeholder' => '',
-            //     'type' => 'text',
-            //     'default' => '',
-            //     'sanitize_callback' => 'sanitize_text_field',
-            // ],
             [
-                'name' => 'hstart',
-                'label' => __('Headline\'s size', 'rrze-lectures'),
-                'desc' => __('Headlines start at this size.', 'rrze-lectures'),
-                'min' => 2,
-                'max' => 10,
-                'step' => '1',
-                'type' => 'number',
-                'default' => '2',
-                'sanitize_callback' => 'floatval',
+                'name' => 'FAUOrgNr',
+                'label' => __('FAU Org Number', 'rrze-lectures'),
+                'desc' => __('To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr="123"]', 'rrze-lectures'),
+                'placeholder' => '',
+                'type' => 'text',
+                'default' => '',
+                'sanitize_callback' => 'sanitize_text_field',
             ],
+            // [
+            //     'name' => 'hstart',
+            //     'label' => __('Headline\'s size', 'rrze-lectures'),
+            //     'desc' => __('Headlines start at this size.', 'rrze-lectures'),
+            //     'min' => 2,
+            //     'max' => 10,
+            //     'step' => '1',
+            //     'type' => 'number',
+            //     'default' => '2',
+            //     'sanitize_callback' => 'floatval',
+            // ],
         ],
     ];
 }
