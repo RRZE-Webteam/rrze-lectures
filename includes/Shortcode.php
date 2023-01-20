@@ -69,7 +69,7 @@ class Shortcode
     public function shortcodeLectures($atts, $content = NULL)
     {
         // show link to DIP only
-        if (in_array('link', $this->show)){
+        if (in_array('link', $this->show)) {
             return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
         }
 
@@ -82,22 +82,28 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
-        // set FAU Org Nr
-
-        if (empty($this->atts['fauorgnr'])){
-            // try to get it from the plugin's options
-            if (!empty($this->options['basic_FAUOrgNr'])){
-                $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
-            }else{
-                return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+        if (!empty($this->atts['id'])){
+            $dipParameter = $this->atts['id'];
+        }else{
+            // no lecture ID given
+            if (empty($this->atts['fauorgnr'])) {
+                // try to get it from the plugin's options
+                if (!empty($this->options['basic_FAUOrgNr'])) {
+                    $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+                } else {
+                    return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+                }
             }
 
+            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&sort=providerValues.event.title=1';
+            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&page='; // sort by DIP doesn't work with leading numbers
+            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title'; // sort by DIP doesn't work with leading numbers
         }
 
         // dynamically generate hide vars
         $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
-        foreach($aHide as $val){
-            ${'hide_'.$val} = 1;
+        foreach ($aHide as $val) {
+            ${'hide_' . $val} = 1;
         }
 
         // set accordions' colors
@@ -106,60 +112,80 @@ class Shortcode
         $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
         // get data
-        $data = '';
+        $data = [];
         // $this->hide = ['cache'];
         // if (!in_array('cache', $this->hide)){
         //     $data = Functions::getDataFromCache($this->atts);
         // }
 
-        if (empty($data)){
+        $page = 2;
+
+        $test = 0;
+
+        if (empty($data)) {
             $this->oDIP = new DIPAPI();
+            // $response = $this->oDIP->getResponse($dipParameter . $page);
+            $response = $this->oDIP->getResponse($dipParameter);
 
-            // $this->atts['id'] = 'e782cf9b14';
-            // $response = $this->oDIP->getResponse($this->atts['id']);
-
-            $response = $this->oDIP->getResponse('?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&sort=providerValues.event.title=1');
-
-
-
-            // Functions::setDataToCache($data, $this->atts);
+            if (!$response['valid']) {
+                return __('No lecture found', 'rrze-lectures');
+            // }else{
+            //     while(($response['content']['pagination']['remaining'] > 0) && ($test < 1)) {
+            //         $page++;
+            //         $response = $this->oDIP->getResponse($dipParameter . $page);
+            //         $data += $response['content']['data'];
+            //         $test++;
+            //     }
+            }
         }
 
-        if (!$response['valid']){
-            return __('No lecture found with this ID', 'rrze-lectures') . ' ' . $atts['id'];
-        }
 
 
         // $oSanitizer = new Sanitizer();
         // $data = $oSanitizer->sanitizeArray($response['content']);
 
-        $data = $response['content'];
 
-        if (isset($_GET['debug'])){
+        if (isset($_GET['debug'])) {
             echo '<pre>';
             var_dump($data);
             exit;
         }
 
+        $this->atts['format'] = 'linklist';
+
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
+        if ($this->atts['format'] == 'linklist') {
 
-        // Link List only because data is missing returned from DIP
-        $data = (!empty($data['data']) ? $data['data'] : $data);
+            // let's sort independently to special chars
+            $aTmp = [];
+            foreach ($data['data'] as $nr => $aEntries) {
+                // echo '<pre>';
+                // var_dump($aEntries);
+                // exit;
+                $name = preg_replace('/[a-z]+/', '', $aEntries['providerValues']['event']['title']);
+                $aTmp[$name] = [
+                    'url' => $aEntries['url'],
+                    'title' => $aEntries['providerValues']['event']['title']
+                ];
+            }
+            $aData = $aTmp;
 
-        $ret = '<ul>';
-        foreach($data as $entry){
-            $ret .= '<li><a href="' . $entry['url'] . '" target="campo">' . $entry['providerValues']['event']['title'] . '</a></li>';
-        }
-        $ret .= '</ul>';
+            array_multisort(array_keys($aData), SORT_NATURAL | SORT_FLAG_CASE, $aData);
 
-        return $ret;
+            $data = ['data'];
+            foreach($aData as $tmp => $aEntries){
+                $data['data'][] = [
+                    'title' => $aEntries['title'], 
+                    'url' => $aEntries['url']
+                ];
+            }
 
-
-        if (empty($data['data'])){
+            $content = Template::getContent($template, $data);
+        } elseif (empty($data['data'])) {
             // = 1 lecture
             $content = Template::getContent($template, $data);
-        }else{
+        } else {
             // > 1 lecture
             $aTmp = [];
 
@@ -177,7 +203,7 @@ class Shortcode
 
             // let's sort independently to special chars
             $aTmp = [];
-            foreach($aData as $name => $aEntries){
+            foreach ($aData as $name => $aEntries) {
                 $name = preg_replace('/[a-z]+/', '', $name);
                 $aTmp[$name] = $aEntries;
             }
@@ -202,7 +228,7 @@ class Shortcode
             }
             $aData = $aTmp;
 
-            foreach($aData as $nr => $data){
+            foreach ($aData as $nr => $data) {
                 $content .= Template::getContent($template, $data);
             }
         }
@@ -442,11 +468,13 @@ class Shortcode
             wp_localize_script($editor_script, $settings['block']['blockname'] . 'Config', $settings);
 
             // register block
-            register_block_type($settings['block']['blocktype'], array(
-                'editor_script' => $editor_script,
-                'render_callback' => [$this, 'shortcodeOutput'],
-                'attributes' => $settings,
-            )
+            register_block_type(
+                $settings['block']['blocktype'],
+                array(
+                    'editor_script' => $editor_script,
+                    'render_callback' => [$this, 'shortcodeOutput'],
+                    'attributes' => $settings,
+                )
             );
         }
     }
