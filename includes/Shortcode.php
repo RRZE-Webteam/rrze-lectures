@@ -118,7 +118,9 @@ class Shortcode
             // $this->atts['id'] = 'e782cf9b14';
             // $response = $this->oDIP->getResponse($this->atts['id']);
 
-            $response = $this->oDIP->getResponse('?q=' . $this->atts['fauorgnr'] . '&attrs=url;name');
+            $response = $this->oDIP->getResponse('?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&sort=providerValues.event.title=1');
+
+
 
             // Functions::setDataToCache($data, $this->atts);
         }
@@ -147,7 +149,7 @@ class Shortcode
 
         $ret = '<ul>';
         foreach($data as $entry){
-            $ret .= '<li><a href="' . $entry['url'] . '" target="campo">' . $entry['name'] . '</a></li>';
+            $ret .= '<li><a href="' . $entry['url'] . '" target="campo">' . $entry['providerValues']['event']['title'] . '</a></li>';
         }
         $ret .= '</ul>';
 
