@@ -58,6 +58,10 @@ class DIPAPI
 
         $apiResponse = wp_remote_get($this->api . $sParam, $aGetArgs);
 
+        // echo '<pre>';
+        // var_dump($apiResponse);
+        // exit;
+
         if ($apiResponse['response']['code'] != 200){
             $aRet = [
                 'valid' => FALSE, 

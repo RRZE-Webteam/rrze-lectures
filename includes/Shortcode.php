@@ -82,9 +82,9 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
-        if (!empty($this->atts['id'])){
+        if (!empty($this->atts['id'])) {
             $dipParameter = $this->atts['id'];
-        }else{
+        } else {
             // no lecture ID given
             if (empty($this->atts['fauorgnr'])) {
                 // try to get it from the plugin's options
@@ -95,9 +95,68 @@ class Shortcode
                 }
             }
 
-            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&sort=providerValues.event.title=1';
-            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&page='; // sort by DIP doesn't work with leading numbers
-            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title'; // sort by DIP doesn't work with leading numbers
+            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&limit=100&page='; // sort by DIP doesn't work with leading numbers
+            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype&limit=100&page='; // sort by DIP doesn't work with leading numbers
+        }
+
+        // get data
+        $data = [];
+        // $this->hide = ['cache'];
+        // if (!in_array('cache', $this->hide)){
+        //     $data = Functions::getDataFromCache($this->atts);
+        // }
+
+        $page = 1;
+
+        if (empty($data)) {
+            $this->oDIP = new DIPAPI();
+            $response = $this->oDIP->getResponse($dipParameter . $page);
+
+            if (!$response['valid']) {
+                return __('No lecture found', 'rrze-lectures');
+            } else {
+                $data = $response['content']['data'];
+
+                while ($response['content']['pagination']['remaining'] > 0) {
+                    $page++;
+                    $response = $this->oDIP->getResponse($dipParameter . $page);
+
+                    $data = array_merge($response['content']['data'], $data);
+                }
+            }
+        }
+
+        // $oSanitizer = new Sanitizer();
+        // $data = $oSanitizer->sanitizeArray($response['content']);
+
+        // group by eventtype
+        $aTmp = [];
+
+        foreach ($data as $nr => $aEntries) {
+            $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
+
+            $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                'url' => $aEntries['url'],
+                'title' => $aEntries['providerValues']['event']['title']
+            ];
+        }
+
+        // sort by group
+        array_multisort(array_keys($aTmp), SORT_NATURAL | SORT_FLAG_CASE, $aTmp);
+
+        // let's sort independently to special chars
+        $aData = [];
+        foreach ($aTmp as $group => $aDetails) {
+            $aTmp2 = [];
+            foreach($aDetails as $name => $aEntries){
+                $aTmp2[$name] = [
+                    'url' => $aEntries['url'],
+                    'title' => $aEntries['title']
+                ];
+            }
+
+            array_multisort(array_keys($aTmp2), SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+            $aData[$group] = $aTmp2;
         }
 
         // dynamically generate hide vars
@@ -111,77 +170,35 @@ class Shortcode
         $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
         $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
-        // get data
-        $data = [];
-        // $this->hide = ['cache'];
-        // if (!in_array('cache', $this->hide)){
-        //     $data = Functions::getDataFromCache($this->atts);
-        // }
-
-        $page = 2;
-
-        $test = 0;
-
-        if (empty($data)) {
-            $this->oDIP = new DIPAPI();
-            // $response = $this->oDIP->getResponse($dipParameter . $page);
-            $response = $this->oDIP->getResponse($dipParameter);
-
-            if (!$response['valid']) {
-                return __('No lecture found', 'rrze-lectures');
-            // }else{
-            //     while(($response['content']['pagination']['remaining'] > 0) && ($test < 1)) {
-            //         $page++;
-            //         $response = $this->oDIP->getResponse($dipParameter . $page);
-            //         $data += $response['content']['data'];
-            //         $test++;
-            //     }
-            }
-        }
-
-
-
-        // $oSanitizer = new Sanitizer();
-        // $data = $oSanitizer->sanitizeArray($response['content']);
-
-
-        if (isset($_GET['debug'])) {
-            echo '<pre>';
-            var_dump($data);
-            exit;
-        }
-
         $this->atts['format'] = 'linklist';
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
         if ($this->atts['format'] == 'linklist') {
 
-            // let's sort independently to special chars
             $aTmp = [];
-            foreach ($data['data'] as $nr => $aEntries) {
-                // echo '<pre>';
-                // var_dump($aEntries);
-                // exit;
-                $name = preg_replace('/[a-z]+/', '', $aEntries['providerValues']['event']['title']);
-                $aTmp[$name] = [
-                    'url' => $aEntries['url'],
-                    'title' => $aEntries['providerValues']['event']['title']
-                ];
+
+            $iMax = count($aData, COUNT_RECURSIVE);
+
+            foreach ($aData as $title => $aEntries) {
+                $i = 1;
+
+                foreach ($aEntries as $tmp => $data) {
+                    $data['accordion'] = true;
+                    $data['collapsibles_start'] = ($i == 1 ? true : false);
+                    $data['collapse_title'] = ($i == 1 ? $title : false);
+                    $data['collapsibles_end'] = ($i < $iMax ? false : true);
+                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
+                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
+                    $aTmp[] = $data;
+                    $i++;
+                }
             }
             $aData = $aTmp;
 
-            array_multisort(array_keys($aData), SORT_NATURAL | SORT_FLAG_CASE, $aData);
-
-            $data = ['data'];
-            foreach($aData as $tmp => $aEntries){
-                $data['data'][] = [
-                    'title' => $aEntries['title'], 
-                    'url' => $aEntries['url']
-                ];
+            foreach ($aData as $data){
+                $content .= Template::getContent($template, $data);
             }
-
-            $content = Template::getContent($template, $data);
         } elseif (empty($data['data'])) {
             // = 1 lecture
             $content = Template::getContent($template, $data);

@@ -1,9 +1,23 @@
-<div class="rrze-lectures">
-    {{data}}
-    <ul>
-        {{@data}}
-        <li><a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=_val.title}}</a></li>
-        {{/@data}}
-    </ul>
-    {{/data}}
-</div>
+{{accordion}}
+    {{collapsibles_start}}
+        <div class="rrze-lectures">
+        [collapsibles]
+    {{/collapsibles_start}}
+    {{collapse_start}}
+        [collapse title="{{=collapse_title}}"]
+        <ul>
+    {{/collapse_start}}
+{{/accordion}}
+
+    <li><a href="{{=url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=title}}</a></li>
+
+{{accordion}}
+    {{collapse_end}}
+        </ul>
+        [/collapse]
+    {{/collapse_end}}
+    {{collapsibles_end}}
+        [/collapsibles]
+        </div>
+    {{/collapsibles_end}}
+{{/accordion}}
