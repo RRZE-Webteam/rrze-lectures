@@ -227,6 +227,42 @@ function getShortcodeSettings()
                 'label' => __('Format', 'rrze-lectures'),
                 'type' => 'string',
             ],
+            'color' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Color of accordions', 'rrze-lectures'),
+                'type' => 'array',
+                'values' => [
+                    [
+                        'id' => '',
+                        'val' => __('Kein', 'rrze-contact'),
+                    ],
+                    [
+                        'id' => 'med',
+                        'val' => __('Med: Blau', 'rrze-contact'),
+                    ],
+                    [
+                        'id' => 'phil',
+                        'val' => __('Phil: Ocker', 'rrze-contact'),
+                    ],
+                    [
+                        'id' => 'tf',
+                        'val' => __('TF: Silbern', 'rrze-contact'),
+                    ],
+                    [
+                        'id' => 'nat',
+                        'val' => __('Nat: Meeresgrün', 'rrze-contact'),
+                    ],
+                    [
+                        'id' => 'rw',
+                        'val' => __('RW: Bordeaurot', 'rrze-contact'),
+                    ],
+                    [
+                        'id' => 'fau',
+                        'val' => __('FAU: Dunkelblau', 'rrze-contact'),
+                    ],
+                ],
+            ],
             'nodata' => [
                 'default' => __('No matching entries found.', 'rrze-lectures'),
                 'field_type' => 'text',

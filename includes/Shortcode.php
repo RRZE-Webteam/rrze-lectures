@@ -58,7 +58,9 @@ class Shortcode
     public function enqueueScripts()
     {
         wp_register_style('rrze-lectures', plugins_url('css/rrze-lectures.css', plugin_basename($this->pluginFile)));
-        wp_enqueue_style('rrze-lectures');
+        if (file_exists(WP_PLUGIN_DIR . '/rrze-elements/assets/css/rrze-elements.css')) {
+            wp_register_style('rrze-elements', plugins_url() . '/rrze-elements/assets/css/rrze-elements.css');
+        }
     }
 
     /**
@@ -166,7 +168,8 @@ class Shortcode
         }
 
         // set accordions' colors
-        $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
+        // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
+        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
         $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
         $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
@@ -190,6 +193,8 @@ class Shortcode
                     $data['collapsibles_end'] = ($i < $iMax ? false : true);
                     $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                     $data['collapse_end'] = ($i == count($aEntries) ? true : false);
+                    $data['color'] = $this->atts['color'];
+
                     $aTmp[] = $data;
                     $i++;
                 }
@@ -229,20 +234,24 @@ class Shortcode
             array_multisort(array_keys($aData), SORT_NATURAL | SORT_FLAG_CASE, $aData);
 
             $aTmp = [];
+            $start = true;
             foreach ($aData as $title => $aEntries) {
                 $i = 1;
 
                 foreach ($aEntries as $nr => $data) {
                     $data['accordion'] = true;
-                    $data['collapsibles_start'] = ($nr == 0 ? true : false);
+                    $data['collapsibles_start'] = $start;
                     $data['collapse_title'] = ($nr == 0 ? $data['name'] : false);
                     $data['collapsibles_end'] = ($i < $iMax ? false : true);
                     $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                     $data['collapse_end'] = ($i == count($aEntries) ? true : false);
                     $aTmp[] = $data;
                     $i++;
+                    $start = false;
                 }
+
             }
+
             $aData = $aTmp;
 
             foreach ($aData as $nr => $data) {
@@ -252,9 +261,10 @@ class Shortcode
 
         $content = do_shortcode($content);
 
+        wp_enqueue_style('rrze-elements');
+        wp_enqueue_style('rrze-lectures');
+
         return $content;
-
-
     }
 
     public function normalize($atts)
