@@ -135,10 +135,22 @@ class Shortcode
         foreach ($data as $nr => $aEntries) {
             $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
 
-            $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                'url' => $aEntries['url'],
-                'title' => $aEntries['providerValues']['event']['title']
-            ];
+            if (!empty($this->atts['type'])){
+                // group only types defined in attribute type - DIP doesn't offer filter by type yet
+                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
+                
+                if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)){
+                    $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                        'url' => $aEntries['url'],
+                        'title' => $aEntries['providerValues']['event']['title']
+                    ];
+                }
+            }else{
+                $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                    'url' => $aEntries['url'],
+                    'title' => $aEntries['providerValues']['event']['title']
+                ];
+            }
         }
 
         // sort by group

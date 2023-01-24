@@ -167,7 +167,7 @@ function getShortcodeSettings()
                 'label' => __('Firstname, Lastname', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lectureid' => [
+            'lectureID' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Person ID', 'rrze-lectures'),
