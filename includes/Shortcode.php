@@ -171,7 +171,14 @@ class Shortcode
             $aTmp = $aTmp2;
         }else{
             // sort alphabetically by group
-            array_multisort(array_keys($aTmp), SORT_NATURAL | SORT_FLAG_CASE, $aTmp);
+            $coll = collator_create( 'de_DE' );
+            $arrayKeys = array_keys($aTmp);
+            collator_sort($coll, $arrayKeys);
+            $aTmp2 = [];
+            foreach($arrayKeys as $key){
+                $aTmp2[$key] = $aTmp[$key];
+            }
+            $aTmp = $aTmp2;
         }
 
         $iMax = 0;
