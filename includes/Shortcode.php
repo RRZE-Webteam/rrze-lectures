@@ -132,13 +132,17 @@ class Shortcode
         // group by eventtype
         $aTmp = [];
 
+        $aGivenTypes = [];
+
+        if (!empty($this->atts['type'])) {
+            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
+        }
+
         foreach ($data as $nr => $aEntries) {
             $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
 
             if (!empty($this->atts['type'])){
-                // group only types defined in attribute type - DIP doesn't offer filter by type yet
-                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-                
+                // group only types defined in attribute type - DIP doesn't offer filter by type yet               
                 if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)){
                     $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
                         'url' => $aEntries['url'],
@@ -153,8 +157,18 @@ class Shortcode
             }
         }
 
-        // sort by group
-        array_multisort(array_keys($aTmp), SORT_NATURAL | SORT_FLAG_CASE, $aTmp);
+        if (!empty($this->atts['type'])){
+            $aTmp2 = [];
+            foreach($aGivenTypes as $givenType){
+                if (!empty($aTmp[$givenType])){
+                    $aTmp2[$givenType] = $aTmp[$givenType];
+                }
+            }
+            $aTmp = $aTmp2;
+        }else{
+            // sort alphabetically by group
+            array_multisort(array_keys($aTmp), SORT_NATURAL | SORT_FLAG_CASE, $aTmp);
+        }
 
         $iMax = 0;
         // let's sort independently to special chars
