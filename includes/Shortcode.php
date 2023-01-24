@@ -113,7 +113,7 @@ class Shortcode
             $response = $this->oDIP->getResponse($dipParameter . $page);
 
             if (!$response['valid']) {
-                return __('No lecture found', 'rrze-lectures');
+                return $this->atts['nodata'];
             } else {
                 $data = $response['content']['data'];
 
@@ -124,6 +124,10 @@ class Shortcode
                     $data = array_merge($response['content']['data'], $data);
                 }
             }
+        }
+
+        if (empty($data)){
+            return $this->atts['nodata'];
         }
 
         // $oSanitizer = new Sanitizer();

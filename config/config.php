@@ -155,6 +155,12 @@ function getShortcodeSettings()
                 'icon' => 'bank',
                 'tinymce_icon' => 'paste',
             ],
+            'fauorgnr' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('FAU Org Nr', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'id' => [
                 'default' => '',
                 'field_type' => 'text',
