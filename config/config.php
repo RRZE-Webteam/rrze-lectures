@@ -241,31 +241,31 @@ function getShortcodeSettings()
                 'values' => [
                     [
                         'id' => '',
-                        'val' => __('Kein', 'rrze-contact'),
+                        'val' => __('Kein', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'med',
-                        'val' => __('Med: Blau', 'rrze-contact'),
+                        'val' => __('Med: Blau', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'phil',
-                        'val' => __('Phil: Ocker', 'rrze-contact'),
+                        'val' => __('Phil: Ocker', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'tf',
-                        'val' => __('TF: Silbern', 'rrze-contact'),
+                        'val' => __('TF: Silbern', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'nat',
-                        'val' => __('Nat: Meeresgrün', 'rrze-contact'),
+                        'val' => __('Nat: Meeresgrün', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'rw',
-                        'val' => __('RW: Bordeaurot', 'rrze-contact'),
+                        'val' => __('RW: Bordeaurot', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'fau',
-                        'val' => __('FAU: Dunkelblau', 'rrze-contact'),
+                        'val' => __('FAU: Dunkelblau', 'rrze-lectures'),
                     ],
                 ],
             ],
