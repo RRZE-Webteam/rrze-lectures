@@ -25,6 +25,8 @@ class Shortcode
     protected $oDIP;
     private $settings = '';
     private $aAllowedColors = [];
+    protected $noCache = false;
+
 
     /**
      * Variablen Werte zuweisen.
@@ -71,9 +73,14 @@ class Shortcode
     public function shortcodeLectures($atts, $content = NULL)
     {
         // show link to DIP only
-        if (in_array('link', $this->show)) {
-            return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
+        // if (in_array('link', $this->show)) {
+        //     return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
+        // }
+
+        if (!empty($atts['nocache'])) {
+            $this->noCache = true;
         }
+
 
         // merge given attributes with default ones
         $atts_default = array();
@@ -83,6 +90,14 @@ class Shortcode
             }
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
+
+        // set accordions' colors
+        // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
+        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
+        $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
+        $this->atts['color_courses'] = $this->atts['color_courses'][0];
+
+        $this->atts['format'] = 'linklist';
 
         if (!empty($this->atts['id'])) {
             $dipParameter = $this->atts['id'];
@@ -101,14 +116,14 @@ class Shortcode
         }
 
         $data = [];
-        // $this->hide = ['cache'];
-        // if (!in_array('cache', $this->hide)){
-        //     $data = Functions::getDataFromCache($this->atts);
-        // }
 
-        $page = 1;
+        if (!$this->noCache){
+            $data = Functions::getDataFromCache($this->atts);
+        }
 
-        if (empty($data)) {
+        if (empty($data)){
+            $page = 1;
+
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse($dipParameter . $page);
 
@@ -123,15 +138,15 @@ class Shortcode
 
                     $data = array_merge($response['content']['data'], $data);
                 }
+
+                // set cache
+                Functions::setDataToCache($data, $this->atts);
             }
         }
 
         if (empty($data)){
             return $this->atts['nodata'];
         }
-
-        // $oSanitizer = new Sanitizer();
-        // $data = $oSanitizer->sanitizeArray($response['content']);
 
         // group by eventtype
         $aTmp = [];
@@ -200,18 +215,13 @@ class Shortcode
         }
 
         // dynamically generate hide vars
-        $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
-        foreach ($aHide as $val) {
-            ${'hide_' . $val} = 1;
-        }
+        // $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
+        // foreach ($aHide as $val) {
+        //     ${'hide_' . $val} = 1;
+        // }
 
-        // set accordions' colors
-        // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
-        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
-        $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
-        $this->atts['color_courses'] = $this->atts['color_courses'][0];
-
-        $this->atts['format'] = 'linklist';
+        // $oSanitizer = new Sanitizer();
+        // $aData = $oSanitizer->sanitizeArray($aData);
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
@@ -299,9 +309,6 @@ class Shortcode
         }
 
         $content = do_shortcode($content);
-
-        wp_enqueue_style('rrze-elements');
-        wp_enqueue_style('rrze-lectures');
 
         return $content;
     }

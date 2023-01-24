@@ -87,27 +87,27 @@ function getFields()
 {
     return [
         'basic' => [
-            [
-                'name' => 'url',
-                'label' => __('Link to DIP', 'rrze-lectures'),
-                'desc' => __('Hier fehlt noch der Link zur Doku oder doch zum Vorlesungsverzeichnis. Dieser Link wird nur als Anzeige verwendet, nicht als API', 'rrze-lectures'),
-                'placeholder' => 'https://api.fau.de/pub/v1/vz/',
-                'type' => 'text',
-                'default' => 'https://api.fau.de/pub/v1/vz/',
-                'sanitize_callback' => 'sanitize_url',
-            ],
-            [
-                'name' => 'linkTxt',
-                'label' => __('Text for the link to DIP (oder zum Vorlesungsverzeichnis', 'rrze-lectures'),
-                'desc' => __('', 'rrze-lectures'),
-                'placeholder' => __('', 'rrze-lectures'),
-                'type' => 'text',
-                'default' => __('Link to DIP', 'rrze-lectures'),
-                'sanitize_callback' => 'sanitize_text_field',
-            ],
+            // [
+            //     'name' => 'url',
+            //     'label' => __('Link to DIP', 'rrze-lectures'),
+            //     'desc' => __('Hier fehlt noch der Link zur Doku oder doch zum Vorlesungsverzeichnis. Dieser Link wird nur als Anzeige verwendet, nicht als API', 'rrze-lectures'),
+            //     'placeholder' => 'https://api.fau.de/pub/v1/vz/',
+            //     'type' => 'text',
+            //     'default' => 'https://api.fau.de/pub/v1/vz/',
+            //     'sanitize_callback' => 'sanitize_url',
+            // ],
+            // [
+            //     'name' => 'linkTxt',
+            //     'label' => __('Text for the link to DIP (oder zum Vorlesungsverzeichnis', 'rrze-lectures'),
+            //     'desc' => __('', 'rrze-lectures'),
+            //     'placeholder' => __('', 'rrze-lectures'),
+            //     'type' => 'text',
+            //     'default' => __('Link to DIP', 'rrze-lectures'),
+            //     'sanitize_callback' => 'sanitize_text_field',
+            // ],
             [
                 'name' => 'ApiKey',
-                'label' => __('DIP ApiKey', 'rrze-lectures'),
+                'label' => __('DIP API-Key', 'rrze-lectures'),
                 'desc' => __('If you are not using a multisite installation of Wordpress, contact rrze-integration@fau.de to receive this key.', 'rrze-settings'),
                 'placeholder' => '',
                 'type' => 'text',

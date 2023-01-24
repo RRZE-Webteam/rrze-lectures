@@ -89,18 +89,18 @@ class Functions
     public static function setDataToCache($data = '', $aAtts = []){
         $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
 
-        if ($ret){
-            // lets store $transient in an option to delete them on save using deleteTransients()
-            $aOptions = get_option(self::TRANSIENT_OPTION);
+        // if ($ret){
+        //     // lets store $transient in an option to delete them on save using deleteTransients()
+        //     $aOptions = get_option(self::TRANSIENT_OPTION);
 
-            if (!empty($aOptions)) {
-                $aOptions[] = $transient;
-            } else {
-                $aOptions = [$transient];
-            }
+        //     if (!empty($aOptions)) {
+        //         $aOptions[] = $transient;
+        //     } else {
+        //         $aOptions = [$transient];
+        //     }
 
-            update_option(self::TRANSIENT_OPTION, $aOptions);
-        }
+        //     update_option(self::TRANSIENT_OPTION, $aOptions);
+        // }
     }
 
     public static function getDataFromCache($aAtts = [])
