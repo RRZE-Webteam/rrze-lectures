@@ -97,11 +97,9 @@ class Shortcode
                 }
             }
 
-            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title&limit=100&page='; // sort by DIP doesn't work with leading numbers
             $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype&limit=100&page='; // sort by DIP doesn't work with leading numbers
         }
 
-        // get data
         $data = [];
         // $this->hide = ['cache'];
         // if (!in_array('cache', $this->hide)){
@@ -146,6 +144,7 @@ class Shortcode
         // sort by group
         array_multisort(array_keys($aTmp), SORT_NATURAL | SORT_FLAG_CASE, $aTmp);
 
+        $iMax = 0;
         // let's sort independently to special chars
         $aData = [];
         foreach ($aTmp as $group => $aDetails) {
@@ -156,6 +155,8 @@ class Shortcode
                     'title' => $aEntries['title']
                 ];
             }
+
+            $iMax += count($aTmp2);
 
             array_multisort(array_keys($aTmp2), SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
             $aData[$group] = $aTmp2;
@@ -178,25 +179,26 @@ class Shortcode
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
         if ($this->atts['format'] == 'linklist') {
-
             $aTmp = [];
-
-            $iMax = count($aData, COUNT_RECURSIVE);
+            $start = true;
+            $iCnt = 1;
 
             foreach ($aData as $title => $aEntries) {
                 $i = 1;
 
                 foreach ($aEntries as $tmp => $data) {
                     $data['accordion'] = true;
-                    $data['collapsibles_start'] = ($i == 1 ? true : false);
+                    $data['collapsibles_start'] = $start;
                     $data['collapse_title'] = ($i == 1 ? $title : false);
-                    $data['collapsibles_end'] = ($i < $iMax ? false : true);
+                    $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
                     $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                     $data['collapse_end'] = ($i == count($aEntries) ? true : false);
                     $data['color'] = $this->atts['color'];
 
                     $aTmp[] = $data;
                     $i++;
+                    $start = false;
+                    $iCnt++;
                 }
             }
             $aData = $aTmp;
