@@ -263,6 +263,14 @@ function getShortcodeSettings()
                     ],
                 ],
             ],
+            'max' => [
+                'default' => '',
+                'min' => 1,
+                'max' => 100,
+                'step' => '1',
+                'field_type' => 'number',
+            ],
+
             'nodata' => [
                 'default' => __('No matching entries found.', 'rrze-lectures'),
                 'field_type' => 'text',

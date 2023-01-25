@@ -7,17 +7,27 @@
         [collapse title="{{=collapse_title}}" color="{{=color}}"]
         <ul>
     {{/collapse_start}}
+{{:accordion}}
+    {{first}}
+        <div class="rrze-lectures">
+            <ul>
+    {{/first}}
 {{/accordion}}
 
-    <li><a href="{{=url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=title}}</a></li>
+                <li><a href="{{=url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=title}}</a></li>
 
 {{accordion}}
     {{collapse_end}}
-        </ul>
+            </ul>
         [/collapse]
     {{/collapse_end}}
     {{collapsibles_end}}
         [/collapsibles]
         </div>
     {{/collapsibles_end}}
+{{:accordion}}
+    {{last}}
+            </ul>
+        </div>
+    {{/last}}
 {{/accordion}}
