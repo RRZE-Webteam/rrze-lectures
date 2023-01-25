@@ -91,6 +91,12 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+        // dynamically generate hide vars
+        $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
+        foreach ($aHide as $val) {
+            ${'hide_' . $val} = 1;
+        }
+
         // set accordions' colors
         // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
@@ -103,11 +109,9 @@ class Shortcode
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
             $limit = (int) $this->atts['max'];
             $bFetchAll = false;
-            $bAccodion = false;
         } else {
             $limit = 100;
             $bFetchAll = true;
-            $bAccodion = true;
         }
 
         if (!empty($this->atts['lecture_id'])) {
@@ -254,12 +258,6 @@ class Shortcode
             $aData[$group] = $aTmp2;
         }
 
-        // dynamically generate hide vars
-        // $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
-        // foreach ($aHide as $val) {
-        //     ${'hide_' . $val} = 1;
-        // }
-
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
 
@@ -274,12 +272,12 @@ class Shortcode
                 $i = 1;
 
                 foreach ($aEntries as $tmp => $data) {
-                    if ($bAccodion) {
+                    if (empty($hide_accordion)) {
                         $data['accordion'] = true;
                         $data['collapsibles_start'] = $start;
                         $data['collapse_title'] = ($i == 1 ? $title : false);
                         $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
-                        $data['collapse_start'] = ($datpa['collapse_title'] ? true : false);
+                        $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                         $data['collapse_end'] = ($i == count($aEntries) ? true : false);
                         $data['color'] = $this->atts['color'];
                     }else{
