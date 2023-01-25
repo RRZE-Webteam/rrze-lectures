@@ -99,8 +99,8 @@ class Shortcode
 
         $this->atts['format'] = 'linklist';
 
-        if (!empty($this->atts['id'])) {
-            $dipParameter = $this->atts['id'];
+        if (!empty($this->atts['lecture_id'])) {
+            $dipParameter = $this->atts['lecture_id'];
         } else {
             // no lecture ID given
             if (empty($this->atts['fauorgnr'])) {
@@ -112,7 +112,7 @@ class Shortcode
                 }
             }
 
-            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype&limit=100&page='; // sort by DIP doesn't work with leading numbers
+            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=100&page='; // sort by DIP doesn't work with leading numbers
         }
 
         $data = [];
@@ -152,27 +152,54 @@ class Shortcode
         $aTmp = [];
 
         $aGivenTypes = [];
+        $aGivenLecturerIDs = [];
 
         if (!empty($this->atts['type'])) {
             $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
         }
 
+        if (!empty($this->atts['lecturer_id'])) {
+            $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
+        }
+
         foreach ($data as $nr => $aEntries) {
             $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
 
-            if (!empty($this->atts['type'])){
-                // group only types defined in attribute type - DIP doesn't offer filter by type yet               
-                if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)){
+            $bSkip = false;
+            if (!empty($this->atts['lecturer_id'])){
+                if (empty($aEntries['providerValues']['course_responsible'])){
+                    $bSkip = true;
+                }else{
+                    $aFoundLecturerIDs = [];
+                    foreach($aEntries['providerValues']['course_responsible'] as $nr => $aDetails){
+                        $aFoundLecturerIDs[] = $aDetails['idm_uid'];
+                    }
+
+                    $bSkip = true;
+                    foreach($aGivenLecturerIDs as $givenLectureID){
+                        if (in_array($givenLectureID, $aFoundLecturerIDs)){
+                            $bSkip = false;
+                            continue; 
+                        }
+                    }
+                }
+            }
+
+            if (!$bSkip){
+                if (!empty($this->atts['type'])){
+                    // group only types defined in attribute type - DIP doesn't offer filter by type yet               
+                    if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)){
+                        $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                            'url' => $aEntries['url'],
+                            'title' => $aEntries['providerValues']['event']['title']
+                        ];
+                    }
+                }else{
                     $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
                         'url' => $aEntries['url'],
                         'title' => $aEntries['providerValues']['event']['title']
                     ];
                 }
-            }else{
-                $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                    'url' => $aEntries['url'],
-                    'title' => $aEntries['providerValues']['event']['title']
-                ];
             }
         }
 
@@ -321,8 +348,8 @@ class Shortcode
         } elseif (!empty($atts['id'])) {
             $this->DIPOrgNr = $atts['id'];
         }
-        if (!empty($atts['dozentid'])) {
-            $atts['id'] = $atts['dozentid'];
+        if (!empty($atts['lecturer_id'])) {
+            $atts['lecturer_id'] = $atts['lecturer_id'];
         }
         if (!empty($atts['dozentname'])) {
             $atts['name'] = $atts['dozentname'];

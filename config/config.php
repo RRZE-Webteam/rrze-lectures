@@ -161,25 +161,19 @@ function getShortcodeSettings()
                 'label' => __('FAU Org Nr', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'id' => [
+            'lecture_id' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Lecture ID', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'name' => [
+            'lecturer_name' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Firstname, Lastname', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lectureID' => [
-                'default' => '',
-                'field_type' => 'text',
-                'label' => __('Person ID', 'rrze-lectures'),
-                'type' => 'string',
-            ],
-            'lecturerID' => [
+            'lecturer_id' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Lecturer ID', 'rrze-lectures'),
