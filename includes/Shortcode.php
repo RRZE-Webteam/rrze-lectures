@@ -107,10 +107,10 @@ class Shortcode
 
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
-            if (empty($this->atts['type'])){
+            if (empty($this->atts['type'])) {
                 $limit = (int) $this->atts['max'];
-                $bFetchAll = false;    
-            }else{
+                $bFetchAll = false;
+            } else {
                 $limit = 100;
                 $bFetchAll = true;
             }
@@ -210,8 +210,8 @@ class Shortcode
 
             if (!$bSkip) {
                 if (!empty($this->atts['type'])) {
-                    if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])){
-                        continue; 
+                    if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
+                        continue;
                     }
 
                     // group only types defined in attribute type - DIP doesn't offer filter by type yet               
@@ -232,49 +232,72 @@ class Shortcode
             }
         }
 
-
         // sort
-        if (!empty($this->atts['type'])) {
-            // sort in order of $this->atts['type']
+        if (!empty($hide_accordion)) {
+            // combine all entries and sort them
             $aTmp = [];
-            foreach ($aGivenTypes as $givenType) {
-                if (!empty($aData[$givenType])) {
-                    $aTmp[$givenType] = $aData[$givenType];
+            foreach ($aData as $group => $aDetails) {
+                foreach($aDetails as $aEntries){
+                    $name = preg_replace('/[\W]/', '', $aEntries['title']);
+                    $aTmp[$name] = $aEntries;
                 }
             }
-            $aData = $aTmp;
-        } else {
-            // sort alphabetically by group
             $coll = collator_create('de_DE');
-            $arrayKeys = array_keys($aData);
+            $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
-            $aTmp = [];
-            foreach ($arrayKeys as $key) {
-                $aTmp[$key] = $aData[$key];
-            }
-            $aData = $aTmp;
-        }
-
-        $iMax = 0;
-        // sort entries
-        $aTmp = [];
-        foreach ($aData as $group => $aDetails) {
             $aTmp2 = [];
-            foreach ($aDetails as $name => $aEntries) {
-                $aTmp2[$name] = [
-                    'url' => $aEntries['url'],
-                    'title' => $aEntries['title']
-                ];
+            foreach ($arrayKeys as $key) {
+                $aTmp2[$key] = $aTmp[$key];
+            }
+            $aData = [];
+            $aData[] = $aTmp2;
+            $iMax = count($aTmp2);
+        } else {
+            // sort group
+            if (!empty($this->atts['type'])) {
+                // sort in order of $this->atts['type']
+                $aTmp = [];
+                foreach ($aGivenTypes as $givenType) {
+                    if (!empty($aData[$givenType])) {
+                        $aTmp[$givenType] = $aData[$givenType];
+                    }
+                }
+                $aData = $aTmp;
+            } else {
+                // sort alphabetically by group
+                $coll = collator_create('de_DE');
+                $arrayKeys = array_keys($aData);
+                collator_sort($coll, $arrayKeys);
+                $aTmp = [];
+                foreach ($arrayKeys as $key) {
+                    $aTmp[$key] = $aData[$key];
+                }
+                $aData = $aTmp;
             }
 
-            $iMax += count($aTmp2);
+            $iMax = 0;
+            // sort entries
+            $aTmp = [];
+            foreach ($aData as $group => $aDetails) {
+                $aTmp2 = [];
+                foreach ($aDetails as $name => $aEntries) {
+                    $name = preg_replace('/[\W]/', '', $name);
+                    $aTmp2[$name] = [
+                        'url' => $aEntries['url'],
+                        'title' => $aEntries['title']
+                    ];
+                }
 
-            $arrayKeys = array_keys($aTmp2);
-            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-            $aTmp[$group] = $aTmp2;
+                $iMax += count($aTmp2);
+
+                $arrayKeys = array_keys($aTmp2);
+                array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+                $aTmp[$group] = $aTmp2;
+            }
+
+            $aData = $aTmp;
+
         }
-
-        $aData = $aTmp;
 
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
@@ -298,7 +321,7 @@ class Shortcode
                         $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                         $data['collapse_end'] = ($i == count($aEntries) ? true : false);
                         $data['color'] = $this->atts['color'];
-                    }else{
+                    } else {
                         $data['first'] = $start;
                         $data['last'] = ($iCnt == $iMax ? true : false);
                     }
