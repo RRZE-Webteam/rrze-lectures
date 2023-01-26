@@ -107,8 +107,13 @@ class Shortcode
 
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
-            $limit = (int) $this->atts['max'];
-            $bFetchAll = false;
+            if (empty($this->atts['type'])){
+                $limit = (int) $this->atts['max'];
+                $bFetchAll = false;    
+            }else{
+                $limit = 100;
+                $bFetchAll = true;
+            }
         } else {
             $limit = 100;
             $bFetchAll = true;
@@ -179,6 +184,7 @@ class Shortcode
             $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
         }
 
+        $iCnt = 0;
         foreach ($data as $nr => $aEntries) {
             $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
 
@@ -204,12 +210,18 @@ class Shortcode
 
             if (!$bSkip) {
                 if (!empty($this->atts['type'])) {
+                    if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])){
+                        continue; 
+                    }
+
                     // group only types defined in attribute type - DIP doesn't offer filter by type yet               
                     if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)) {
                         $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
                             'url' => $aEntries['url'],
                             'title' => $aEntries['providerValues']['event']['title']
                         ];
+
+                        $iCnt++;
                     }
                 } else {
                     $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
@@ -254,7 +266,12 @@ class Shortcode
 
             $iMax += count($aTmp2);
 
-            array_multisort(array_keys($aTmp2), SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+            // array_multisort(array_keys($aTmp2), SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+
+            $coll = collator_create('de_DE');
+            $arrayKeys = array_keys($aTmp2);
+            collator_sort($coll, $arrayKeys);
+
             $aData[$group] = $aTmp2;
         }
 
