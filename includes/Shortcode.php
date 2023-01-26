@@ -91,6 +91,12 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+        // dynamically generate hide vars
+        $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
+        foreach ($aHide as $val) {
+            ${'hide_' . $val} = 1;
+        }
+
         // set accordions' colors
         // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
@@ -98,6 +104,20 @@ class Shortcode
         $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
         $this->atts['format'] = 'linklist';
+
+
+        if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
+            if (empty($this->atts['type'])) {
+                $limit = (int) $this->atts['max'];
+                $bFetchAll = false;
+            } else {
+                $limit = 100;
+                $bFetchAll = true;
+            }
+        } else {
+            $limit = 100;
+            $bFetchAll = true;
+        }
 
         if (!empty($this->atts['lecture_id'])) {
             $dipParameter = $this->atts['lecture_id'];
@@ -112,16 +132,16 @@ class Shortcode
                 }
             }
 
-            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=100&page='; // sort by DIP doesn't work with leading numbers
+            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
         }
 
         $data = [];
 
-        if (!$this->noCache){
+        if (!$this->noCache) {
             $data = Functions::getDataFromCache($this->atts);
         }
 
-        if (empty($data)){
+        if (empty($data)) {
             $page = 1;
 
             $this->oDIP = new DIPAPI();
@@ -132,11 +152,13 @@ class Shortcode
             } else {
                 $data = $response['content']['data'];
 
-                while ($response['content']['pagination']['remaining'] > 0) {
-                    $page++;
-                    $response = $this->oDIP->getResponse($dipParameter . $page);
+                if ($bFetchAll) {
+                    while ($response['content']['pagination']['remaining'] > 0) {
+                        $page++;
+                        $response = $this->oDIP->getResponse($dipParameter . $page);
 
-                    $data = array_merge($response['content']['data'], $data);
+                        $data = array_merge($response['content']['data'], $data);
+                    }
                 }
 
                 // set cache
@@ -144,12 +166,12 @@ class Shortcode
             }
         }
 
-        if (empty($data)){
+        if (empty($data)) {
             return $this->atts['nodata'];
         }
 
         // group by eventtype
-        $aTmp = [];
+        $aData = [];
 
         $aGivenTypes = [];
         $aGivenLecturerIDs = [];
@@ -162,40 +184,47 @@ class Shortcode
             $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
         }
 
+        $iCnt = 0;
         foreach ($data as $nr => $aEntries) {
             $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
 
             $bSkip = false;
-            if (!empty($this->atts['lecturer_id'])){
-                if (empty($aEntries['providerValues']['course_responsible'])){
+            if (!empty($this->atts['lecturer_id'])) {
+                if (empty($aEntries['providerValues']['course_responsible'])) {
                     $bSkip = true;
-                }else{
+                } else {
                     $aFoundLecturerIDs = [];
-                    foreach($aEntries['providerValues']['course_responsible'] as $nr => $aDetails){
+                    foreach ($aEntries['providerValues']['course_responsible'] as $nr => $aDetails) {
                         $aFoundLecturerIDs[] = $aDetails['idm_uid'];
                     }
 
                     $bSkip = true;
-                    foreach($aGivenLecturerIDs as $givenLectureID){
-                        if (in_array($givenLectureID, $aFoundLecturerIDs)){
+                    foreach ($aGivenLecturerIDs as $givenLectureID) {
+                        if (in_array($givenLectureID, $aFoundLecturerIDs)) {
                             $bSkip = false;
-                            continue; 
+                            continue;
                         }
                     }
                 }
             }
 
-            if (!$bSkip){
-                if (!empty($this->atts['type'])){
+            if (!$bSkip) {
+                if (!empty($this->atts['type'])) {
+                    if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
+                        continue;
+                    }
+
                     // group only types defined in attribute type - DIP doesn't offer filter by type yet               
-                    if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)){
-                        $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                    if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)) {
+                        $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
                             'url' => $aEntries['url'],
                             'title' => $aEntries['providerValues']['event']['title']
                         ];
+
+                        $iCnt++;
                     }
-                }else{
-                    $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                } else {
+                    $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
                         'url' => $aEntries['url'],
                         'title' => $aEntries['providerValues']['event']['title']
                     ];
@@ -203,49 +232,72 @@ class Shortcode
             }
         }
 
-        if (!empty($this->atts['type'])){
-            $aTmp2 = [];
-            foreach($aGivenTypes as $givenType){
-                if (!empty($aTmp[$givenType])){
-                    $aTmp2[$givenType] = $aTmp[$givenType];
+        // sort
+        if (!empty($hide_accordion)) {
+            // combine all entries and sort them
+            $aTmp = [];
+            foreach ($aData as $group => $aDetails) {
+                foreach($aDetails as $aEntries){
+                    $name = preg_replace('/[\W]/', '', $aEntries['title']);
+                    $aTmp[$name] = $aEntries;
                 }
             }
-            $aTmp = $aTmp2;
-        }else{
-            // sort alphabetically by group
-            $coll = collator_create( 'de_DE' );
+            $coll = collator_create('de_DE');
             $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
             $aTmp2 = [];
-            foreach($arrayKeys as $key){
+            foreach ($arrayKeys as $key) {
                 $aTmp2[$key] = $aTmp[$key];
             }
-            $aTmp = $aTmp2;
-        }
-
-        $iMax = 0;
-        // let's sort independently to special chars
-        $aData = [];
-        foreach ($aTmp as $group => $aDetails) {
-            $aTmp2 = [];
-            foreach($aDetails as $name => $aEntries){
-                $aTmp2[$name] = [
-                    'url' => $aEntries['url'],
-                    'title' => $aEntries['title']
-                ];
+            $aData = [];
+            $aData[] = $aTmp2;
+            $iMax = count($aTmp2);
+        } else {
+            // sort group
+            if (!empty($this->atts['type'])) {
+                // sort in order of $this->atts['type']
+                $aTmp = [];
+                foreach ($aGivenTypes as $givenType) {
+                    if (!empty($aData[$givenType])) {
+                        $aTmp[$givenType] = $aData[$givenType];
+                    }
+                }
+                $aData = $aTmp;
+            } else {
+                // sort alphabetically by group
+                $coll = collator_create('de_DE');
+                $arrayKeys = array_keys($aData);
+                collator_sort($coll, $arrayKeys);
+                $aTmp = [];
+                foreach ($arrayKeys as $key) {
+                    $aTmp[$key] = $aData[$key];
+                }
+                $aData = $aTmp;
             }
 
-            $iMax += count($aTmp2);
+            $iMax = 0;
+            // sort entries
+            $aTmp = [];
+            foreach ($aData as $group => $aDetails) {
+                $aTmp2 = [];
+                foreach ($aDetails as $name => $aEntries) {
+                    $name = preg_replace('/[\W]/', '', $name);
+                    $aTmp2[$name] = [
+                        'url' => $aEntries['url'],
+                        'title' => $aEntries['title']
+                    ];
+                }
 
-            array_multisort(array_keys($aTmp2), SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-            $aData[$group] = $aTmp2;
+                $iMax += count($aTmp2);
+
+                $arrayKeys = array_keys($aTmp2);
+                array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+                $aTmp[$group] = $aTmp2;
+            }
+
+            $aData = $aTmp;
+
         }
-
-        // dynamically generate hide vars
-        // $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
-        // foreach ($aHide as $val) {
-        //     ${'hide_' . $val} = 1;
-        // }
 
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
@@ -261,13 +313,18 @@ class Shortcode
                 $i = 1;
 
                 foreach ($aEntries as $tmp => $data) {
-                    $data['accordion'] = true;
-                    $data['collapsibles_start'] = $start;
-                    $data['collapse_title'] = ($i == 1 ? $title : false);
-                    $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
-                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
-                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                    $data['color'] = $this->atts['color'];
+                    if (empty($hide_accordion)) {
+                        $data['accordion'] = true;
+                        $data['collapsibles_start'] = $start;
+                        $data['collapse_title'] = ($i == 1 ? $title : false);
+                        $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
+                        $data['collapse_start'] = ($data['collapse_title'] ? true : false);
+                        $data['collapse_end'] = ($i == count($aEntries) ? true : false);
+                        $data['color'] = $this->atts['color'];
+                    } else {
+                        $data['first'] = $start;
+                        $data['last'] = ($iCnt == $iMax ? true : false);
+                    }
 
                     $aTmp[] = $data;
                     $i++;
@@ -277,7 +334,7 @@ class Shortcode
             }
             $aData = $aTmp;
 
-            foreach ($aData as $data){
+            foreach ($aData as $data) {
                 $content .= Template::getContent($template, $data);
             }
         } elseif (empty($data['data'])) {
