@@ -171,7 +171,7 @@ class Shortcode
         }
 
         // group by eventtype
-        $aTmp = [];
+        $aData = [];
 
         $aGivenTypes = [];
         $aGivenLecturerIDs = [];
@@ -216,7 +216,7 @@ class Shortcode
 
                     // group only types defined in attribute type - DIP doesn't offer filter by type yet               
                     if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)) {
-                        $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                        $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
                             'url' => $aEntries['url'],
                             'title' => $aEntries['providerValues']['event']['title']
                         ];
@@ -224,7 +224,7 @@ class Shortcode
                         $iCnt++;
                     }
                 } else {
-                    $aTmp[$aEntries['providerValues']['event']['eventtype']][$name] = [
+                    $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
                         'url' => $aEntries['url'],
                         'title' => $aEntries['providerValues']['event']['title']
                     ];
@@ -232,30 +232,33 @@ class Shortcode
             }
         }
 
+
+        // sort
         if (!empty($this->atts['type'])) {
-            $aTmp2 = [];
+            // sort in order of $this->atts['type']
+            $aTmp = [];
             foreach ($aGivenTypes as $givenType) {
-                if (!empty($aTmp[$givenType])) {
-                    $aTmp2[$givenType] = $aTmp[$givenType];
+                if (!empty($aData[$givenType])) {
+                    $aTmp[$givenType] = $aData[$givenType];
                 }
             }
-            $aTmp = $aTmp2;
+            $aData = $aTmp;
         } else {
             // sort alphabetically by group
             $coll = collator_create('de_DE');
-            $arrayKeys = array_keys($aTmp);
+            $arrayKeys = array_keys($aData);
             collator_sort($coll, $arrayKeys);
-            $aTmp2 = [];
+            $aTmp = [];
             foreach ($arrayKeys as $key) {
-                $aTmp2[$key] = $aTmp[$key];
+                $aTmp[$key] = $aData[$key];
             }
-            $aTmp = $aTmp2;
+            $aData = $aTmp;
         }
 
         $iMax = 0;
-        // let's sort independently to special chars
-        $aData = [];
-        foreach ($aTmp as $group => $aDetails) {
+        // sort entries
+        $aTmp = [];
+        foreach ($aData as $group => $aDetails) {
             $aTmp2 = [];
             foreach ($aDetails as $name => $aEntries) {
                 $aTmp2[$name] = [
@@ -266,14 +269,12 @@ class Shortcode
 
             $iMax += count($aTmp2);
 
-            // array_multisort(array_keys($aTmp2), SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-
-            $coll = collator_create('de_DE');
             $arrayKeys = array_keys($aTmp2);
-            collator_sort($coll, $arrayKeys);
-
-            $aData[$group] = $aTmp2;
+            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+            $aTmp[$group] = $aTmp2;
         }
+
+        $aData = $aTmp;
 
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
