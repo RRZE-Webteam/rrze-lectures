@@ -108,7 +108,7 @@ function getFields()
             [
                 'name' => 'ApiKey',
                 'label' => __('DIP API-Key', 'rrze-lectures'),
-                'desc' => __('If you are not using a multisite installation of Wordpress, contact rrze-integration@fau.de to receive this key.', 'rrze-settings'),
+                'desc' => '',
                 'placeholder' => '',
                 'type' => 'text',
                 'default' => '',
