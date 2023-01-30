@@ -103,7 +103,14 @@ class Shortcode
         $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
         $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
-        $this->atts['format'] = 'linklist';
+        $bSingleEntry = false;
+
+        if (!empty($_GET['debug'])){
+            $bSingleEntry = true;
+            $this->atts['format'] = 'default';
+        }else{
+            $this->atts['format'] = 'linklist';
+        }
 
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
@@ -119,8 +126,19 @@ class Shortcode
             $bFetchAll = true;
         }
 
+        switch($this->atts['format']){
+            case 'linklist':
+                $dipFields = '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible';
+                break;
+            default:
+                $dipFields = '';
+        }
+
         if (!empty($this->atts['lecture_id'])) {
-            $dipParameter = $this->atts['lecture_id'];
+            $dipParameter = '/' . $this->atts['lecture_id'];
+            $bSingleEntry = true;
+            $bFetchAll = false;
+            $this->atts['format'] = 'default';
         } else {
             // no lecture ID given
             if (empty($this->atts['fauorgnr'])) {
@@ -132,10 +150,14 @@ class Shortcode
                 }
             }
 
-            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
+            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
+            $dipParameter = '?q=' . $this->atts['fauorgnr'] . $dipFields . '&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
         }
 
         $data = [];
+
+        // echo $dipParameter;
+        // exit;
 
         if (!$this->noCache) {
             $data = Functions::getDataFromCache($this->atts);
@@ -145,12 +167,23 @@ class Shortcode
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse($dipParameter . $page);
+            $response = $this->oDIP->getResponse($dipParameter . ($bSingleEntry ? '' : $page));
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
-                $data = $response['content']['data'];
+
+                if ($bSingleEntry){
+                    $data = $response['content'];
+
+                    if(!empty($data)){
+                        $aTmp = [];
+                        $aTmp[] = $data;
+                        $data = $aTmp;
+                    }
+                }else{
+                    $data = $response['content']['data'];
+                }
 
                 if ($bFetchAll) {
                     while ($response['content']['pagination']['remaining'] > 0) {
@@ -225,7 +258,7 @@ class Shortcode
                     }
                 } else {
                     $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                        'url' => $aEntries['url'],
+                        'url' => (!empty($aEntries['url']) ? $aEntries['url'] : 'API liefert noch keinen Wert'),
                         'title' => $aEntries['providerValues']['event']['title']
                     ];
                 }
@@ -233,6 +266,8 @@ class Shortcode
         }
 
         // sort
+        $coll = collator_create('de_DE');
+
         if (!empty($hide_accordion)) {
             // combine all entries and sort them
             $aTmp = [];
@@ -242,7 +277,6 @@ class Shortcode
                     $aTmp[$name] = $aEntries;
                 }
             }
-            $coll = collator_create('de_DE');
             $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
             $aTmp2 = [];
@@ -265,7 +299,6 @@ class Shortcode
                 $aData = $aTmp;
             } else {
                 // sort alphabetically by group
-                $coll = collator_create('de_DE');
                 $arrayKeys = array_keys($aData);
                 collator_sort($coll, $arrayKeys);
                 $aTmp = [];
