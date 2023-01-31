@@ -93,10 +93,12 @@ class Shortcode
 
 
         // either lecture_id or fauorgnr or basic_FAUOrgNr (options) must be given 
-        $bSingleEntry = true;
-
-        if (empty($this->atts['lecture_id'])) {
+        if (!empty($this->atts['lecture_id'])) {
+            $bSingleEntry = true;
+            $this->atts['format'] = 'table';
+        } else {
             $bSingleEntry = false;
+            $this->atts['format'] = 'linklist';
 
             // no lecture ID given
             if (empty($this->atts['fauorgnr'])) {
@@ -122,7 +124,6 @@ class Shortcode
         // $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
         // $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
-        $this->atts['format'] = 'linklist';
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
             if (empty($this->atts['type'])) {
@@ -141,13 +142,18 @@ class Shortcode
 
         switch ($this->atts['format']) {
             case 'linklist':
-                $dipFields = '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible';
+                $dipFields = '&attrs=url;providerValues.event.title;providerValues.event.eventtype';
                 break;
             default:
                 $dipFields = '';
         }
 
-        $dipParams = '?q=' . $this->atts['fauorgnr'] . $dipFields . '&limit=' . $limit;
+        if (!empty($this->atts['lecture_id'])) {
+            $dipParams = '?q=' . trim($this->atts['lecture_id']);
+        } else {
+            $dipParams = '?q=' . $this->atts['fauorgnr'] . $dipFields . '&limit=' . $limit;
+        }
+
 
         if (!empty($this->atts['lecturer_id'])) {
             $aParams = array_map('trim', explode(',', $this->atts['lecturer_id']));
@@ -181,22 +187,12 @@ class Shortcode
             $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
 
 
-    
+
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
 
-                if ($bSingleEntry) {
-                    $data = $response['content'];
-
-                    if (!empty($data)) {
-                        $aTmp = [];
-                        $aTmp[] = $data;
-                        $data = $aTmp;
-                    }
-                } else {
-                    $data = $response['content']['data'];
-                }
+                $data = $response['content']['data'];
 
                 if ($bFetchAll) {
                     while ($response['content']['pagination']['remaining'] > 0) {
@@ -216,22 +212,23 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
+
         // group by eventtype
         $aData = [];
 
         $iCnt = 0;
         foreach ($data as $nr => $aEntries) {
-            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['providerValues']['event']['title']] = [
-                'url' => $aEntries['url'],
-                'title' => $aEntries['providerValues']['event']['title']
-            ];
-
+            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['providerValues']['event']['title']] = $aEntries;
             $iCnt++;
 
             if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
                 continue;
             }
         }
+
+        // echo '<pre>';
+        // var_dump($aData);
+        // exit;
 
         // sort
         $coll = collator_create('de_DE');
@@ -282,10 +279,7 @@ class Shortcode
                 $aTmp2 = [];
                 foreach ($aDetails as $name => $aEntries) {
                     $name = preg_replace('/[\W]/', '', $name);
-                    $aTmp2[$name] = [
-                        'url' => $aEntries['url'],
-                        'title' => $aEntries['title']
-                    ];
+                    $aTmp2[$name] = $aEntries;
                 }
 
                 $iMax += count($aTmp2);
@@ -299,102 +293,48 @@ class Shortcode
 
         }
 
-        // echo '<pre>';
-        // var_dump($aData);
-        // exit;
-
-
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
 
+
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
-        if ($this->atts['format'] == 'linklist') {
-            $aTmp = [];
-            $start = true;
-            $iCnt = 1;
 
-            foreach ($aData as $title => $aEntries) {
-                $i = 1;
 
-                foreach ($aEntries as $tmp => $data) {
-                    if (empty($hide_accordion)) {
-                        $data['accordion'] = true;
-                        $data['collapsibles_start'] = $start;
-                        $data['collapse_title'] = ($i == 1 ? $title : false);
-                        $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
-                        $data['collapse_start'] = ($data['collapse_title'] ? true : false);
-                        $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                        $data['color'] = $this->atts['color'];
-                    } else {
-                        $data['first'] = $start;
-                        $data['last'] = ($iCnt == $iMax ? true : false);
-                    }
+        $aTmp = [];
+        $start = true;
+        $iCnt = 1;
 
-                    $aTmp[] = $data;
-                    $i++;
-                    $start = false;
-                    $iCnt++;
-                }
-            }
-            $aData = $aTmp;
+        foreach ($aData as $title => $aEntries) {
+            $i = 1;
 
-            foreach ($aData as $data) {
-                $content .= Template::getContent($template, $data);
-            }
-        } elseif (empty($data['data'])) {
-            // = 1 lecture
-            $content = Template::getContent($template, $data);
-        } else {
-            // > 1 lecture
-            $aTmp = [];
-
-            // $this->atts['accordion'] = 'a-z';
-            $this->atts['accordion'] = '';
-
-            $iMax = 0;
-
-            foreach ($data['data'] as $data) {
-                $aTmp[Template::makeCollapseTitle($data, $this->atts['accordion'])][] = $data;
-                $iMax++;
-            }
-
-            $aData = $aTmp;
-
-            // let's sort independently to special chars
-            $aTmp = [];
-            foreach ($aData as $name => $aEntries) {
-                $name = preg_replace('/[a-z]+/', '', $name);
-                $aTmp[$name] = $aEntries;
-            }
-            $aData = $aTmp;
-
-            array_multisort(array_keys($aData), SORT_NATURAL | SORT_FLAG_CASE, $aData);
-
-            $aTmp = [];
-            $start = true;
-            foreach ($aData as $title => $aEntries) {
-                $i = 1;
-
-                foreach ($aEntries as $nr => $data) {
+            foreach ($aEntries as $tmp => $data) {
+                if (empty($hide_accordion)) {
                     $data['accordion'] = true;
                     $data['collapsibles_start'] = $start;
-                    $data['collapse_title'] = ($nr == 0 ? $data['name'] : false);
-                    $data['collapsibles_end'] = ($i < $iMax ? false : true);
+                    $data['collapse_title'] = ($i == 1 ? $title : false);
+                    $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
                     $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                     $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                    $aTmp[] = $data;
-                    $i++;
-                    $start = false;
+                    $data['color'] = $this->atts['color'];
+                } else {
+                    $data['first'] = $start;
+                    $data['last'] = ($iCnt == $iMax ? true : false);
                 }
 
+                $aTmp[] = $data;
+                $i++;
+                $start = false;
+                $iCnt++;
             }
+        }
+        $aData = $aTmp;
 
-            $aData = $aTmp;
-
-            foreach ($aData as $nr => $data) {
-                $content .= Template::getContent($template, $data);
-            }
+        foreach ($aData as $data) {
+            // echo '<pre>';
+            // var_dump($data);
+            // exit;
+            $content .= Template::getContent($template, $data);
         }
 
         $content = do_shortcode($content);
