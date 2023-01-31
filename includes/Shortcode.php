@@ -91,6 +91,25 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+
+        // either lecture_id or fauorgnr or basic_FAUOrgNr (options) must be given 
+        $bSingleEntry = true;
+
+        if (empty($this->atts['lecture_id'])) {
+            $bSingleEntry = false;
+
+            // no lecture ID given
+            if (empty($this->atts['fauorgnr'])) {
+                // try to get it from the plugin's options
+                if (!empty($this->options['basic_FAUOrgNr'])) {
+                    $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+                } else {
+                    return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+                }
+            }
+        }
+
+
         // dynamically generate hide vars
         $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
         foreach ($aHide as $val) {
@@ -100,18 +119,10 @@ class Shortcode
         // set accordions' colors
         // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
-        $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
-        $this->atts['color_courses'] = $this->atts['color_courses'][0];
+        // $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
+        // $this->atts['color_courses'] = $this->atts['color_courses'][0];
 
-        $bSingleEntry = false;
-
-        if (!empty($_GET['debug'])){
-            $bSingleEntry = true;
-            $this->atts['format'] = 'default';
-        }else{
-            $this->atts['format'] = 'linklist';
-        }
-
+        $this->atts['format'] = 'linklist';
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
             if (empty($this->atts['type'])) {
@@ -126,7 +137,9 @@ class Shortcode
             $bFetchAll = true;
         }
 
-        switch($this->atts['format']){
+
+
+        switch ($this->atts['format']) {
             case 'linklist':
                 $dipFields = '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible';
                 break;
@@ -134,30 +147,28 @@ class Shortcode
                 $dipFields = '';
         }
 
-        if (!empty($this->atts['lecture_id'])) {
-            $dipParameter = '/' . $this->atts['lecture_id'];
-            $bSingleEntry = true;
-            $bFetchAll = false;
-            $this->atts['format'] = 'default';
-        } else {
-            // no lecture ID given
-            if (empty($this->atts['fauorgnr'])) {
-                // try to get it from the plugin's options
-                if (!empty($this->options['basic_FAUOrgNr'])) {
-                    $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
-                } else {
-                    return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
-                }
-            }
+        $dipParams = '?q=' . $this->atts['fauorgnr'] . $dipFields . '&limit=' . $limit;
 
-            // $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
-            $dipParameter = '?q=' . $this->atts['fauorgnr'] . $dipFields . '&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
+        if (!empty($this->atts['lecturer_id'])) {
+            $aParams = array_map('trim', explode(',', $this->atts['lecturer_id']));
+            if (count($aParams) > 1) {
+                $dipParams .= '&lq=providerValues.course_responsible.idm_uid[in]=' . implode(';', $aParams);
+            } else {
+                $dipParams .= '&lq=providerValues.course_responsible.idm_uid=' . implode('', $aParams);
+            }
+        }
+
+        $aGivenTypes = [];
+        if (!empty($this->atts['type'])) {
+            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
+            if (count($aParams) > 1) {
+                $dipParams .= (!empty($this->atts['lecturer_id']) ? '&' : 'lq=') . 'providerValues.event.eventtype[in]=' . implode(';', $aGivenTypes);
+            } else {
+                $dipParams .= (!empty($this->atts['lecturer_id']) ? '&' : 'lq=') . 'providerValues.event.eventtype=' . implode('', $aGivenTypes);
+            }
         }
 
         $data = [];
-
-        // echo $dipParameter;
-        // exit;
 
         if (!$this->noCache) {
             $data = Functions::getDataFromCache($this->atts);
@@ -167,28 +178,30 @@ class Shortcode
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse($dipParameter . ($bSingleEntry ? '' : $page));
+            $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
 
+
+    
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
 
-                if ($bSingleEntry){
+                if ($bSingleEntry) {
                     $data = $response['content'];
 
-                    if(!empty($data)){
+                    if (!empty($data)) {
                         $aTmp = [];
                         $aTmp[] = $data;
                         $data = $aTmp;
                     }
-                }else{
+                } else {
                     $data = $response['content']['data'];
                 }
 
                 if ($bFetchAll) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
-                        $response = $this->oDIP->getResponse($dipParameter . $page);
+                        $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
 
                         $data = array_merge($response['content']['data'], $data);
                     }
@@ -206,62 +219,17 @@ class Shortcode
         // group by eventtype
         $aData = [];
 
-        $aGivenTypes = [];
-        $aGivenLecturerIDs = [];
-
-        if (!empty($this->atts['type'])) {
-            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-        }
-
-        if (!empty($this->atts['lecturer_id'])) {
-            $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
-        }
-
         $iCnt = 0;
         foreach ($data as $nr => $aEntries) {
-            $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
+            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['providerValues']['event']['title']] = [
+                'url' => $aEntries['url'],
+                'title' => $aEntries['providerValues']['event']['title']
+            ];
 
-            $bSkip = false;
-            if (!empty($this->atts['lecturer_id'])) {
-                if (empty($aEntries['providerValues']['course_responsible'])) {
-                    $bSkip = true;
-                } else {
-                    $aFoundLecturerIDs = [];
-                    foreach ($aEntries['providerValues']['course_responsible'] as $nr => $aDetails) {
-                        $aFoundLecturerIDs[] = $aDetails['idm_uid'];
-                    }
+            $iCnt++;
 
-                    $bSkip = true;
-                    foreach ($aGivenLecturerIDs as $givenLectureID) {
-                        if (in_array($givenLectureID, $aFoundLecturerIDs)) {
-                            $bSkip = false;
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            if (!$bSkip) {
-                if (!empty($this->atts['type'])) {
-                    if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
-                        continue;
-                    }
-
-                    // group only types defined in attribute type - DIP doesn't offer filter by type yet               
-                    if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)) {
-                        $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                            'url' => $aEntries['url'],
-                            'title' => $aEntries['providerValues']['event']['title']
-                        ];
-
-                        $iCnt++;
-                    }
-                } else {
-                    $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                        'url' => (!empty($aEntries['url']) ? $aEntries['url'] : 'API liefert noch keinen Wert'),
-                        'title' => $aEntries['providerValues']['event']['title']
-                    ];
-                }
+            if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
+                continue;
             }
         }
 
@@ -272,9 +240,8 @@ class Shortcode
             // combine all entries and sort them
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
-                foreach($aDetails as $aEntries){
-                    $name = preg_replace('/[\W]/', '', $aEntries['title']);
-                    $aTmp[$name] = $aEntries;
+                foreach ($aDetails as $aEntries) {
+                    $aTmp[$aEntries['title']] = $aEntries;
                 }
             }
             $arrayKeys = array_keys($aTmp);
@@ -331,6 +298,11 @@ class Shortcode
             $aData = $aTmp;
 
         }
+
+        // echo '<pre>';
+        // var_dump($aData);
+        // exit;
+
 
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
