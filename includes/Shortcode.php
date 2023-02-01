@@ -149,30 +149,24 @@ class Shortcode
         }
 
         if (!empty($this->atts['lecture_id'])) {
-            $dipParams = '?q=' . trim($this->atts['lecture_id']);
+            $aGivenLectureIDs = array_map('trim', explode(',', $this->atts['lecture_id']));
+            $dipParams = '?lq=identifier[in]=' . implode(';', $aGivenLectureIDs);
         } else {
-            $dipParams = '?q=' . $this->atts['fauorgnr'] . $dipFields . '&limit=' . $limit;
-        }
+            $dipParams = '?lq=providerValues.event_orgunit.fauorg=' . $this->atts['fauorgnr'];
 
+            if (!empty($this->atts['lecturer_id'])) {
+                $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
+                $dipParams .= '&providerValues.course_responsible.idm_uid[in]=' . implode(';', $aGivenLecturerIDs);
+            }
 
-        if (!empty($this->atts['lecturer_id'])) {
-            $aParams = array_map('trim', explode(',', $this->atts['lecturer_id']));
-            if (count($aParams) > 1) {
-                $dipParams .= '&lq=providerValues.course_responsible.idm_uid[in]=' . implode(';', $aParams);
-            } else {
-                $dipParams .= '&lq=providerValues.course_responsible.idm_uid=' . implode('', $aParams);
+            if (!empty($this->atts['type'])) {
+                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
+                $dipParams .= '&providerValues.event.eventtype[in]=' . implode(';', $aGivenTypes);
             }
         }
 
-        $aGivenTypes = [];
-        if (!empty($this->atts['type'])) {
-            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-            if (count($aParams) > 1) {
-                $dipParams .= (!empty($this->atts['lecturer_id']) ? '&' : 'lq=') . 'providerValues.event.eventtype[in]=' . implode(';', $aGivenTypes);
-            } else {
-                $dipParams .= (!empty($this->atts['lecturer_id']) ? '&' : 'lq=') . 'providerValues.event.eventtype=' . implode('', $aGivenTypes);
-            }
-        }
+
+        $dipParams .= $dipFields . '&limit=' . $limit;
 
         $data = [];
 
@@ -185,8 +179,6 @@ class Shortcode
 
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
-
-
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -212,7 +204,6 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
-
         // group by eventtype
         $aData = [];
 
@@ -225,10 +216,6 @@ class Shortcode
                 continue;
             }
         }
-
-        // echo '<pre>';
-        // var_dump($aData);
-        // exit;
 
         // sort
         $coll = collator_create('de_DE');
