@@ -1,5 +1,19 @@
-<div class="rrze-lectures">
-    <div itemscope="" itemtype="https://schema.org/Course">
+{{accordion}}
+    {{collapsibles_start}}
+        <div class="rrze-lectures">
+        [collapsibles]
+    {{/collapsibles_start}}
+    {{collapse_start}}
+        [collapse title="{{=collapse_title}}" color="{{=color}}"]
+        <div itemscope="" itemtype="https://schema.org/Course">
+    {{/collapse_start}}
+{{:accordion}}
+    {{first}}
+        <div class="rrze-lectures">
+            <div itemscope="" itemtype="https://schema.org/Course">
+    {{/first}}
+{{/accordion}}
+
         <p><em>(Nur zum Debuggen: identifier = {{=identifier}})</em></p>
         <h2><span itemprop="name">{{=name}}</span></h2>
 
@@ -129,5 +143,20 @@
         </table>
         {{/providerValues.module}}
 
-    </div>
-</div>
+
+{{accordion}}
+    {{collapse_end}}
+            </div>
+        [/collapse]
+    {{/collapse_end}}
+    {{collapsibles_end}}
+        [/collapsibles]
+        </div>
+    {{/collapsibles_end}}
+{{:accordion}}
+    {{last}}
+            </div>
+        </div>
+    {{/last}}
+{{/accordion}}
+

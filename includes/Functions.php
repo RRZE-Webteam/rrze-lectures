@@ -86,7 +86,7 @@ class Functions
         return $ret;
     }
 
-    public static function setDataToCache($data = '', $aAtts = []){
+    public static function setDataToCache($data, $aAtts = []){
         $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
 
         // if ($ret){

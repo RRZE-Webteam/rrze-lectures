@@ -91,6 +91,14 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+        // get cache
+        if (!$this->noCache) {
+            $content = Functions::getDataFromCache($this->atts);
+
+            if (!empty($content)){
+                return $content;
+            }
+        }
 
         // either lecture_id or fauorgnr or basic_FAUOrgNr (options) must be given 
         if (!empty($this->atts['lecture_id'])) {
@@ -138,14 +146,12 @@ class Shortcode
             $bFetchAll = true;
         }
 
-
-
         switch ($this->atts['format']) {
             case 'linklist':
-                $dipFields = '&attrs=url;providerValues.event.title;providerValues.event.eventtype';
+                $dipFields = '&attrs=identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 break;
             default:
-                $dipFields = '';
+                $dipFields = '&attrs=identifier;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
         }
 
         if (!empty($this->atts['lecture_id'])) {
@@ -165,14 +171,9 @@ class Shortcode
             }
         }
 
-
         $dipParams .= $dipFields . '&limit=' . $limit;
 
         $data = [];
-
-        if (!$this->noCache) {
-            $data = Functions::getDataFromCache($this->atts);
-        }
 
         if (empty($data)) {
             $page = 1;
@@ -190,13 +191,9 @@ class Shortcode
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
                         $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
-
                         $data = array_merge($response['content']['data'], $data);
                     }
                 }
-
-                // set cache
-                Functions::setDataToCache($data, $this->atts);
             }
         }
 
@@ -216,6 +213,7 @@ class Shortcode
                 continue;
             }
         }
+        unset($data); // free memory
 
         // sort
         $coll = collator_create('de_DE');
@@ -228,14 +226,18 @@ class Shortcode
                     $aTmp[$aEntries['title']] = $aEntries;
                 }
             }
+            unset($aData); // free memory
+
             $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
             $aTmp2 = [];
             foreach ($arrayKeys as $key) {
                 $aTmp2[$key] = $aTmp[$key];
-            }
+            }            
+            unset($aTmp); // free memory
             $aData = [];
             $aData[] = $aTmp2;
+            unset($aTmp2); // free memory
             $iMax = count($aTmp2);
         } else {
             // sort group
@@ -248,6 +250,7 @@ class Shortcode
                     }
                 }
                 $aData = $aTmp;
+                unset($aTmp); // free memory
             } else {
                 // sort alphabetically by group
                 $arrayKeys = array_keys($aData);
@@ -257,6 +260,7 @@ class Shortcode
                     $aTmp[$key] = $aData[$key];
                 }
                 $aData = $aTmp;
+                unset($aTmp); // free memory
             }
 
             $iMax = 0;
@@ -274,18 +278,19 @@ class Shortcode
                 $arrayKeys = array_keys($aTmp2);
                 array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
                 $aTmp[$group] = $aTmp2;
+                unset($aTmp2); // free memory
             }
 
             $aData = $aTmp;
-
+            unset($aTmp); // free memory
         }
+
 
         // $oSanitizer = new Sanitizer();
         // $aData = $oSanitizer->sanitizeArray($aData);
 
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
-
 
 
         $aTmp = [];
@@ -316,15 +321,17 @@ class Shortcode
             }
         }
         $aData = $aTmp;
+        unset($aTmp); // free memory
 
         foreach ($aData as $data) {
-            // echo '<pre>';
-            // var_dump($data);
-            // exit;
             $content .= Template::getContent($template, $data);
         }
+        unset($aData); // free memory
 
         $content = do_shortcode($content);
+
+        // set cache
+        Functions::setDataToCache($content, $this->atts);
 
         return $content;
     }
