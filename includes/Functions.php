@@ -29,7 +29,7 @@ class Functions
         add_action('wp_ajax_nopriv_GenerateICS', [$this, 'ajaxGenerateICS']);
     }
 
-    public static function console_log($msg = '', $tsStart) {
+    public static function console_log($msg = '', $tsStart = 0) {
         if (isset($_GET['debug'])){
             $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';
             echo '<script>console.log(' . json_encode($msg, JSON_HEX_TAG) . ');</script>';    

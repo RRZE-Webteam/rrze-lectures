@@ -166,12 +166,12 @@ class Shortcode
 
             if (!empty($this->atts['lecturer_id'])) {
                 $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
-                $dipParams .= '&providerValues.course_responsible.idm_uid[in]=' . implode(';', $aGivenLecturerIDs);
+                $dipParams .= '&providerValues.course_responsible.idm_uid' . (count($aGivenLecturerIDs) > 1 ? '[in]' : '') . '=' . implode(';', $aGivenLecturerIDs);
             }
 
             if (!empty($this->atts['type'])) {
                 $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-                $dipParams .= '&providerValues.event.eventtype[in]=' . implode(';', $aGivenTypes);
+                $dipParams .= '&providerValues.event.eventtype' . (count($aGivenTypes) > 1 ? '[in]' : '') . '=' . implode(';', $aGivenTypes);
             }
         }
 
@@ -186,6 +186,9 @@ class Shortcode
 
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
+
+            // echo $dipParams . ($bSingleEntry ? '' : '&page=' . $page);
+            // exit;
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -208,6 +211,11 @@ class Shortcode
         if (empty($data)) {
             return $this->atts['nodata'];
         }
+
+
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
 
         // group by eventtype
         $aData = [];
@@ -233,7 +241,7 @@ class Shortcode
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 foreach ($aDetails as $aEntries) {
-                    $aTmp[$aEntries['title']] = $aEntries;
+                    $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
                 }
             }
             unset($aData); // free memory
@@ -247,8 +255,8 @@ class Shortcode
             unset($aTmp); // free memory
             $aData = [];
             $aData[] = $aTmp2;
-            unset($aTmp2); // free memory
             $iMax = count($aTmp2);
+            unset($aTmp2); // free memory
         } else {
             // sort group
             if (!empty($this->atts['type'])) {
