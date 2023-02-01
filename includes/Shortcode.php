@@ -72,15 +72,17 @@ class Shortcode
      */
     public function shortcodeLectures($atts, $content = NULL)
     {
+        $tsStart = microtime(true);
         // show link to DIP only
         // if (in_array('link', $this->show)) {
         //     return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
         // }
 
+        Functions::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
+
         if (!empty($atts['nocache'])) {
             $this->noCache = true;
         }
-
 
         // merge given attributes with default ones
         $atts_default = array();
@@ -91,11 +93,15 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+        // $oSanitizer = new Sanitizer();
+        // $this->atts = $oSanitizer->sanitizeArray($this->atts);
+
         // get cache
         if (!$this->noCache) {
             $content = Functions::getDataFromCache($this->atts);
 
             if (!empty($content)){
+                Functions::console_log('Cache found and returned', $tsStart);
                 return $content;
             }
         }
@@ -106,7 +112,7 @@ class Shortcode
             $this->atts['format'] = 'table';
         } else {
             $bSingleEntry = false;
-            $this->atts['format'] = 'linklist';
+            // $this->atts['format'] = 'linklist';
 
             // no lecture ID given
             if (empty($this->atts['fauorgnr'])) {
@@ -119,7 +125,6 @@ class Shortcode
             }
         }
 
-
         // dynamically generate hide vars
         $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
         foreach ($aHide as $val) {
@@ -131,7 +136,6 @@ class Shortcode
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
         // $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
         // $this->atts['color_courses'] = $this->atts['color_courses'][0];
-
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
             if (empty($this->atts['type'])) {
@@ -173,6 +177,8 @@ class Shortcode
 
         $dipParams .= $dipFields . '&limit=' . $limit;
 
+        Functions::console_log('Set params for DIP', $tsStart);
+
         $data = [];
 
         if (empty($data)) {
@@ -197,6 +203,8 @@ class Shortcode
             }
         }
 
+        Functions::console_log('Fetched data from DIP', $tsStart);
+
         if (empty($data)) {
             return $this->atts['nodata'];
         }
@@ -214,6 +222,8 @@ class Shortcode
             }
         }
         unset($data); // free memory
+
+        Functions::console_log('Group by eventtype completed', $tsStart);
 
         // sort
         $coll = collator_create('de_DE');
@@ -285,13 +295,9 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-
-        // $oSanitizer = new Sanitizer();
-        // $aData = $oSanitizer->sanitizeArray($aData);
-
+        Functions::console_log('Sort completed', $tsStart);
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
-
 
         $aTmp = [];
         $start = true;
@@ -323,15 +329,26 @@ class Shortcode
         $aData = $aTmp;
         unset($aTmp); // free memory
 
+        Functions::console_log('Accordion & first/last values set for template', $tsStart);
+
         foreach ($aData as $data) {
             $content .= Template::getContent($template, $data);
         }
         unset($aData); // free memory
 
-        $content = do_shortcode($content);
+        Functions::console_log('Template parsed', $tsStart);
+
+        if (empty($hide_accordion)) {
+            $content = do_shortcode($content);
+        }
+
+        Functions::console_log('do_shortcode() executed', $tsStart);
 
         // set cache
         Functions::setDataToCache($content, $this->atts);
+
+        Functions::console_log('Cache set', $tsStart);
+        Functions::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
         return $content;
     }
