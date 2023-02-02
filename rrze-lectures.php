@@ -4,7 +4,7 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         1.3.4
+ * Version:         1.3.6
  * Author:          RRZE-Webteam
  * Author URI:      https://blogs.fau.de/webworking/
  * License:         GNU General Public License v3
@@ -73,6 +73,19 @@ function systemRequirements(): string
     return $error;
 }
 
+function setFAUOrgNr(){
+    $thisOptions = get_option('rrze-lectures');
+
+    if (empty($thisOptions['basic_FAUOrgNr'])) {
+        $univisOptions = get_option('rrze-univis');
+
+        if (!empty($univisOptions['basic_UnivISOrgNr'])) {
+            $thisOptions['basic_FAUOrgNr'] = $univisOptions['basic_UnivISOrgNr'];
+            update_option('rrze-lectures', $thisOptions);
+        }
+    }
+}
+
 /**
  * Wird nach der Aktivierung des Plugins ausgeführt.
  */
@@ -87,6 +100,8 @@ function activation()
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die($error);
     }
+
+    setFAUOrgNr();
 
     // Endpoint hinzufügen
     add_endpoint(true);
