@@ -200,7 +200,6 @@ class Shortcode
 
         foreach ($data as $nr => $aEntries) {
             $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['providerValues']['event']['title']] = $aEntries;
-            // $aData[$aEntries['providerValues']['event']['eventtype']][] = $aEntries;
         }
         unset($data); // free memory
 
@@ -283,6 +282,10 @@ class Shortcode
         $aTmp = [];
         $start = true;
         $iCnt = 1;
+
+        if (empty($aData)) {
+            return $this->atts['nodata'];
+        }
 
         foreach ($aData as $title => $aEntries) {
             $i = 1;
