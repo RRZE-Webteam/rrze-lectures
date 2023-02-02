@@ -25,6 +25,7 @@ class Shortcode
     protected $oDIP;
     private $settings = '';
     private $aAllowedColors = [];
+    private $aAllowedFormats = [];
     protected $noCache = false;
 
 
@@ -40,6 +41,7 @@ class Shortcode
         $this->options = get_option('rrze-lectures');
         $constants = getConstants();
         $this->aAllowedColors = $constants['colors'];
+        $this->aAllowedFormats = $constants['formats'];
 
         add_action('admin_enqueue_scripts', [$this, 'enqueueGutenberg']);
         add_action('init', [$this, 'initGutenberg']);
@@ -109,10 +111,8 @@ class Shortcode
         // either lecture_id or fauorgnr or basic_FAUOrgNr (options) must be given 
         if (!empty($this->atts['lecture_id'])) {
             $bSingleEntry = true;
-            $this->atts['format'] = 'table';
         } else {
             $bSingleEntry = false;
-            // $this->atts['format'] = 'linklist';
 
             // no lecture ID given
             if (empty($this->atts['fauorgnr'])) {
@@ -131,11 +131,9 @@ class Shortcode
             ${'hide_' . $val} = 1;
         }
 
-        // set accordions' colors
-        // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
-        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
-        // $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
-        // $this->atts['color_courses'] = $this->atts['color_courses'][0];
+        // check atts
+        $this->atts['format'] = (in_array($this->atts['color'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
+        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
 
         if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
             if (empty($this->atts['type'])) {
@@ -149,6 +147,9 @@ class Shortcode
             $limit = 100;
             $bFetchAll = true;
         }
+
+
+        $this->atts['format'] = 'linklist';
 
         switch ($this->atts['format']) {
             case 'linklist':
@@ -187,9 +188,6 @@ class Shortcode
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
 
-            // echo $dipParams . ($bSingleEntry ? '' : '&page=' . $page);
-            // exit;
-
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
@@ -211,11 +209,6 @@ class Shortcode
         if (empty($data)) {
             return $this->atts['nodata'];
         }
-
-
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
 
         // group by eventtype
         $aData = [];

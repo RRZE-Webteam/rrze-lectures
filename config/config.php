@@ -38,14 +38,20 @@ function getConstants()
             "ru" => __('Russian', 'rrze-lectures'),
             "zh" => __('Chinese', 'rrze-lectures'),
         ],
-        'colors' => [
-            'med',
-            'nat',
-            'rw',
-            'phil',
-            'tk',
-        ],
     );
+
+    $aTmp = getShortcodeSettings();
+
+    foreach($aTmp['lectures']['color']['values'] as $aVals){
+        if (!empty($aVals['id'])){
+            $options['colors'][] = $aVals['id'];
+        }
+    }
+
+    foreach($aTmp['lectures']['format']['values'] as $aVals){
+        $options['formats'][] = $aVals['id'];
+    }
+
     return $options;
 }
 
@@ -123,17 +129,6 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
-            // [
-            //     'name' => 'hstart',
-            //     'label' => __('Headline\'s size', 'rrze-lectures'),
-            //     'desc' => __('Headlines start at this size.', 'rrze-lectures'),
-            //     'min' => 2,
-            //     'max' => 10,
-            //     'step' => '1',
-            //     'type' => 'number',
-            //     'default' => '2',
-            //     'sanitize_callback' => 'floatval',
-            // ],
         ],
     ];
 }
@@ -225,7 +220,13 @@ function getShortcodeSettings()
                 'default' => 'linklist',
                 'field_type' => 'text',
                 'label' => __('Format', 'rrze-lectures'),
-                'type' => 'string',
+                'type' => 'array',
+                'values' => [
+                    [
+                        'id' => 'linklist',
+                        'val' => 'linklist',
+                    ],
+                ],
             ],
             'color' => [
                 'default' => '',
