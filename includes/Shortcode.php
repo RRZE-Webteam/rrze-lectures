@@ -134,22 +134,7 @@ class Shortcode
         // check atts
         $this->atts['format'] = (in_array($this->atts['color'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
-
-        if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
-            if (empty($this->atts['type'])) {
-                $limit = (int) $this->atts['max'];
-                $bFetchAll = false;
-            } else {
-                $limit = 100;
-                $bFetchAll = true;
-            }
-        } else {
-            $limit = 100;
-            $bFetchAll = true;
-        }
-
-
-        $this->atts['format'] = 'linklist';
+        $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
         switch ($this->atts['format']) {
             case 'linklist':
@@ -176,7 +161,7 @@ class Shortcode
             }
         }
 
-        $dipParams .= $dipFields . '&limit=' . $limit;
+        $dipParams .= $dipFields . '&limit=' . $this->atts['max'];
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -194,7 +179,7 @@ class Shortcode
 
                 $data = $response['content']['data'];
 
-                if ($bFetchAll) {
+                if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
                         $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
@@ -210,17 +195,12 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
-        // group by eventtype
+        // group & sort
         $aData = [];
 
-        $iCnt = 0;
         foreach ($data as $nr => $aEntries) {
             $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['providerValues']['event']['title']] = $aEntries;
-            $iCnt++;
-
-            if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
-                continue;
-            }
+            // $aData[$aEntries['providerValues']['event']['eventtype']][] = $aEntries;
         }
         unset($data); // free memory
 
