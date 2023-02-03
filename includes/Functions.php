@@ -36,6 +36,16 @@ class Functions
         }
     }
 
+    public static function makeLQ($aIn){
+        $aLQ = [];
+        foreach($aIn as $dipField => $attVal){
+            $aTmp = array_map('trim', explode(',', $attVal));
+            $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
+        }
+
+        return implode('&', $aLQ);
+    }
+
     public function ajaxGenerateICS(){
         check_ajax_referer('lecture-ajax-ics-nonce', 'ics_nonce');
         $inputs = filter_input(INPUT_GET, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);

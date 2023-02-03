@@ -139,35 +139,36 @@ class Shortcode
 
         switch ($this->atts['format']) {
             case 'linklist':
-                $attrs = 'identifier%3Burl%3BproviderValues.event.title%3BproviderValues.event.eventtype';
+                $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 break;
             default:
-                $attrs = 'identifier%3BproviderValues.event.title%3BproviderValues.event_orgunit.orgunit%3BproviderValues.event.eventtype%3BproviderValues.event_responsible%3Bdescription%3BmaximumAttendeeCapacity%3BminimumAttendeeCapacity%3BproviderValues.planned_dates%3BproviderValues.module';
+                $attrs = 'identifier;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
         }
 
+
+        $aLQ = [];
+
         if (!empty($this->atts['lecture_id'])) {
-            $aGivenLectureIDs = array_map('trim', explode(',', $this->atts['lecture_id']));
-            $lq = 'identifier'. (count($aGivenLectureIDs) > 1 ? '%5Bin%5D' : '') . '%3D' . implode('%26', $aGivenLectureIDs);
+            $aLQ['identifier'] = $this->atts['lecture_id'];
         } else {
-            $lq = 'providerValues.event_orgunit.fauorg%3D' . $this->atts['fauorgnr'];
+            $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
 
             if (!empty($this->atts['lecturer_id'])) {
-                $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
-                $lq .= '%26providerValues.course_responsible.idm_uid' . (count($aGivenLecturerIDs) > 1 ? '%5Bin%5D' : '') . '%3D' . implode('%3B', $aGivenLecturerIDs);
+                $aLQ['providerValues.course_responsible.idm_uid'] = $this->atts['lecturer_id'];
             }
 
             if (!empty($this->atts['type'])) {
-                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-                $lq .= '%26providerValues.event.eventtype' . (count($aGivenTypes) > 1 ? '%5Bin%5D' : '') . '%3D' . implode('%3B', $aGivenTypes);
+                $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
             }
         }
 
-        $dipParams  = '?limit=' . $this->atts['max'] . '&sort=providerValues.event.title%3D1' . '&attrs=' . $attrs . '&lq=' . $lq . '&page=';
-
+        // we cannot use API parameter "sort" because it sorts per page not the complete dataset
+        $dipParams  = '?limit=' . $this->atts['max'] . '&attrs=' . urlencode($attrs) . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
+        // $iAllEntries = 0;
 
         if (empty($data)) {
             $page = 1;
@@ -176,16 +177,18 @@ class Shortcode
             $response = $this->oDIP->getResponse($dipParams . $page);
 
             if (!$response['valid']) {
-                return $this->atts['nodata'] . ' A';
+                return $this->atts['nodata'];
             } else {
 
                 $data = $response['content']['data'];
+                // $iAllEntries += $response['content']['pagination']['count'];
 
                 if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
                         $response = $this->oDIP->getResponse($dipParams . $page);
                         $data = array_merge($response['content']['data'], $data);
+                        // $iAllEntries += $response['content']['pagination']['count'];
                     }
                 }
             }
@@ -195,14 +198,14 @@ class Shortcode
         Functions::console_log('Fetched data from DIP', $tsStart);
 
         if (empty($data)) {
-            return $this->atts['nodata'] . 'B';
+            return $this->atts['nodata'];
         }
 
         // group & sort
         $aData = [];
 
         foreach ($data as $nr => $aEntries) {
-            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['providerValues']['event']['title']] = $aEntries;
+            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
         }
         unset($data); // free memory
 
@@ -257,20 +260,19 @@ class Shortcode
                 unset($aTmp); // free memory
             }
 
-            $iMax = 0;
             // sort entries
+            $iAllEntries = 0;
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
-                foreach ($aDetails as $name => $aEntries) {
-                    $name = preg_replace('/[\W]/', '', $name);
+                foreach ($aDetails as $identifier => $aEntries) {
+                    $name = $aEntries['providerValues']['event']['title'];
                     $aTmp2[$name] = $aEntries;
                 }
 
-                $iMax += count($aTmp2);
-
                 $arrayKeys = array_keys($aTmp2);
                 array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+                $iAllEntries += count($aTmp2);
                 $aTmp[$group] = $aTmp2;
                 unset($aTmp2); // free memory
             }
@@ -299,13 +301,13 @@ class Shortcode
                     $data['accordion'] = true;
                     $data['collapsibles_start'] = $start;
                     $data['collapse_title'] = ($i == 1 ? $title : false);
-                    $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
+                    $data['collapsibles_end'] = ($iCnt == $iAllEntries ? true : false);
                     $data['collapse_start'] = ($data['collapse_title'] ? true : false);
                     $data['collapse_end'] = ($i == count($aEntries) ? true : false);
                     $data['color'] = $this->atts['color'];
                 } else {
                     $data['first'] = $start;
-                    $data['last'] = ($iCnt == $iMax ? true : false);
+                    $data['last'] = ($iCnt == $iAllEntries ? true : false);
                 }
 
                 $aTmp[] = $data;
