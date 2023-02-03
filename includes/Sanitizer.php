@@ -48,6 +48,9 @@ class Sanitizer
 
     public static function sanitizeLectures(&$data){
         foreach($data as $nr => $aEntries){
+
+            // 2DO: sanitize_text_field() all other fields for output
+
             $data[$nr]['providerValues']['planned_dates']['startdate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['startdate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
             $data[$nr]['providerValues']['planned_dates']['enddate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['enddate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
             $data[$nr]['providerValues']['planned_dates']['starttime'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['starttime'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'H:i');
