@@ -136,32 +136,34 @@ class Shortcode
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
         $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
+
         switch ($this->atts['format']) {
             case 'linklist':
-                $dipFields = '&attrs=identifier;url;providerValues.event.title;providerValues.event.eventtype';
+                $attrs = 'identifier%3Burl%3BproviderValues.event.title%3BproviderValues.event.eventtype';
                 break;
             default:
-                $dipFields = '&attrs=identifier;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
+                $attrs = 'identifier%3BproviderValues.event.title%3BproviderValues.event_orgunit.orgunit%3BproviderValues.event.eventtype%3BproviderValues.event_responsible%3Bdescription%3BmaximumAttendeeCapacity%3BminimumAttendeeCapacity%3BproviderValues.planned_dates%3BproviderValues.module';
         }
 
         if (!empty($this->atts['lecture_id'])) {
             $aGivenLectureIDs = array_map('trim', explode(',', $this->atts['lecture_id']));
-            $dipParams = '?lq=identifier[in]=' . implode(';', $aGivenLectureIDs);
+            $lq = 'identifier'. (count($aGivenLectureIDs) > 1 ? '%5Bin%5D' : '') . '%3D' . implode('%26', $aGivenLectureIDs);
         } else {
-            $dipParams = '?lq=providerValues.event_orgunit.fauorg=' . $this->atts['fauorgnr'];
+            $lq = 'providerValues.event_orgunit.fauorg%3D' . $this->atts['fauorgnr'];
 
             if (!empty($this->atts['lecturer_id'])) {
                 $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
-                $dipParams .= '&providerValues.course_responsible.idm_uid' . (count($aGivenLecturerIDs) > 1 ? '[in]' : '') . '=' . implode(';', $aGivenLecturerIDs);
+                $lq .= '%26providerValues.course_responsible.idm_uid' . (count($aGivenLecturerIDs) > 1 ? '%5Bin%5D' : '') . '%3D' . implode('%3B', $aGivenLecturerIDs);
             }
 
             if (!empty($this->atts['type'])) {
                 $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-                $dipParams .= '&providerValues.event.eventtype' . (count($aGivenTypes) > 1 ? '[in]' : '') . '=' . implode(';', $aGivenTypes);
+                $lq .= '%26providerValues.event.eventtype' . (count($aGivenTypes) > 1 ? '%5Bin%5D' : '') . '%3D' . implode('%3B', $aGivenTypes);
             }
         }
 
-        $dipParams .= $dipFields . '&limit=' . $this->atts['max'];
+        $dipParams  = '?limit=' . $this->atts['max'] . '&sort=providerValues.event.title%3D1' . '&attrs=' . $attrs . '&lq=' . $lq . '&page=';
+
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -171,10 +173,10 @@ class Shortcode
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
+            $response = $this->oDIP->getResponse($dipParams . $page);
 
             if (!$response['valid']) {
-                return $this->atts['nodata'];
+                return $this->atts['nodata'] . ' A';
             } else {
 
                 $data = $response['content']['data'];
@@ -182,17 +184,18 @@ class Shortcode
                 if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
-                        $response = $this->oDIP->getResponse($dipParams . ($bSingleEntry ? '' : '&page=' . $page));
+                        $response = $this->oDIP->getResponse($dipParams . $page);
                         $data = array_merge($response['content']['data'], $data);
                     }
                 }
             }
         }
 
+
         Functions::console_log('Fetched data from DIP', $tsStart);
 
         if (empty($data)) {
-            return $this->atts['nodata'];
+            return $this->atts['nodata'] . 'B';
         }
 
         // group & sort
@@ -234,6 +237,7 @@ class Shortcode
             if (!empty($this->atts['type'])) {
                 // sort in order of $this->atts['type']
                 $aTmp = [];
+
                 foreach ($aGivenTypes as $givenType) {
                     if (!empty($aData[$givenType])) {
                         $aTmp[$givenType] = $aData[$givenType];
@@ -284,7 +288,7 @@ class Shortcode
         $iCnt = 1;
 
         if (empty($aData)) {
-            return $this->atts['nodata'];
+            return $this->atts['nodata'] . ' C';
         }
 
         foreach ($aData as $title => $aEntries) {
