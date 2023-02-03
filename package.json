@@ -1,6 +1,6 @@
 {
   "name": "rrze-lectures",
-  "version": "1.4.10",
+  "version": "1.4.11",
   "description": "Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP",
   "main": "rrze-lectures.php",
   "textdomain": "rrze-lectures",

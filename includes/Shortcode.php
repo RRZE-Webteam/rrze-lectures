@@ -233,13 +233,14 @@ class Shortcode
             unset($aTmp); // free memory
             $aData = [];
             $aData[] = $aTmp2;
-            $iMax = count($aTmp2);
+            $iAllEntries = count($aTmp2);
             unset($aTmp2); // free memory
         } else {
             // sort group
             if (!empty($this->atts['type'])) {
                 // sort in order of $this->atts['type']
                 $aTmp = [];
+                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
 
                 foreach ($aGivenTypes as $givenType) {
                     if (!empty($aData[$givenType])) {
