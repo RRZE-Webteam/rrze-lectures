@@ -79,12 +79,12 @@
             </tr>
             <tr>
                 <td>{{providerValues.planned_dates.rhythm}}{{=providerValues.planned_dates.rhythm}}{{/providerValues.planned_dates.rhythm}}</td>
-                <td>muss Plugin noch berechnen aus Feld planned_dates.startdate (Achtung! TZ-Time umrechnen)</td>
+                <td>{{providerValues.planned_dates.weekday}}{{=providerValues.planned_dates.weekday}}{{/providerValues.planned_dates.weekday}}</td>
                 <td>{{providerValues.planned_dates.starttime}}{{=providerValues.planned_dates.starttime}}{{/providerValues.planned_dates.starttime}}
                     -
                     {{providerValues.planned_dates.endtime}}{{=providerValues.planned_dates.endtime}}{{/providerValues.planned_dates.endtime}}
                 </td>
-                <td>individual_dates mit cancelled==1</td>
+                <td>{{@providerValues.planned_dates.misseddates}}{{=_val}}<br>{{/@providerValues.planned_dates.misseddates}}</td>
                 <td>{{providerValues.planned_dates.startdate}}{{=providerValues.planned_dates.startdate}}{{/providerValues.planned_dates.startdate}}
                     -
                     {{providerValues.planned_dates.enddate}}{{=providerValues.planned_dates.enddate}}{{/providerValues.planned_dates.enddate}}

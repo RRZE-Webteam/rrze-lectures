@@ -25,20 +25,22 @@ class Functions
         add_action('wp_ajax_nopriv_GetLectureData', [$this, 'ajaxGetLectureData']);
         add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetLectureDataForBlockelements']);
         add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetLectureDataForBlockelements']);
-        add_action('wp_ajax_GenerateICS', [$this, 'ajaxGenerateICS'] );
+        add_action('wp_ajax_GenerateICS', [$this, 'ajaxGenerateICS']);
         add_action('wp_ajax_nopriv_GenerateICS', [$this, 'ajaxGenerateICS']);
     }
 
-    public static function console_log($msg = '', $tsStart = 0) {
-        if (isset($_GET['debug'])){
+    public static function console_log($msg = '', $tsStart = 0)
+    {
+        if (isset($_GET['debug'])) {
             $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';
-            echo '<script>console.log(' . json_encode($msg, JSON_HEX_TAG) . ');</script>';    
+            echo '<script>console.log(' . json_encode($msg, JSON_HEX_TAG) . ');</script>';
         }
     }
 
-    public static function makeLQ($aIn){
+    public static function makeLQ($aIn)
+    {
         $aLQ = [];
-        foreach($aIn as $dipField => $attVal){
+        foreach ($aIn as $dipField => $attVal) {
             $aTmp = array_map('trim', explode(',', $attVal));
             $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
         }
@@ -46,7 +48,42 @@ class Functions
         return implode('&', $aLQ);
     }
 
-    public function ajaxGenerateICS(){
+    public static function convertDate($tz, $timezone, $format)
+    {
+        $dt = new \DateTime($tz, new \DateTimeZone($timezone));
+        $dt->setTimezone(new \DateTimeZone('Europe/Berlin'));
+        $ret = $dt->format($format);
+        if ($format == "N") {
+            switch ($ret) {
+                case 1:
+                    $ret = __('Mon', 'rrze-lectures');
+                    break;
+                case 2:
+                    $ret = __('Tue', 'rrze-lectures');
+                    break;
+                case 3:
+                    $ret = __('Wed', 'rrze-lectures');
+                    break;
+                case 4:
+                    $ret = __('Thu', 'rrze-lectures');
+                    break;
+                case 5:
+                    $ret = __('Fri', 'rrze-lectures');
+                    break;
+                case 6:
+                    $ret = __('Sat', 'rrze-lectures');
+                    break;
+                case 7:
+                    $ret = __('Sun', 'rrze-lectures');
+                    break;
+            }
+        }
+        return $ret;
+    }
+
+
+    public function ajaxGenerateICS()
+    {
         check_ajax_referer('lecture-ajax-ics-nonce', 'ics_nonce');
         $inputs = filter_input(INPUT_GET, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
         $aProps = json_decode(openssl_decrypt(base64_decode($inputs['v']), 'AES-256-CBC', hash('sha256', AUTH_KEY), 0, substr(hash('sha256', AUTH_SALT), 0, 16)), true);
@@ -60,7 +97,8 @@ class Functions
         wp_send_json($response);
     }
 
-    public function enqueueScripts(){
+    public function enqueueScripts()
+    {
         wp_enqueue_script(
             'rrze-lectures-ajax-frontend',
             plugins_url('js/rrze-lectures-frontend.js', plugin_basename($this->pluginFile)),
@@ -103,7 +141,8 @@ class Functions
         return $ret;
     }
 
-    public static function setDataToCache($data, $aAtts = []){
+    public static function setDataToCache($data, $aAtts = [])
+    {
         $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
 
         // if ($ret){
@@ -338,10 +377,10 @@ class Functions
             $givenWeekday = date('N', strtotime($aProps['DTSTART']));
             if (!in_array($givenWeekday, $aGivenDays)) {
                 // move to next possible date
-                while(!in_array($givenWeekday, $aGivenDays)){
+                while (!in_array($givenWeekday, $aGivenDays)) {
                     $givenWeekday++;
                     $givenWeekday = ($givenWeekday > 5 ? 1 : $givenWeekday);
-                    if (in_array($givenWeekday, $aGivenDays)){
+                    if (in_array($givenWeekday, $aGivenDays)) {
                         $aProps['DTSTART'] = date('Ymd', strtotime("next " . $aWeekdays[$givenWeekday]['long'], strtotime($aProps['DTSTART'])));
                         $aProps['DTEND'] = $aProps['DTSTART'] . date('\THis', strtotime($tEnd));
                         $aProps['DTSTART'] .= date('\THis', strtotime($tStart));

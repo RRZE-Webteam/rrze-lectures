@@ -95,33 +95,23 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
-        // $oSanitizer = new Sanitizer();
-        // $this->atts = $oSanitizer->sanitizeArray($this->atts);
-
         // get cache
         if (!$this->noCache) {
             $content = Functions::getDataFromCache($this->atts);
 
-            if (!empty($content)){
+            if (!empty($content)) {
                 Functions::console_log('Cache found and returned', $tsStart);
                 return $content;
             }
         }
 
         // either lecture_id or fauorgnr or basic_FAUOrgNr (options) must be given 
-        if (!empty($this->atts['lecture_id'])) {
-            $bSingleEntry = true;
-        } else {
-            $bSingleEntry = false;
-
-            // no lecture ID given
-            if (empty($this->atts['fauorgnr'])) {
-                // try to get it from the plugin's options
-                if (!empty($this->options['basic_FAUOrgNr'])) {
-                    $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
-                } else {
-                    return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
-                }
+        if (empty($this->atts['lecture_id']) && empty($this->atts['fauorgnr'])) {
+            // try to get it from the plugin's options
+            if (!empty($this->options['basic_FAUOrgNr'])) {
+                $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+            } else {
+                return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
             }
         }
 
@@ -132,7 +122,7 @@ class Shortcode
         }
 
         // check atts
-        $this->atts['format'] = (in_array($this->atts['color'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
+        $this->atts['format'] = (in_array($this->atts['format'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
         $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
@@ -142,7 +132,8 @@ class Shortcode
                 $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 break;
             default:
-                $attrs = 'identifier;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
+                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
+                $attrs = ''; // TEST
         }
 
 
@@ -163,7 +154,7 @@ class Shortcode
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
-        $dipParams  = '?limit=' . $this->atts['max'] . '&attrs=' . urlencode($attrs) . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . '&attrs=' . urlencode($attrs) . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -194,6 +185,12 @@ class Shortcode
             }
         }
 
+
+        Sanitizer::sanitizeLectures($data);
+
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -229,7 +226,7 @@ class Shortcode
             $aTmp2 = [];
             foreach ($arrayKeys as $key) {
                 $aTmp2[$key] = $aTmp[$key];
-            }            
+            }
             unset($aTmp); // free memory
             $aData = [];
             $aData[] = $aTmp2;

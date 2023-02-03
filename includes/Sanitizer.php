@@ -46,4 +46,22 @@ class Sanitizer
         }
     }
 
+    public static function sanitizeLectures(&$data){
+        foreach($data as $nr => $aEntries){
+            $data[$nr]['providerValues']['planned_dates']['startdate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['startdate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
+            $data[$nr]['providerValues']['planned_dates']['enddate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['enddate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
+            $data[$nr]['providerValues']['planned_dates']['starttime'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['starttime'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'H:i');
+            $data[$nr]['providerValues']['planned_dates']['endtime'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['endtime'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'H:i');
+            $data[$nr]['providerValues']['planned_dates']['weekday'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['startdate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'N');
+
+            // get "Ausfalltermine"
+            foreach($aEntries['providerValues']['individual_dates'] as $eNr => $aDetails){
+                if ($aDetails['cancelled'] == 1){
+                    $data[$nr]['providerValues']['planned_dates']['misseddates'][] = Functions::convertDate($aDetails['date'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
+                }
+
+            }
+        }
+    }
+
 }
