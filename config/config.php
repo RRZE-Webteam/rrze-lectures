@@ -156,10 +156,10 @@ function getShortcodeSettings()
                 'label' => __('FAU Org Nr', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lecture_id' => [
+            'lecture_name' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Lecture ID', 'rrze-lectures'),
+                'label' => __('Lecture\'s name', 'rrze-lectures'),
                 'type' => 'string',
             ],
             // 'lecturer_name' => [
@@ -178,6 +178,12 @@ function getShortcodeSettings()
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Type f.e. Vorlesung', 'rrze-lectures'),
+                'type' => 'string',
+            ],
+            'degree' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Degree', 'rrze-lectures'), // Studiengang
                 'type' => 'string',
             ],
             // 'order' => [

@@ -136,14 +136,12 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        // $attrs = 'url;providerValues.event.guest'; // TEST
-
-
+        $attrs = ''; // TEST
 
         $aLQ = [];
 
-        if (!empty($this->atts['lecture_id'])) {
-            $aLQ['identifier'] = $this->atts['lecture_id'];
+        if (!empty($this->atts['lecture_name'])) {
+            $aLQ['name'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
 
@@ -154,15 +152,28 @@ class Shortcode
             if (!empty($this->atts['type'])) {
                 $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
             }
+
+            if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
+                // we cannot use empty() because it can contain 0
+                $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
+            }
+
+            if (!empty($this->atts['degree'])) {
+                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
+            }
+
+    
         }
 
-        if (isset($this->atts['guest'])) {
-            // isset() because it can contain 0
-            $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
-        }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . '&attrs=' . urlencode($attrs) . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+
+        // echo $dipParams;
+        // exit;
+
+        // [lectures degree="Zahnmedizin, Medizin Erlangen/Bayreuth" nocache="1"]
+        // Mathematik, Wirtschaftsmathematik, Technomathematik, Data Science
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -193,6 +204,10 @@ class Shortcode
                 }
             }
         }
+
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
 
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
