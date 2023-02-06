@@ -205,13 +205,12 @@ class Shortcode
             }
         }
 
+        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+        Sanitizer::sanitizeLectures($data);
+
         // echo '<pre>';
         // var_dump($data);
         // exit;
-
-
-        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
-        Sanitizer::sanitizeLectures($data);
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 

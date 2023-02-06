@@ -53,10 +53,22 @@ class Sanitizer
         foreach ($data as $nr => $aEntries) {
 
             // 2DO: sanitize_text_field() all other fields for output
+            if (!empty($data[$nr]['providerValues']['event_orgunit'])){
+                foreach ($data[$nr]['providerValues']['event_orgunit'] as $oNr => $aOrgunit){
+                    if(!empty($aOrgunit[$oNr]['orgunit'])){
+                        $data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit'] = sanitize_text_field($data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit']) . ' TEST 1';
+                    }
+                }
+            }
 
+            if (!empty($data[$nr]['providerValues']['event']['eventtype'])) {
+                $data[$nr]['providerValues']['event']['eventtype'] = sanitize_text_field($data[$nr]['providerValues']['event']['eventtype']) . ' TEST 2';
+            }
+
+            // convert dates
             if (!empty($data[$nr]['providerValues']['planned_dates']['startdate'])) {
-                $data[$nr]['providerValues']['planned_dates']['startdate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['startdate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
                 $data[$nr]['providerValues']['planned_dates']['weekday'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['startdate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'N');
+                $data[$nr]['providerValues']['planned_dates']['startdate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['startdate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
             }
             if (!empty($data[$nr]['providerValues']['planned_dates']['enddate'])) {
                 $data[$nr]['providerValues']['planned_dates']['enddate'] = Functions::convertDate($data[$nr]['providerValues']['planned_dates']['enddate'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
@@ -74,10 +86,11 @@ class Sanitizer
                 // 2DO: empty() prüfen
                 foreach ($aEntries['providerValues']['individual_dates'] as $eNr => $aDetails) {
                     // $aDetails['cancelled'] $aDetails['date'], $data[$nr]['eventSchedule']['scheduleTimezone']
-                    if ($aDetails['cancelled'] == 1) {
-                        $data[$nr]['providerValues']['planned_dates']['misseddates'][] = Functions::convertDate($aDetails['date'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
+                    if (!empty($aDetails['cancelled']) && !empty($aDetails['date']) && !empty($data[$nr]['eventSchedule']['scheduleTimezone'])){
+                        if ($aDetails['cancelled'] == 1) {
+                            $data[$nr]['providerValues']['planned_dates']['misseddates'][] = Functions::convertDate($aDetails['date'], $data[$nr]['eventSchedule']['scheduleTimezone'], 'd.m.Y');
+                        }    
                     }
-
                 }
             }
         }
