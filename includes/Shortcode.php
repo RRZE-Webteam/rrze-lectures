@@ -93,7 +93,7 @@ class Shortcode
                 $atts_default[$k] = $v['default'];
             }
         }
-        $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
+        $this->atts = shortcode_atts($atts_default, $atts);
 
         // get cache
         if (!$this->noCache) {
@@ -136,6 +136,9 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
+        // $attrs = 'url;providerValues.event.guest'; // TEST
+
+
 
         $aLQ = [];
 
@@ -151,6 +154,11 @@ class Shortcode
             if (!empty($this->atts['type'])) {
                 $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
             }
+        }
+
+        if (isset($this->atts['guest'])) {
+            // isset() because it can contain 0
+            $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
@@ -172,6 +180,7 @@ class Shortcode
             } else {
 
                 $data = $response['content']['data'];
+
                 // $iAllEntries += $response['content']['pagination']['count'];
 
                 if ($this->atts['max'] == 100) {
@@ -188,10 +197,6 @@ class Shortcode
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
-
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -342,84 +347,6 @@ class Shortcode
         return $content;
     }
 
-    public function normalize($atts)
-    {
-        // normalize given attributes according to rrze-lectures version 2
-        if (!empty($atts['number'])) {
-            $this->DIPOrgNr = $atts['number'];
-        } elseif (!empty($atts['id'])) {
-            $this->DIPOrgNr = $atts['id'];
-        }
-        if (!empty($atts['lecturer_id'])) {
-            $atts['lecturer_id'] = $atts['lecturer_id'];
-        }
-        if (!empty($atts['dozentname'])) {
-            $atts['name'] = $atts['dozentname'];
-        }
-        if (empty($atts['show'])) {
-            $atts['show'] = '';
-        }
-        if (empty($atts['hide'])) {
-            $atts['hide'] = '';
-        }
-        if (!empty($atts['sprache'])) {
-            $atts['lang'] = $atts['sprache'];
-        }
-        if (isset($atts['show_phone'])) {
-            if ($atts['show_phone']) {
-                $atts['show'] .= ',telefon';
-            } else {
-                $atts['hide'] .= ',telefon';
-            }
-        }
-        if (isset($atts['show_mail'])) {
-            if ($atts['show_mail']) {
-                $atts['show'] .= ',mail';
-            } else {
-                $atts['hide'] .= ',mail';
-            }
-        }
-        if (isset($atts['show_jumpmarks'])) {
-            if ($atts['show_jumpmarks']) {
-                $atts['show'] .= ',sprungmarken';
-            } else {
-                $atts['hide'] .= ',sprungmarken';
-            }
-        }
-        if (isset($atts['ics'])) {
-            if ($atts['ics']) {
-                $atts['show'] .= ',ics';
-            } else {
-                $atts['hide'] .= ',ics';
-            }
-        }
-        if (isset($atts['call'])) {
-            if ($atts['call']) {
-                $atts['show'] .= ',call';
-            } else {
-                $atts['hide'] .= ',call';
-            }
-        }
-        if (!empty($atts['show'])) {
-            $this->show = array_map('trim', explode(',', strtolower($atts['show'])));
-        }
-        if (!empty($atts['hide'])) {
-            $this->hide = array_map('trim', explode(',', strtolower($atts['hide'])));
-        }
-        if (!empty($atts['sem'])) {
-            if (is_int($atts['sem'])) {
-                $year = date("Y") + $atts['sem'];
-                $thisSeason = (in_array(date('n'), [10, 11, 12, 1]) ? 'w' : 's');
-                $season = ($thisSeason = 's' ? 'w' : 's');
-                $atts['sem'] = $year . $season;
-            }
-        }
-        if (empty($atts['hstart'])) {
-            $atts['hstart'] = $this->options['basic_hstart'];
-        }
-
-        return $atts;
-    }
 
     public function isGutenberg()
     {

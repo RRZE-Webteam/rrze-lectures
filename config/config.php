@@ -162,12 +162,12 @@ function getShortcodeSettings()
                 'label' => __('Lecture ID', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lecturer_name' => [
-                'default' => '',
-                'field_type' => 'text',
-                'label' => __('Firstname, Lastname', 'rrze-lectures'),
-                'type' => 'string',
-            ],
+            // 'lecturer_name' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Firstname, Lastname', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
             'lecturer_id' => [
                 'default' => '',
                 'field_type' => 'text',
@@ -177,32 +177,52 @@ function getShortcodeSettings()
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Type f.e. vorl (=Vorlesung)', 'rrze-lectures'),
+                'label' => __('Type f.e. Vorlesung', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'order' => [
-                'default' => '',
-                'field_type' => 'text',
-                'label' => __('Sort by type f.e. "vorl,ueb"', 'rrze-lectures'),
-                'type' => 'string',
-            ],
-            'sem' => [
-                'default' => '',
-                'field_type' => 'text',
-                'label' => __('Semester f.e. 2020w', 'rrze-lectures'),
-                'type' => 'string',
-            ],
+            // 'order' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Sort by type f.e. "vorl,ueb"', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
+            // 'sem' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Semester f.e. 2020w', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
             'lang' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Language', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'show' => [
+            // 'show' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Show', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
+            'guest' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Show', 'rrze-lectures'),
-                'type' => 'string',
+                'label' => __('Visiting students', 'rrze-lectures'),
+                'type' => 'array',
+                'values' => [
+                    [
+                        'id' => '',
+                        'val' => __('don\'t filter', 'rrze-lectures'),
+                    ],
+                    [
+                        'id' => 1,
+                        'val' => __('Suitable for visiting students', 'rrze-lectures'),
+                    ],
+                    [
+                        'id' => 0,
+                        'val' => __('Not suitable for visiting students', 'rrze-lectures'),
+                    ],
+                ],
             ],
             'hide' => [
                 'default' => '',
@@ -210,12 +230,12 @@ function getShortcodeSettings()
                 'label' => __('Hide', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'hstart' => [
-                'default' => 2,
-                'field_type' => 'text',
-                'label' => __('Headline\'s size', 'rrze-lectures'),
-                'type' => 'number',
-            ],
+            // 'hstart' => [
+            //     'default' => 2,
+            //     'field_type' => 'text',
+            //     'label' => __('Headline\'s size', 'rrze-lectures'),
+            //     'type' => 'number',
+            // ],
             'format' => [
                 'default' => 'linklist',
                 'field_type' => 'text',
