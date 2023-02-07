@@ -56,13 +56,13 @@ class Sanitizer
             if (!empty($data[$nr]['providerValues']['event_orgunit'])){
                 foreach ($data[$nr]['providerValues']['event_orgunit'] as $oNr => $aOrgunit){
                     if(!empty($aOrgunit[$oNr]['orgunit'])){
-                        $data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit'] = sanitize_text_field($data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit']) . ' TEST 1';
+                        $data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit'] = sanitize_text_field($data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit']);
                     }
                 }
             }
 
             if (!empty($data[$nr]['providerValues']['event']['eventtype'])) {
-                $data[$nr]['providerValues']['event']['eventtype'] = sanitize_text_field($data[$nr]['providerValues']['event']['eventtype']) . ' TEST 2';
+                $data[$nr]['providerValues']['event']['eventtype'] = sanitize_text_field($data[$nr]['providerValues']['event']['eventtype']);
             }
 
             // convert dates

@@ -136,21 +136,21 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        $attrs = ''; // TEST
+        // $attrs = ''; // TEST
 
         $aLQ = [];
 
         if (!empty($this->atts['lecture_name'])) {
-            $aLQ['name'] = $this->atts['lecture_name'];
+            $aLQ['name'] = urlencode($this->atts['lecture_name']); // funktioniert mit neuer API nicht, auch nicht mit urlencode() - 2DO: test mit q
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
 
             if (!empty($this->atts['lecturer_id'])) {
-                $aLQ['providerValues.course_responsible.idm_uid'] = $this->atts['lecturer_id'];
+                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_id'];
             }
 
             if (!empty($this->atts['type'])) {
-                $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
+                $aLQ['providerValues.event.eventtype'] = $this->atts['type']; // funktioniert bei Übung nicht
             }
 
             if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
@@ -159,7 +159,7 @@ class Shortcode
             }
 
             if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
+                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree']; // funktioniert nicht - liefert Module, die nicht zu subject passen
             }
 
     
@@ -167,7 +167,7 @@ class Shortcode
 
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
-        $dipParams = '?limit=' . $this->atts['max'] . '&attrs=' . urlencode($attrs) . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         // echo $dipParams;
         // exit;
