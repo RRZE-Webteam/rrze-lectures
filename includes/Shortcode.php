@@ -136,21 +136,25 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        // $attrs = ''; // TEST
+        // $attrs = 'providerValues.event.eventtype'; // TEST
 
         $aLQ = [];
 
         if (!empty($this->atts['lecture_name'])) {
-            $aLQ['name'] = urlencode($this->atts['lecture_name']); // funktioniert mit neuer API nicht, auch nicht mit urlencode() - 2DO: test mit q
+            $aLQ['name'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
 
-            if (!empty($this->atts['lecturer_id'])) {
-                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_id'];
+            if (!empty($this->atts['lecturer_idm'])) {
+                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
+            }
+
+            if (!empty($this->atts['lecturer_identifier'])) {
+                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
             }
 
             if (!empty($this->atts['type'])) {
-                $aLQ['providerValues.event.eventtype'] = $this->atts['type']; // funktioniert bei Übung nicht
+                $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
             }
 
             if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
@@ -168,34 +172,6 @@ class Shortcode
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
-        // echo $dipParams;
-        // exit;
-
-        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&page=
-        // liefert auch andere Studiengänge wie z.B. "Zahnmedizin" obwohl nach "Medizin Erlangen/Bayreuth" gesucht wird
-
-        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&page=
-
-        // Test mit distinct Endpoint:
-        // https://api.fau.de/pub/v1/vz/aggr/distinct/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&distinct=providerValues.module.module_cos.subject
-
-        // [lectures degree="Zahnmedizin, Medizin Erlangen/Bayreuth" nocache="1"]
-        // Mathematik, Wirtschaftsmathematik, Technomathematik, Data Science
-
-
-        // Anderes Problem:
-
-        // Ziel: liefere Praktika und Übungen
-        
-        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&attrs=identifier%3Burl%3BproviderValues.event.title%3BproviderValues.event.eventtype&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.event.eventtype%5Bin%5D%3DPraktikum%3B%C3%9Cbung
-        
-        // => liefert keine Übungen
-
-        // obwohl Übungen vorhanden sind:
-        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&attrs=identifier%3Burl%3BproviderValues.event.title%3BproviderValues.event.eventtype&lq=providerValues.event_orgunit.fauorg%3D9013008108
-
-        // Ich hole dabei alle Daten indem page von 1 hochgezäht wird bis content.pagination.remaining = 0 ist 
-
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
@@ -205,13 +181,7 @@ class Shortcode
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-
-            // $response = $this->oDIP->getResponse('https://api.fau.de/pub/v1/vz/aggr/group/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&group=providerValues.module.module_cos.subject');
             $response = $this->oDIP->getResponse($dipParams . $page);
-
-            // echo '<pre>';
-            // var_dump($response);
-            // exit;
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -231,6 +201,7 @@ class Shortcode
                 }
             }
         }
+
 
         // echo '<pre>';
         // var_dump($data);
