@@ -57,6 +57,7 @@ class DIPAPI
             ];
 
         $apiResponse = wp_remote_get($this->api . $sParam, $aGetArgs);
+        // $apiResponse = wp_remote_get($sParam, $aGetArgs);
 
         // echo '<pre>';
         // var_dump($apiResponse);

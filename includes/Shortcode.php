@@ -165,15 +165,36 @@ class Shortcode
     
         }
 
-
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         // echo $dipParams;
         // exit;
 
+        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&page=
+        // liefert auch andere Studiengänge wie z.B. "Zahnmedizin" obwohl nach "Medizin Erlangen/Bayreuth" gesucht wird
+
+        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&page=
+
+        // Test mit distinct Endpoint:
+        // https://api.fau.de/pub/v1/vz/aggr/distinct/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&distinct=providerValues.module.module_cos.subject
+
         // [lectures degree="Zahnmedizin, Medizin Erlangen/Bayreuth" nocache="1"]
         // Mathematik, Wirtschaftsmathematik, Technomathematik, Data Science
+
+
+        // Anderes Problem:
+
+        // Ziel: liefere Praktika und Übungen
+        
+        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&attrs=identifier%3Burl%3BproviderValues.event.title%3BproviderValues.event.eventtype&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.event.eventtype%5Bin%5D%3DPraktikum%3B%C3%9Cbung
+        
+        // => liefert keine Übungen
+
+        // obwohl Übungen vorhanden sind:
+        // https://api.fau.de/pub/v1/vz/educationEvents?limit=100&attrs=identifier%3Burl%3BproviderValues.event.title%3BproviderValues.event.eventtype&lq=providerValues.event_orgunit.fauorg%3D9013008108
+
+        // Ich hole dabei alle Daten indem page von 1 hochgezäht wird bis content.pagination.remaining = 0 ist 
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -184,7 +205,13 @@ class Shortcode
             $page = 1;
 
             $this->oDIP = new DIPAPI();
+
+            // $response = $this->oDIP->getResponse('https://api.fau.de/pub/v1/vz/aggr/group/educationEvents?limit=100&lq=providerValues.event_orgunit.fauorg%3D9013008108%26providerValues.module.module_cos.subject%3DMedizin+Erlangen%2FBayreuth&group=providerValues.module.module_cos.subject');
             $response = $this->oDIP->getResponse($dipParams . $page);
+
+            // echo '<pre>';
+            // var_dump($response);
+            // exit;
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -205,12 +232,13 @@ class Shortcode
             }
         }
 
-        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
-        Sanitizer::sanitizeLectures($data);
-
         // echo '<pre>';
         // var_dump($data);
         // exit;
+
+        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+        Sanitizer::sanitizeLectures($data);
+
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
