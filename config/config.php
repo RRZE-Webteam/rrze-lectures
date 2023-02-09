@@ -4,6 +4,8 @@ namespace RRZE\Lectures\Config;
 
 defined('ABSPATH') || exit;
 
+
+
 /**
  * Gibt der Name der Option zurück.
  * @return array [description]
@@ -198,12 +200,12 @@ function getShortcodeSettings()
             //     'label' => __('Sort by type f.e. "vorl,ueb"', 'rrze-lectures'),
             //     'type' => 'string',
             // ],
-            // 'sem' => [
-            //     'default' => '',
-            //     'field_type' => 'text',
-            //     'label' => __('Semester f.e. 2020w', 'rrze-lectures'),
-            //     'type' => 'string',
-            // ],
+            'sem' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'lang' => [
                 'default' => '',
                 'field_type' => 'text',
@@ -258,10 +260,10 @@ function getShortcodeSettings()
                         'id' => 'linklist',
                         'val' => 'linklist',
                     ],
-                    [
-                        'id' => 'table',
-                        'val' => 'table',
-                    ],
+                    // [
+                    //     'id' => 'table',
+                    //     'val' => 'table',
+                    // ],
                 ],
             ],
             'color' => [

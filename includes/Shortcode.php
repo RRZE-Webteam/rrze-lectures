@@ -136,7 +136,7 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        // $attrs = 'providerValues.event.eventtype'; // TEST
+        // $attrs = ''; // TEST
 
         $aLQ = [];
 
@@ -144,6 +144,11 @@ class Shortcode
             $aLQ['name'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+
+            if (empty($this->atts['sem'])){
+                $this->atts['sem'] = Functions::getSemester();
+            }
+            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
             if (!empty($this->atts['lecturer_idm'])) {
                 $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
@@ -201,7 +206,6 @@ class Shortcode
                 }
             }
         }
-
 
         // echo '<pre>';
         // var_dump($data);
@@ -299,6 +303,9 @@ class Shortcode
         }
 
         Functions::console_log('Sort completed', $tsStart);
+
+        // echo $this->atts['format'];
+        // exit;
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 

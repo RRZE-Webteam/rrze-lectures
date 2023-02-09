@@ -15,7 +15,7 @@ GNU General Public License (GPL) Version 3
 
 als Shortcode:
 
-`[lecture format="" type="" degree="" fauorgnr="" lecturer_idm="" lecturer_identifier="" lecture_name="" guest="" max="" hide="" color="" nodata=""]`
+`[lecture format="" type="" degree="" fauorgnr="" lecturer_idm="" lecturer_identifier="" lecture_name="" sem="" guest="" max="" hide="" color="" nodata=""]`
 
 
 Parameter:
@@ -29,6 +29,7 @@ Parameter:
 |**lecturer_idm**|nein|IDM-Kennung einer oder mehrere verantwortlicher Personen. Mehrere Werte müssen durch Komma getrennt werden.||lecturer_id="idm1abc, idm2def"|
 |**lecturer_identifier**|nein|Identifier einer oder mehrere verantwortlicher Personen. Mehrere Werte müssen durch Komma getrennt werden.||lecturer_id="1234567890, 0987654321"|
 |**lecture_name**|nein|Name der Lehrveranstaltung||lecture_name="Diskrete Optimierung I"|
+|**sem**|nein|Kürzel SoSe bzw WiSe und 4-stellige Jahreszahl|das aktuelle Semester wird verwendet|sem="WiSe2024" oder sem="SoSe2023"|
 |**guest**|nein|Für Gaststudium geeignet = 1 / nicht geeignet = 0|alle werden ausgegeben|guest="1"|
 |**max**|nein|Maximale Anzahl an Lehrveranstaltungen.||max="5"|
 |**hide**|nein|Die Anzeige von Teilen der Ausgabe können hiermit unterbunden werden. Derzeit: accordion||hide="accordion"|

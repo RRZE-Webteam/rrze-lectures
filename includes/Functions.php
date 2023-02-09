@@ -38,6 +38,38 @@ class Functions
     }
 
 
+    public static function getSemester($iSem = 0){
+        // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
+        // Das Wintersemester entsprechend vom 01.10. des Jahres bis zum 31.03. des folgenden Jahres
+        $today = date('Y-m-d');
+        $thisYear = date('Y');
+        $thisMonth = date('m');
+        $nextYear = date('Y', strtotime('+1 year'));
+        $soseStart = date('Y-m-d', strtotime($thisYear . '-04-01'));
+        $soseEnd = date('Y-m-d', strtotime($thisYear . '-09-30'));
+        $thisQuarter = ceil($thisMonth / 3);
+
+        $year = $thisYear;
+
+        if (($today >= $soseStart) && ($today <= $soseEnd)){
+            $sem = 'SoSe';
+        }else{
+            $sem = 'WiSe';
+            if ($thisMonth >= 10){
+                $year = $nextYear;
+            }
+        }
+
+        // 2DO: calc year based on $iSem and $thisQuarter
+        if (!empty($iSem)){
+            if ($iSem % 2 != 0) {
+                $sem = ($sem == 'SoSe' ? 'WiSe' : 'SoSe');
+            }
+        }
+
+        return $sem . $year;
+    }
+
     public static function makeLQ($aIn)
     {
         $aLQ = [];
