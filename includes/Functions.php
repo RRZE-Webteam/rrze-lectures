@@ -47,7 +47,6 @@ class Functions
         $nextYear = date('Y', strtotime('+1 year'));
         $soseStart = date('Y-m-d', strtotime($thisYear . '-04-01'));
         $soseEnd = date('Y-m-d', strtotime($thisYear . '-09-30'));
-        $thisQuarter = ceil($thisMonth / 3);
 
         $year = $thisYear;
 
@@ -60,11 +59,28 @@ class Functions
             }
         }
 
-        // 2DO: calc year based on $iSem and $thisQuarter
+        // 2DO: calc year based on $thisQuarter and $iSem
         if (!empty($iSem)){
+            $thisQuarter = ceil($thisMonth / 3);
+
             if ($iSem % 2 != 0) {
                 $sem = ($sem == 'SoSe' ? 'WiSe' : 'SoSe');
             }
+
+            switch($thisQuarter){
+                case 1:
+                    $iDiff = 2;
+                    break;
+                case 2:
+                case 3:
+                    $iDiff = 1;
+                    break;
+                case 4:
+                    $iDiff = 0;
+                    break;
+            }
+
+            $year += (($iSem - $iDiff) % 2) + 1;
         }
 
         return $sem . $year;
