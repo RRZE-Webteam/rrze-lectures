@@ -37,11 +37,23 @@ class Functions
         }
     }
 
+
     public static function makeLQ($aIn)
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
+            $attVal = sanitize_text_field($attVal);
             $aTmp = array_map('trim', explode(',', $attVal));
+
+            // check if 10 figures hex 
+            if ($dipField == 'providerValues.courses.course_responsible.identifier') {
+                foreach ($aTmp as $nr => $val) {
+                    if (!(ctype_xdigit($val) && strlen($val) == 10)) {
+                        unset($aTmp[$nr]);
+                    }
+                }
+            }
+
             $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
         }
 

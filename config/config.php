@@ -168,10 +168,16 @@ function getShortcodeSettings()
             //     'label' => __('Firstname, Lastname', 'rrze-lectures'),
             //     'type' => 'string',
             // ],
-            'lecturer_id' => [
+            'lecturer_idm' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Lecturer ID', 'rrze-lectures'),
+                'label' => __('Lecturer IdM', 'rrze-lectures'),
+                'type' => 'string',
+            ],
+            'lecturer_identifier' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Lecturer identifier', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'type' => [
