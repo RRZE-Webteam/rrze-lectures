@@ -121,10 +121,15 @@ class Shortcode
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
         $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
+        // echo '<pre>';
+        // var_dump($this->atts);
+        // exit;
+
 
         switch ($this->atts['format']) {
             case 'linklist':
-                $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
+                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
+                $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
                 break;
             default:
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
@@ -169,6 +174,9 @@ class Shortcode
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
+        // echo $dipParams;
+        // exit;
+
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
@@ -199,17 +207,32 @@ class Shortcode
             }
         }
 
+        // delete all courses that don't fit to given semester
+        foreach($data as $nr => $aVal){
+            foreach($aVal['providerValues']['courses'] as $cNr => $aDetails){
+                if ($aDetails['semester'] != $this->atts['sem']){
+                    unset($data[$nr]['providerValues']['courses'][$cNr]);
+                }else{
+                    $data[$nr]['providerValues']['courses'] = $aDetails;
+                }
+            }
+
+        }
+
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
+
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
 
-
         Functions::console_log('Fetched data from DIP', $tsStart);
-
 
         if (empty($data)) {
             return $this->atts['nodata'];
         }
+
 
         // group & sort
         $aData = [];
@@ -229,7 +252,8 @@ class Shortcode
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 foreach ($aDetails as $aEntries) {
-                    $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
+                    // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
+                    $aTmp[$aEntries['name']] = $aEntries;
                 }
             }
             unset($aData); // free memory
@@ -277,7 +301,8 @@ class Shortcode
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
-                    $name = $aEntries['providerValues']['event']['title'];
+                    // $name = $aEntries['providerValues']['event']['title'];
+                    $name = $aEntries['name'];
                     $aTmp2[$name] = $aEntries;
                 }
 
@@ -304,8 +329,14 @@ class Shortcode
         $iCnt = 1;
 
         if (empty($aData)) {
-            return $this->atts['nodata'] . ' C';
+            return $this->atts['nodata'];
         }
+
+
+        // echo '<pre>';
+        // var_dump($aData);
+        // exit;
+
 
         foreach ($aData as $title => $aEntries) {
             $i = 1;
@@ -363,6 +394,10 @@ class Shortcode
             $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
         }
 
+        if (!empty($atts['lecture_name'])){
+            $atts['lecture_name'] = trim($atts['lecture_name']);
+        }
+
         // sem
         if (empty($atts['sem'])){
             $atts['sem'] = Functions::getSemester();
@@ -373,7 +408,7 @@ class Shortcode
             }elseif (preg_match("/(ss|ws)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
                 // wsYYYY ssYYYY WSYYYY SSYYYY
                 $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
-            }elseif (preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches) !== true){
+            }elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
                 // invalid input
                 $atts['sem'] = Functions::getSemester();
             }    
