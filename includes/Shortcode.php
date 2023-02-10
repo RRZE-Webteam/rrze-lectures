@@ -130,6 +130,10 @@ class Shortcode
             case 'linklist':
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
+
+                if (!empty($this->atts['degree'])){
+                    $attrs .= ';providerValues.module.module_cos.subject';
+                }
                 break;
             default:
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
@@ -142,6 +146,8 @@ class Shortcode
 
         if (!empty($this->atts['lecture_name'])) {
             $aLQ['name'] = $this->atts['lecture_name'];
+
+            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
 
@@ -167,14 +173,12 @@ class Shortcode
             if (!empty($this->atts['degree'])) {
                 $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree']; // funktioniert nicht - liefert Module, die nicht zu subject passen
             }
-
-    
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
-        // echo $dipParams;
+        // echo 'https://api.fau.de/pub/v1/vz/educationEvents/' . $dipParams;
         // exit;
 
         Functions::console_log('Set params for DIP', $tsStart);
@@ -207,6 +211,10 @@ class Shortcode
             }
         }
 
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
+
         // delete all courses that don't fit to given semester
         foreach($data as $nr => $aVal){
             foreach($aVal['providerValues']['courses'] as $cNr => $aDetails){
@@ -218,11 +226,6 @@ class Shortcode
             }
 
         }
-
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
-
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
