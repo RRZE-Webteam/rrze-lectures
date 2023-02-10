@@ -105,14 +105,9 @@ class Shortcode
             }
         }
 
-        // either lecture_id or fauorgnr or basic_FAUOrgNr (options) must be given 
-        if (empty($this->atts['lecture_id']) && empty($this->atts['fauorgnr'])) {
-            // try to get it from the plugin's options
-            if (!empty($this->options['basic_FAUOrgNr'])) {
-                $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
-            } else {
-                return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
-            }
+        // either lecture_name or fauorgnr or basic_FAUOrgNr (options) must be given - see normalize()
+        if (empty($this->atts['lecture_name']) && empty($this->atts['fauorgnr'])) {
+            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
         }
 
         // dynamically generate hide vars
@@ -204,15 +199,13 @@ class Shortcode
             }
         }
 
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
 
 
         Functions::console_log('Fetched data from DIP', $tsStart);
+
 
         if (empty($data)) {
             return $this->atts['nodata'];
@@ -365,6 +358,12 @@ class Shortcode
     }
 
     private function normalize($atts){
+        // fauorgnr
+        if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
+            $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+        }
+
+        // sem
         if (empty($atts['sem'])){
             $atts['sem'] = Functions::getSemester();
         }else{
@@ -378,6 +377,12 @@ class Shortcode
                 // invalid input
                 $atts['sem'] = Functions::getSemester();
             }    
+        }
+
+        // no data
+        if (empty($atts['nodata']) && !empty($this->options['basic_nodata'])) {
+            // we allow nodata to be empty in case users don't want any output 
+            $atts['nodata'] = $this->options['basic_nodata'];
         }
 
         return $atts;

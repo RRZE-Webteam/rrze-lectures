@@ -131,6 +131,15 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
+            [
+                'name' => 'nodata',
+                'label' => __('No data', 'rrze-lectures'),
+                'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
+                'placeholder' => '',
+                'type' => 'text',
+                'default' => __('No matching entries found.', 'rrze-lectures'),
+                'sanitize_callback' => 'sanitize_text_field',
+            ],
         ],
     ];
 }
@@ -311,7 +320,7 @@ function getShortcodeSettings()
             ],
 
             'nodata' => [
-                'default' => __('No matching entries found.', 'rrze-lectures'),
+                'default' => '',
                 'field_type' => 'text',
                 'label' => __('Show', 'rrze-lectures'),
                 'type' => 'string',
