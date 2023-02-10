@@ -34,5 +34,5 @@ Parameter:
 |**max**|nein|Maximale Anzahl an Lehrveranstaltungen.||max="5"|
 |**hide**|nein|Die Anzeige von Teilen der Ausgabe können hiermit unterbunden werden. Derzeit: accordion||hide="accordion"|
 |**color**|nein|med oder phil oder tf oder nat oder rw oder fau|fau|color="med"|
-|**nodata**|nein|Eine beliebige Zeichenkette|No matching entries found.|nodata="Es wurden keine Lehrveranstaltungen gefunden."|
+|**nodata**|nein|Eine beliebige Zeichenkette|Der in den Settings vorgegebene Eintrag. Siehe /wp-admin/options-general.php?page=rrze-lectures |nodata="Es wurden keine Lehrveranstaltungen gefunden."|
 
