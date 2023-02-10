@@ -93,7 +93,7 @@ class Shortcode
                 $atts_default[$k] = $v['default'];
             }
         }
-        $this->atts = shortcode_atts($atts_default, $atts);
+        $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
         // get cache
         if (!$this->noCache) {
@@ -145,9 +145,6 @@ class Shortcode
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
 
-            if (empty($this->atts['sem'])){
-                $this->atts['sem'] = Functions::getSemester();
-            }
             $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
             if (!empty($this->atts['lecturer_idm'])) {
@@ -365,6 +362,25 @@ class Shortcode
         Functions::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
         return $content;
+    }
+
+    private function normalize($atts){
+        if (empty($atts['sem'])){
+            $atts['sem'] = Functions::getSemester();
+        }else{
+            if (preg_match("/(\d{4})([w|s])/", trim(strtolower($atts['sem'])), $matches)){
+                // YYYYs YYYYw YYYYS YYYYW
+                $atts['sem'] = ($matches[2] == 'w' ? 'WiSe' : 'SoSe') . $matches[1];
+            }elseif (preg_match("/(ss|ws)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
+                // wsYYYY ssYYYY WSYYYY SSYYYY
+                $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
+            }elseif (preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches) !== true){
+                // invalid input
+                $atts['sem'] = Functions::getSemester();
+            }    
+        }
+
+        return $atts;
     }
 
 
