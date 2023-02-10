@@ -4,6 +4,8 @@ namespace RRZE\Lectures\Config;
 
 defined('ABSPATH') || exit;
 
+
+
 /**
  * Gibt der Name der Option zurück.
  * @return array [description]
@@ -38,14 +40,20 @@ function getConstants()
             "ru" => __('Russian', 'rrze-lectures'),
             "zh" => __('Chinese', 'rrze-lectures'),
         ],
-        'colors' => [
-            'med',
-            'nat',
-            'rw',
-            'phil',
-            'tk',
-        ],
     );
+
+    $aTmp = getShortcodeSettings();
+
+    foreach($aTmp['lectures']['color']['values'] as $aVals){
+        if (!empty($aVals['id'])){
+            $options['colors'][] = $aVals['id'];
+        }
+    }
+
+    foreach($aTmp['lectures']['format']['values'] as $aVals){
+        $options['formats'][] = $aVals['id'];
+    }
+
     return $options;
 }
 
@@ -123,17 +131,15 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
-            // [
-            //     'name' => 'hstart',
-            //     'label' => __('Headline\'s size', 'rrze-lectures'),
-            //     'desc' => __('Headlines start at this size.', 'rrze-lectures'),
-            //     'min' => 2,
-            //     'max' => 10,
-            //     'step' => '1',
-            //     'type' => 'number',
-            //     'default' => '2',
-            //     'sanitize_callback' => 'floatval',
-            // ],
+            [
+                'name' => 'nodata',
+                'label' => __('No data', 'rrze-lectures'),
+                'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
+                'placeholder' => '',
+                'type' => 'text',
+                'default' => __('No matching entries found.', 'rrze-lectures'),
+                'sanitize_callback' => 'sanitize_text_field',
+            ],
         ],
     ];
 }
@@ -161,40 +167,52 @@ function getShortcodeSettings()
                 'label' => __('FAU Org Nr', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lecture_id' => [
+            'lecture_name' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Lecture ID', 'rrze-lectures'),
+                'label' => __('Lecture\'s name', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lecturer_name' => [
+            // 'lecturer_name' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Firstname, Lastname', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
+            'lecturer_idm' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Firstname, Lastname', 'rrze-lectures'),
+                'label' => __('Lecturer IdM', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lecturer_id' => [
+            'lecturer_identifier' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Lecturer ID', 'rrze-lectures'),
+                'label' => __('Lecturer identifier', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Type f.e. vorl (=Vorlesung)', 'rrze-lectures'),
+                'label' => __('Type f.e. Vorlesung', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'order' => [
+            'degree' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Sort by type f.e. "vorl,ueb"', 'rrze-lectures'),
+                'label' => __('Degree', 'rrze-lectures'), // Studiengang
                 'type' => 'string',
             ],
+            // 'order' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Sort by type f.e. "vorl,ueb"', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
             'sem' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Semester f.e. 2020w', 'rrze-lectures'),
+                'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lang' => [
@@ -203,11 +221,31 @@ function getShortcodeSettings()
                 'label' => __('Language', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'show' => [
+            // 'show' => [
+            //     'default' => '',
+            //     'field_type' => 'text',
+            //     'label' => __('Show', 'rrze-lectures'),
+            //     'type' => 'string',
+            // ],
+            'guest' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Show', 'rrze-lectures'),
-                'type' => 'string',
+                'label' => __('Visiting students', 'rrze-lectures'),
+                'type' => 'array',
+                'values' => [
+                    [
+                        'id' => '',
+                        'val' => __('don\'t filter', 'rrze-lectures'),
+                    ],
+                    [
+                        'id' => 1,
+                        'val' => __('Suitable for visiting students', 'rrze-lectures'),
+                    ],
+                    [
+                        'id' => 0,
+                        'val' => __('Not suitable for visiting students', 'rrze-lectures'),
+                    ],
+                ],
             ],
             'hide' => [
                 'default' => '',
@@ -215,17 +253,27 @@ function getShortcodeSettings()
                 'label' => __('Hide', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'hstart' => [
-                'default' => 2,
-                'field_type' => 'text',
-                'label' => __('Headline\'s size', 'rrze-lectures'),
-                'type' => 'number',
-            ],
+            // 'hstart' => [
+            //     'default' => 2,
+            //     'field_type' => 'text',
+            //     'label' => __('Headline\'s size', 'rrze-lectures'),
+            //     'type' => 'number',
+            // ],
             'format' => [
-                'default' => 'default',
+                'default' => 'linklist',
                 'field_type' => 'text',
                 'label' => __('Format', 'rrze-lectures'),
-                'type' => 'string',
+                'type' => 'array',
+                'values' => [
+                    [
+                        'id' => 'linklist',
+                        'val' => 'linklist',
+                    ],
+                    // [
+                    //     'id' => 'table',
+                    //     'val' => 'table',
+                    // ],
+                ],
             ],
             'color' => [
                 'default' => '',
@@ -272,7 +320,7 @@ function getShortcodeSettings()
             ],
 
             'nodata' => [
-                'default' => __('No matching entries found.', 'rrze-lectures'),
+                'default' => '',
                 'field_type' => 'text',
                 'label' => __('Show', 'rrze-lectures'),
                 'type' => 'string',

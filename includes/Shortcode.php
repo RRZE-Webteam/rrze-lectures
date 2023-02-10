@@ -25,6 +25,7 @@ class Shortcode
     protected $oDIP;
     private $settings = '';
     private $aAllowedColors = [];
+    private $aAllowedFormats = [];
     protected $noCache = false;
 
 
@@ -40,6 +41,7 @@ class Shortcode
         $this->options = get_option('rrze-lectures');
         $constants = getConstants();
         $this->aAllowedColors = $constants['colors'];
+        $this->aAllowedFormats = $constants['formats'];
 
         add_action('admin_enqueue_scripts', [$this, 'enqueueGutenberg']);
         add_action('init', [$this, 'initGutenberg']);
@@ -72,15 +74,17 @@ class Shortcode
      */
     public function shortcodeLectures($atts, $content = NULL)
     {
+        $tsStart = microtime(true);
         // show link to DIP only
         // if (in_array('link', $this->show)) {
         //     return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
         // }
 
+        Functions::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
+
         if (!empty($atts['nocache'])) {
             $this->noCache = true;
         }
-
 
         // merge given attributes with default ones
         $atts_default = array();
@@ -91,181 +95,199 @@ class Shortcode
         }
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
+        // get cache
+        if (!$this->noCache) {
+            $content = Functions::getDataFromCache($this->atts);
+
+            if (!empty($content)) {
+                Functions::console_log('Cache found and returned', $tsStart);
+                return $content;
+            }
+        }
+
+        // either lecture_name or fauorgnr or basic_FAUOrgNr (options) must be given - see normalize()
+        if (empty($this->atts['lecture_name']) && empty($this->atts['fauorgnr'])) {
+            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+        }
+
         // dynamically generate hide vars
         $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
         foreach ($aHide as $val) {
             ${'hide_' . $val} = 1;
         }
 
-        // set accordions' colors
-        // $this->atts['color'] = implode('', array_intersect($this->show, $this->aAllowedColors));
-        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : '');
-        $this->atts['color_courses'] = explode('_', implode('', array_intersect($this->show, preg_filter('/$/', '_courses', $this->aAllowedColors))));
-        $this->atts['color_courses'] = $this->atts['color_courses'][0];
+        // check atts
+        $this->atts['format'] = (in_array($this->atts['format'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
+        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
+        $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
-        $this->atts['format'] = 'linklist';
+        // echo '<pre>';
+        // var_dump($this->atts);
+        // exit;
 
 
-        if (!empty($this->atts['max']) && (int) $this->atts['max'] < 100) {
-            if (empty($this->atts['type'])) {
-                $limit = (int) $this->atts['max'];
-                $bFetchAll = false;
-            } else {
-                $limit = 100;
-                $bFetchAll = true;
-            }
-        } else {
-            $limit = 100;
-            $bFetchAll = true;
-        }
+        switch ($this->atts['format']) {
+            case 'linklist':
+                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
+                $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
-        if (!empty($this->atts['lecture_id'])) {
-            $dipParameter = $this->atts['lecture_id'];
-        } else {
-            // no lecture ID given
-            if (empty($this->atts['fauorgnr'])) {
-                // try to get it from the plugin's options
-                if (!empty($this->options['basic_FAUOrgNr'])) {
-                    $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
-                } else {
-                    return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+                if (!empty($this->atts['degree'])){
+                    $attrs .= ';providerValues.module.module_cos.subject';
                 }
+                break;
+            default:
+                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
+                $attrs = ''; // TEST
+        }
+
+        // $attrs = ''; // TEST
+
+        $aLQ = [];
+
+        if (!empty($this->atts['lecture_name'])) {
+            $aLQ['name'] = $this->atts['lecture_name'];
+
+            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+        } else {
+            $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+
+            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+
+            if (!empty($this->atts['lecturer_idm'])) {
+                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
             }
 
-            $dipParameter = '?q=' . $this->atts['fauorgnr'] . '&attrs=url;providerValues.event.title;providerValues.event.eventtype;providerValues.course_responsible&limit=' . $limit . '&page='; // sort by DIP doesn't work with leading numbers
+            if (!empty($this->atts['lecturer_identifier'])) {
+                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+            }
+
+            if (!empty($this->atts['type'])) {
+                $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
+            }
+
+            if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
+                // we cannot use empty() because it can contain 0
+                $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
+            }
+
+            if (!empty($this->atts['degree'])) {
+                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree']; // funktioniert nicht - liefert Module, die nicht zu subject passen
+            }
         }
+
+        // we cannot use API parameter "sort" because it sorts per page not the complete dataset
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+
+        // echo 'https://api.fau.de/pub/v1/vz/educationEvents/' . $dipParams;
+        // exit;
+
+        Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
-
-        if (!$this->noCache) {
-            $data = Functions::getDataFromCache($this->atts);
-        }
+        // $iAllEntries = 0;
 
         if (empty($data)) {
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse($dipParameter . $page);
+            $response = $this->oDIP->getResponse($dipParams . $page);
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
+
                 $data = $response['content']['data'];
 
-                if ($bFetchAll) {
+                // $iAllEntries += $response['content']['pagination']['count'];
+
+                if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
-                        $response = $this->oDIP->getResponse($dipParameter . $page);
-
+                        $response = $this->oDIP->getResponse($dipParams . $page);
                         $data = array_merge($response['content']['data'], $data);
+                        // $iAllEntries += $response['content']['pagination']['count'];
                     }
                 }
-
-                // set cache
-                Functions::setDataToCache($data, $this->atts);
             }
         }
+
+        // echo '<pre>';
+        // var_dump($data);
+        // exit;
+
+        // delete all courses that don't fit to given semester
+        foreach($data as $nr => $aVal){
+            foreach($aVal['providerValues']['courses'] as $cNr => $aDetails){
+                if ($aDetails['semester'] != $this->atts['sem']){
+                    unset($data[$nr]['providerValues']['courses'][$cNr]);
+                }else{
+                    $data[$nr]['providerValues']['courses'] = $aDetails;
+                }
+            }
+
+        }
+
+        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+        Sanitizer::sanitizeLectures($data);
+
+        Functions::console_log('Fetched data from DIP', $tsStart);
 
         if (empty($data)) {
             return $this->atts['nodata'];
         }
 
-        // group by eventtype
+
+        // group & sort
         $aData = [];
 
-        $aGivenTypes = [];
-        $aGivenLecturerIDs = [];
-
-        if (!empty($this->atts['type'])) {
-            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-        }
-
-        if (!empty($this->atts['lecturer_id'])) {
-            $aGivenLecturerIDs = array_map('trim', explode(',', $this->atts['lecturer_id']));
-        }
-
-        $iCnt = 0;
         foreach ($data as $nr => $aEntries) {
-            $name = preg_replace('/[\W]/', '', $aEntries['providerValues']['event']['title']);
-
-            $bSkip = false;
-            if (!empty($this->atts['lecturer_id'])) {
-                if (empty($aEntries['providerValues']['course_responsible'])) {
-                    $bSkip = true;
-                } else {
-                    $aFoundLecturerIDs = [];
-                    foreach ($aEntries['providerValues']['course_responsible'] as $nr => $aDetails) {
-                        $aFoundLecturerIDs[] = $aDetails['idm_uid'];
-                    }
-
-                    $bSkip = true;
-                    foreach ($aGivenLecturerIDs as $givenLectureID) {
-                        if (in_array($givenLectureID, $aFoundLecturerIDs)) {
-                            $bSkip = false;
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            if (!$bSkip) {
-                if (!empty($this->atts['type'])) {
-                    if (!empty($this->atts['max']) && ($iCnt > $this->atts['max'])) {
-                        continue;
-                    }
-
-                    // group only types defined in attribute type - DIP doesn't offer filter by type yet               
-                    if (in_array($aEntries['providerValues']['event']['eventtype'], $aGivenTypes)) {
-                        $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                            'url' => $aEntries['url'],
-                            'title' => $aEntries['providerValues']['event']['title']
-                        ];
-
-                        $iCnt++;
-                    }
-                } else {
-                    $aData[$aEntries['providerValues']['event']['eventtype']][$name] = [
-                        'url' => $aEntries['url'],
-                        'title' => $aEntries['providerValues']['event']['title']
-                    ];
-                }
-            }
+            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
         }
+        unset($data); // free memory
+
+        Functions::console_log('Group by eventtype completed', $tsStart);
 
         // sort
+        $coll = collator_create('de_DE');
+
         if (!empty($hide_accordion)) {
             // combine all entries and sort them
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
-                foreach($aDetails as $aEntries){
-                    $name = preg_replace('/[\W]/', '', $aEntries['title']);
-                    $aTmp[$name] = $aEntries;
+                foreach ($aDetails as $aEntries) {
+                    // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
+                    $aTmp[$aEntries['name']] = $aEntries;
                 }
             }
-            $coll = collator_create('de_DE');
+            unset($aData); // free memory
+
             $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
             $aTmp2 = [];
             foreach ($arrayKeys as $key) {
                 $aTmp2[$key] = $aTmp[$key];
             }
+            unset($aTmp); // free memory
             $aData = [];
             $aData[] = $aTmp2;
-            $iMax = count($aTmp2);
+            $iAllEntries = count($aTmp2);
+            unset($aTmp2); // free memory
         } else {
             // sort group
             if (!empty($this->atts['type'])) {
                 // sort in order of $this->atts['type']
                 $aTmp = [];
+                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
+
                 foreach ($aGivenTypes as $givenType) {
                     if (!empty($aData[$givenType])) {
                         $aTmp[$givenType] = $aData[$givenType];
                     }
                 }
                 $aData = $aTmp;
+                unset($aTmp); // free memory
             } else {
                 // sort alphabetically by group
-                $coll = collator_create('de_DE');
                 $arrayKeys = array_keys($aData);
                 collator_sort($coll, $arrayKeys);
                 $aTmp = [];
@@ -273,208 +295,137 @@ class Shortcode
                     $aTmp[$key] = $aData[$key];
                 }
                 $aData = $aTmp;
+                unset($aTmp); // free memory
             }
 
-            $iMax = 0;
             // sort entries
+            $iAllEntries = 0;
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
-                foreach ($aDetails as $name => $aEntries) {
-                    $name = preg_replace('/[\W]/', '', $name);
-                    $aTmp2[$name] = [
-                        'url' => $aEntries['url'],
-                        'title' => $aEntries['title']
-                    ];
+                foreach ($aDetails as $identifier => $aEntries) {
+                    // $name = $aEntries['providerValues']['event']['title'];
+                    $name = $aEntries['name'];
+                    $aTmp2[$name] = $aEntries;
                 }
-
-                $iMax += count($aTmp2);
 
                 $arrayKeys = array_keys($aTmp2);
                 array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+                $iAllEntries += count($aTmp2);
                 $aTmp[$group] = $aTmp2;
+                unset($aTmp2); // free memory
             }
 
             $aData = $aTmp;
-
+            unset($aTmp); // free memory
         }
 
-        // $oSanitizer = new Sanitizer();
-        // $aData = $oSanitizer->sanitizeArray($aData);
+        Functions::console_log('Sort completed', $tsStart);
+
+        // echo $this->atts['format'];
+        // exit;
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
-        if ($this->atts['format'] == 'linklist') {
-            $aTmp = [];
-            $start = true;
-            $iCnt = 1;
+        $aTmp = [];
+        $start = true;
+        $iCnt = 1;
 
-            foreach ($aData as $title => $aEntries) {
-                $i = 1;
-
-                foreach ($aEntries as $tmp => $data) {
-                    if (empty($hide_accordion)) {
-                        $data['accordion'] = true;
-                        $data['collapsibles_start'] = $start;
-                        $data['collapse_title'] = ($i == 1 ? $title : false);
-                        $data['collapsibles_end'] = ($iCnt == $iMax ? true : false);
-                        $data['collapse_start'] = ($data['collapse_title'] ? true : false);
-                        $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                        $data['color'] = $this->atts['color'];
-                    } else {
-                        $data['first'] = $start;
-                        $data['last'] = ($iCnt == $iMax ? true : false);
-                    }
-
-                    $aTmp[] = $data;
-                    $i++;
-                    $start = false;
-                    $iCnt++;
-                }
-            }
-            $aData = $aTmp;
-
-            foreach ($aData as $data) {
-                $content .= Template::getContent($template, $data);
-            }
-        } elseif (empty($data['data'])) {
-            // = 1 lecture
-            $content = Template::getContent($template, $data);
-        } else {
-            // > 1 lecture
-            $aTmp = [];
-
-            // $this->atts['accordion'] = 'a-z';
-            $this->atts['accordion'] = '';
-
-            $iMax = 0;
-
-            foreach ($data['data'] as $data) {
-                $aTmp[Template::makeCollapseTitle($data, $this->atts['accordion'])][] = $data;
-                $iMax++;
-            }
-
-            $aData = $aTmp;
-
-            // let's sort independently to special chars
-            $aTmp = [];
-            foreach ($aData as $name => $aEntries) {
-                $name = preg_replace('/[a-z]+/', '', $name);
-                $aTmp[$name] = $aEntries;
-            }
-            $aData = $aTmp;
-
-            array_multisort(array_keys($aData), SORT_NATURAL | SORT_FLAG_CASE, $aData);
-
-            $aTmp = [];
-            $start = true;
-            foreach ($aData as $title => $aEntries) {
-                $i = 1;
-
-                foreach ($aEntries as $nr => $data) {
-                    $data['accordion'] = true;
-                    $data['collapsibles_start'] = $start;
-                    $data['collapse_title'] = ($nr == 0 ? $data['name'] : false);
-                    $data['collapsibles_end'] = ($i < $iMax ? false : true);
-                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
-                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                    $aTmp[] = $data;
-                    $i++;
-                    $start = false;
-                }
-
-            }
-
-            $aData = $aTmp;
-
-            foreach ($aData as $nr => $data) {
-                $content .= Template::getContent($template, $data);
-            }
+        if (empty($aData)) {
+            return $this->atts['nodata'];
         }
 
-        $content = do_shortcode($content);
+
+        // echo '<pre>';
+        // var_dump($aData);
+        // exit;
+
+
+        foreach ($aData as $title => $aEntries) {
+            $i = 1;
+
+            foreach ($aEntries as $tmp => $data) {
+                if (empty($hide_accordion)) {
+                    $data['accordion'] = true;
+                    $data['collapsibles_start'] = $start;
+                    $data['collapse_title'] = ($i == 1 ? $title : false);
+                    $data['collapsibles_end'] = ($iCnt == $iAllEntries ? true : false);
+                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
+                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
+                    $data['color'] = $this->atts['color'];
+                } else {
+                    $data['first'] = $start;
+                    $data['last'] = ($iCnt == $iAllEntries ? true : false);
+                }
+
+                $aTmp[] = $data;
+                $i++;
+                $start = false;
+                $iCnt++;
+            }
+        }
+        $aData = $aTmp;
+        unset($aTmp); // free memory
+
+        Functions::console_log('Accordion & first/last values set for template', $tsStart);
+
+        foreach ($aData as $data) {
+            $content .= Template::getContent($template, $data);
+        }
+        unset($aData); // free memory
+
+        Functions::console_log('Template parsed', $tsStart);
+
+        if (empty($hide_accordion)) {
+            $content = do_shortcode($content);
+        }
+
+        Functions::console_log('do_shortcode() executed', $tsStart);
+
+        // set cache
+        Functions::setDataToCache($content, $this->atts);
+
+        Functions::console_log('Cache set', $tsStart);
+        Functions::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
         return $content;
     }
 
-    public function normalize($atts)
-    {
-        // normalize given attributes according to rrze-lectures version 2
-        if (!empty($atts['number'])) {
-            $this->DIPOrgNr = $atts['number'];
-        } elseif (!empty($atts['id'])) {
-            $this->DIPOrgNr = $atts['id'];
+    private function normalize($atts){
+        // fauorgnr
+        if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
+            $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
         }
-        if (!empty($atts['lecturer_id'])) {
-            $atts['lecturer_id'] = $atts['lecturer_id'];
+
+        if (!empty($atts['lecture_name'])){
+            $atts['lecture_name'] = trim($atts['lecture_name']);
         }
-        if (!empty($atts['dozentname'])) {
-            $atts['name'] = $atts['dozentname'];
+
+        // sem
+        if (empty($atts['sem'])){
+            $atts['sem'] = Functions::getSemester();
+        }else{
+            if (preg_match("/(\d{4})([w|s])/", trim(strtolower($atts['sem'])), $matches)){
+                // YYYYs YYYYw YYYYS YYYYW
+                $atts['sem'] = ($matches[2] == 'w' ? 'WiSe' : 'SoSe') . $matches[1];
+            }elseif (preg_match("/(ss|ws)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
+                // wsYYYY ssYYYY WSYYYY SSYYYY
+                $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
+            }elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
+                // invalid input
+                $atts['sem'] = Functions::getSemester();
+            }    
         }
-        if (empty($atts['show'])) {
-            $atts['show'] = '';
-        }
-        if (empty($atts['hide'])) {
-            $atts['hide'] = '';
-        }
-        if (!empty($atts['sprache'])) {
-            $atts['lang'] = $atts['sprache'];
-        }
-        if (isset($atts['show_phone'])) {
-            if ($atts['show_phone']) {
-                $atts['show'] .= ',telefon';
-            } else {
-                $atts['hide'] .= ',telefon';
-            }
-        }
-        if (isset($atts['show_mail'])) {
-            if ($atts['show_mail']) {
-                $atts['show'] .= ',mail';
-            } else {
-                $atts['hide'] .= ',mail';
-            }
-        }
-        if (isset($atts['show_jumpmarks'])) {
-            if ($atts['show_jumpmarks']) {
-                $atts['show'] .= ',sprungmarken';
-            } else {
-                $atts['hide'] .= ',sprungmarken';
-            }
-        }
-        if (isset($atts['ics'])) {
-            if ($atts['ics']) {
-                $atts['show'] .= ',ics';
-            } else {
-                $atts['hide'] .= ',ics';
-            }
-        }
-        if (isset($atts['call'])) {
-            if ($atts['call']) {
-                $atts['show'] .= ',call';
-            } else {
-                $atts['hide'] .= ',call';
-            }
-        }
-        if (!empty($atts['show'])) {
-            $this->show = array_map('trim', explode(',', strtolower($atts['show'])));
-        }
-        if (!empty($atts['hide'])) {
-            $this->hide = array_map('trim', explode(',', strtolower($atts['hide'])));
-        }
-        if (!empty($atts['sem'])) {
-            if (is_int($atts['sem'])) {
-                $year = date("Y") + $atts['sem'];
-                $thisSeason = (in_array(date('n'), [10, 11, 12, 1]) ? 'w' : 's');
-                $season = ($thisSeason = 's' ? 'w' : 's');
-                $atts['sem'] = $year . $season;
-            }
-        }
-        if (empty($atts['hstart'])) {
-            $atts['hstart'] = $this->options['basic_hstart'];
+
+        // no data
+        if (empty($atts['nodata']) && !empty($this->options['basic_nodata'])) {
+            // we allow nodata to be empty in case users don't want any output 
+            $atts['nodata'] = $this->options['basic_nodata'];
         }
 
         return $atts;
     }
+
 
     public function isGutenberg()
     {

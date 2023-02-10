@@ -4,7 +4,9 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         1.3.6
+ * Version:         1.4.26
+ * Requires at least: 6.1
+ * Requires PHP:      8.0
  * Author:          RRZE-Webteam
  * Author URI:      https://blogs.fau.de/webworking/
  * License:         GNU General Public License v3
@@ -41,8 +43,8 @@ spl_autoload_register(function ($class) {
     }
 });
 
-const RRZE_PHP_VERSION = '7.4';
-const RRZE_WP_VERSION = '5.3';
+const RRZE_PHP_VERSION = '8.0';
+const RRZE_WP_VERSION = '6.1';
 
 // Registriert die Plugin-Funktion, die bei Aktivierung des Plugins ausgeführt werden soll.
 register_activation_hook(__FILE__, __NAMESPACE__ . '\activation');
