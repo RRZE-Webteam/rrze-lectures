@@ -270,52 +270,51 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-        // sort entries
-        $iAllEntries = 0;
-        $aTmp = [];
-        foreach ($aData as $group => $aDetails) {
+
+        if (!empty($hide_accordion) && !empty($hide_type) && empty($this->atts['type'])) {
+            // combine all entries and sort them
+            $aTmp = [];
+            foreach ($aData as $group => $aDetails) {
+                foreach ($aDetails as $aEntries) {
+                    // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
+                    $aTmp[$aEntries['name']] = $aEntries;
+                }
+            }
+            unset($aData); // free memory
+
+            $arrayKeys = array_keys($aTmp);
+            collator_sort($coll, $arrayKeys);
             $aTmp2 = [];
-            foreach ($aDetails as $identifier => $aEntries) {
-                // $name = $aEntries['providerValues']['event']['title'];
-                $name = $aEntries['name'];
-                $aTmp2[$name] = $aEntries;
+            foreach ($arrayKeys as $key) {
+                $aTmp2[$key] = $aTmp[$key];
+            }
+            unset($aTmp); // free memory
+            $aData = [];
+            $aData[] = $aTmp2;
+            $iAllEntries = count($aTmp2);
+            unset($aTmp2); // free memory
+        } else {
+            // sort entries
+            $iAllEntries = 0;
+            $aTmp = [];
+            foreach ($aData as $group => $aDetails) {
+                $aTmp2 = [];
+                foreach ($aDetails as $identifier => $aEntries) {
+                    // $name = $aEntries['providerValues']['event']['title'];
+                    $name = $aEntries['name'];
+                    $aTmp2[$name] = $aEntries;
+                }
+
+                $arrayKeys = array_keys($aTmp2);
+                array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+                $iAllEntries += count($aTmp2);
+                $aTmp[$group] = $aTmp2;
+                unset($aTmp2); // free memory
             }
 
-            $arrayKeys = array_keys($aTmp2);
-            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-            $iAllEntries += count($aTmp2);
-            $aTmp[$group] = $aTmp2;
-            unset($aTmp2); // free memory
+            $aData = $aTmp;
+            unset($aTmp); // free memory
         }
-
-        $aData = $aTmp;
-        unset($aTmp); // free memory
-
-
-        // if (!empty($hide_accordion)) {
-        //     // combine all entries and sort them
-        //     $aTmp = [];
-        //     foreach ($aData as $group => $aDetails) {
-        //         foreach ($aDetails as $aEntries) {
-        //             // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
-        //             $aTmp[$aEntries['name']] = $aEntries;
-        //         }
-        //     }
-        //     unset($aData); // free memory
-
-        //     $arrayKeys = array_keys($aTmp);
-        //     collator_sort($coll, $arrayKeys);
-        //     $aTmp2 = [];
-        //     foreach ($arrayKeys as $key) {
-        //         $aTmp2[$key] = $aTmp[$key];
-        //     }
-        //     unset($aTmp); // free memory
-        //     $aData = [];
-        //     $aData[] = $aTmp2;
-        //     $iAllEntries = count($aTmp2);
-        //     unset($aTmp2); // free memory
-        // } else {
-        // }
 
         Functions::console_log('Sort completed', $tsStart);
 
