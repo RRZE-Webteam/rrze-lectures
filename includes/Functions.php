@@ -62,7 +62,6 @@ class Functions
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
-            $attVal = sanitize_text_field($attVal);
             $aTmp = array_map('trim', explode(',', $attVal));
 
             // check if 10 figures hex 

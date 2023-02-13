@@ -166,7 +166,7 @@ class Shortcode
             }
 
             if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree']; // funktioniert nicht - liefert Module, die nicht zu subject passen
+                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
             }
         }
 
@@ -206,9 +206,6 @@ class Shortcode
             }
         }
 
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
 
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
@@ -316,6 +313,49 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
+
+        // echo '<pre>';
+        // var_dump($aData);
+        // exit;
+
+        // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
+        if (!empty($this->atts['degree'])){
+            // group by degree
+            $aGivenDegrees = array_map('trim', explode(',', $this->atts['degree']));
+
+            $aTmp = [];
+
+            foreach ($aData as $type => $aVal) {
+                foreach($aVal as $title => $aLectures){
+                    foreach ($aLectures['providerValues']['module'] as $mNr => $aModules) {
+                        foreach ($aModules['module_cos'] as $cNr => $aDetails) {
+                            if (in_array($aDetails['subject'], $aGivenDegrees)){
+                                $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
+                            }
+                        }
+                    }
+    
+                }
+            }
+            $aDegree = $aTmp;
+            $aTmp = [];
+
+            // sort by given degrees
+            foreach ($aGivenDegrees as $degree) {
+                if (!empty($aDegree[$degree])) {
+                    $aTmp[$degree] = $aDegree[$degree];
+                }
+            }
+
+            $aDegree = $aTmp;
+            unset($aTmp);
+        }
+
+        // echo '<pre>';
+        // var_dump($aDegree);
+        // exit;
+
+
         Functions::console_log('Sort completed', $tsStart);
 
         // echo $this->atts['format'];
@@ -331,42 +371,98 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
-        foreach ($aData as $title => $aEntries) {
-            $i = 1;
-
-            foreach ($aEntries as $tmp => $data) {
-                if (empty($hide_accordion)) {
-                    $data['accordion'] = true;
-                    $data['collapsibles_start'] = $start;
-                    $data['collapse_title'] = ($i == 1 ? $title : false);
-                    $data['collapsibles_end'] = ($iCnt == $iAllEntries ? true : false);
-                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
-                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                    $data['color'] = $this->atts['color'];
-                } else {
-                    $data['type'] = (empty($hide_type) && ($i == 1) ? $title : false);
-                    $data['first'] = $start;
-                    $data['last'] = ($iCnt == $iAllEntries ? true : false);
-                    $data['ul_start'] = ($data['type'] || $data['first'] ? true : false);
-                    $data['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $data['last'] ? true : false);
-                    $data['hstart'] = $this->atts['hstart'];
-                }
-
-                $aTmp[] = $data;
-                $i++;
-                $start = false;
-                $iCnt++;
+        if (!empty($this->atts['degree'])){
+            if (empty($aDegree)) {
+                return $this->atts['nodata'];
             }
+
+            foreach ($aDegree as $degree => $aEntries) {
+                $i = 1;
+    
+
+                // 2DO: set template-instructions in different array as keys lead to errors
+                foreach ($aEntries as $type => $data) {
+                    if (empty($hide_accordion_degree)) {
+                        $data['accordion_title'] = ($i == 1 ? $degree : false);
+                        $data['accordion_start'] = ($data['accordion_title'] ? true : false);
+                        $data['accordion_end'] = ($i == count($aEntries) ? true : false);
+                        $aDegree[$degree][$type] = $data;
+                        // $data['color'] = $this->atts['color'];
+                    // } else {
+                    //     $data['type'] = (empty($hide_type) && ($i == 1) ? $title : false);
+                    //     $data['first'] = $start;
+                    //     $data['last'] = ($iCnt == $iAllEntries ? true : false);
+                    //     $data['ul_start'] = ($data['type'] || $data['first'] ? true : false);
+                    //     $data['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $data['last'] ? true : false);
+                    //     $data['hstart'] = $this->atts['hstart'];
+                    }
+    
+                    // $aTmp[] = $data;
+                    $i++;
+                    $start = false;
+                    $iCnt++;
+                }
+            }
+            // $aDegree = $aTmp;
+            // unset($aTmp); // free memory
+    
+        }else{
+            $aDegree = [];
+            $aDegree[] = $aData;
         }
-        $aData = $aTmp;
-        unset($aTmp); // free memory
+
+        // echo '<pre>';
+        // var_dump($aDegree);
+        // exit;
+
+
+
+        foreach($aDegree as $degree => $aData){
+            foreach ($aData as $type => $aEntries) {
+                $i = 1;
+                foreach ($aEntries as $title => $aDetails) {
+                    if (empty($hide_accordion)) {
+                        $aDetails['do_accordion'] = true;
+                        $aDetails['collapsibles_start'] = $start;
+                        $aDetails['collapse_title'] = ($i == 1 ? $type : false);
+                        $aDetails['collapsibles_end'] = ($iCnt == $iAllEntries ? true : false);
+                        $aDetails['collapse_start'] = ($aDetails['collapse_title'] ? true : false);
+                        $aDetails['collapse_end'] = ($i == count($aEntries) ? true : false);
+                        $aDetails['color'] = $this->atts['color'];
+                        $aDegree[$degree][$type][$title] = $aDetails;
+                    // } else {
+                    //     $aDegree[$degree][$type][$title]['type'] = (empty($hide_type) && ($i == 1) ? $type : false);
+                    //     $aDegree[$degree][$type][$title]['first'] = $start;
+                    //     $aDegree[$degree][$type][$title]['last'] = ($iCnt == $iAllEntries ? true : false);
+                    //     $aDegree[$degree][$type][$title]['ul_start'] = ($aDegree[$degree][$type][$title]['type'] || $aDegree[$degree][$type][$title]['first'] ? true : false);
+                    //     $aDegree[$degree][$type][$title]['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $aDegree[$degree][$type][$title]['last'] ? true : false);
+                    //     $aDegree[$degree][$type][$title]['hstart'] = $this->atts['hstart'];
+                    }
+
+                    // $aTmp[] = $data;
+                    $i++;
+                    $start = false;
+                    $iCnt++;
+                }
+            }
+            // $aData = $aTmp;
+            // $aDegree[$nr] = $aTmp;
+            // unset($aTmp); // free memory
+        }
+
+        // echo '<pre>';
+        // var_dump($aDegree);
+        // exit;
+
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
-        foreach ($aData as $data) {
-            $content .= Template::getContent($template, $data);
+        foreach($aDegree as $nr => $aData){
+            foreach ($aData as $data) {
+                $content .= Template::getContent($template, $data);
+            }
         }
-        unset($aData); // free memory
+        unset($aDegree); // free memory
 
         Functions::console_log('Template parsed', $tsStart);
 
@@ -387,6 +483,11 @@ class Shortcode
 
     private function normalize($atts)
     {
+        // sanatize all fields
+        foreach($atts as $key => $val){
+            $atts[$key] = sanitize_text_field($val);
+        }
+
         // fauorgnr
         if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
             $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
