@@ -253,12 +253,12 @@ function getShortcodeSettings()
                 'label' => __('Hide', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            // 'hstart' => [
-            //     'default' => 2,
-            //     'field_type' => 'text',
-            //     'label' => __('Headline\'s size', 'rrze-lectures'),
-            //     'type' => 'number',
-            // ],
+            'hstart' => [
+                'default' => 2,
+                'field_type' => 'text',
+                'label' => __('Headline\'s size', 'rrze-lectures'),
+                'type' => 'number',
+            ],
             'format' => [
                 'default' => 'linklist',
                 'field_type' => 'text',

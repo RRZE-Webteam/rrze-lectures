@@ -350,6 +350,7 @@ class Shortcode
                     $data['last'] = ($iCnt == $iAllEntries ? true : false);
                     $data['ul_start'] = ($data['type'] || $data['first'] ? true : false);
                     $data['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $data['last'] ? true : false);
+                    $data['hstart'] = $this->atts['hstart'];
                 }
 
                 $aTmp[] = $data;
@@ -417,6 +418,17 @@ class Shortcode
             // we allow nodata to be empty in case users don't want any output 
             $atts['nodata'] = $this->options['basic_nodata'];
         }
+
+        // hstart
+        if (!empty($atts['hstart'])) {
+            $atts['hstart'] = intval($atts['hstart']);
+        } else {
+            $atts['hstart'] = 2;
+        }
+        if (($atts['hstart'] < 1) || ($atts['hstart'] > 6)) {
+            $atts['hstart'] = 2;
+        }
+
 
         return $atts;
     }
