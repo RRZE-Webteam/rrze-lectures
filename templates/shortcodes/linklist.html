@@ -10,11 +10,16 @@
 {{:accordion}}
     {{first}}
         <div class="rrze-lectures">
-            <ul>
     {{/first}}
+    {{type}}
+        <h3>{{=type}}</h3>
+    {{/type}}
+    {{ul_start}}
+        <ul>
+    {{/ul_start}}
 {{/accordion}}
 
-                <li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
+    <li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
 
 {{accordion}}
     {{collapse_end}}
@@ -26,6 +31,9 @@
         </div>
     {{/collapsibles_end}}
 {{:accordion}}
+    {{ul_end}}
+        </ul>
+    {{/ul_end}}
     {{last}}
             </ul>
         </div>

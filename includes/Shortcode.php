@@ -121,17 +121,12 @@ class Shortcode
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
         $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
-        // echo '<pre>';
-        // var_dump($this->atts);
-        // exit;
-
-
         switch ($this->atts['format']) {
             case 'linklist':
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
-                if (!empty($this->atts['degree'])){
+                if (!empty($this->atts['degree'])) {
                     $attrs .= ';providerValues.module.module_cos.subject';
                 }
                 break;
@@ -176,7 +171,7 @@ class Shortcode
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
-        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : ''). '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         // echo 'https://api.fau.de/pub/v1/vz/educationEvents/' . $dipParams;
         // exit;
@@ -216,11 +211,11 @@ class Shortcode
         // exit;
 
         // delete all courses that don't fit to given semester
-        foreach($data as $nr => $aVal){
-            foreach($aVal['providerValues']['courses'] as $cNr => $aDetails){
-                if ($aDetails['semester'] != $this->atts['sem']){
+        foreach ($data as $nr => $aVal) {
+            foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
+                if ($aDetails['semester'] != $this->atts['sem']) {
                     unset($data[$nr]['providerValues']['courses'][$cNr]);
-                }else{
+                } else {
                     $data[$nr]['providerValues']['courses'] = $aDetails;
                 }
             }
@@ -250,75 +245,77 @@ class Shortcode
         // sort
         $coll = collator_create('de_DE');
 
-        if (!empty($hide_accordion)) {
-            // combine all entries and sort them
+        // sort group
+        if (!empty($this->atts['type'])) {
+            // sort in order of $this->atts['type']
             $aTmp = [];
-            foreach ($aData as $group => $aDetails) {
-                foreach ($aDetails as $aEntries) {
-                    // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
-                    $aTmp[$aEntries['name']] = $aEntries;
+            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
+
+            foreach ($aGivenTypes as $givenType) {
+                if (!empty($aData[$givenType])) {
+                    $aTmp[$givenType] = $aData[$givenType];
                 }
             }
-            unset($aData); // free memory
-
-            $arrayKeys = array_keys($aTmp);
-            collator_sort($coll, $arrayKeys);
-            $aTmp2 = [];
-            foreach ($arrayKeys as $key) {
-                $aTmp2[$key] = $aTmp[$key];
-            }
+            $aData = $aTmp;
             unset($aTmp); // free memory
-            $aData = [];
-            $aData[] = $aTmp2;
-            $iAllEntries = count($aTmp2);
-            unset($aTmp2); // free memory
         } else {
-            // sort group
-            if (!empty($this->atts['type'])) {
-                // sort in order of $this->atts['type']
-                $aTmp = [];
-                $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-
-                foreach ($aGivenTypes as $givenType) {
-                    if (!empty($aData[$givenType])) {
-                        $aTmp[$givenType] = $aData[$givenType];
-                    }
-                }
-                $aData = $aTmp;
-                unset($aTmp); // free memory
-            } else {
-                // sort alphabetically by group
-                $arrayKeys = array_keys($aData);
-                collator_sort($coll, $arrayKeys);
-                $aTmp = [];
-                foreach ($arrayKeys as $key) {
-                    $aTmp[$key] = $aData[$key];
-                }
-                $aData = $aTmp;
-                unset($aTmp); // free memory
-            }
-
-            // sort entries
-            $iAllEntries = 0;
+            // sort alphabetically by group
+            $arrayKeys = array_keys($aData);
+            collator_sort($coll, $arrayKeys);
             $aTmp = [];
-            foreach ($aData as $group => $aDetails) {
-                $aTmp2 = [];
-                foreach ($aDetails as $identifier => $aEntries) {
-                    // $name = $aEntries['providerValues']['event']['title'];
-                    $name = $aEntries['name'];
-                    $aTmp2[$name] = $aEntries;
-                }
-
-                $arrayKeys = array_keys($aTmp2);
-                array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-                $iAllEntries += count($aTmp2);
-                $aTmp[$group] = $aTmp2;
-                unset($aTmp2); // free memory
+            foreach ($arrayKeys as $key) {
+                $aTmp[$key] = $aData[$key];
             }
-
             $aData = $aTmp;
             unset($aTmp); // free memory
         }
+
+        // sort entries
+        $iAllEntries = 0;
+        $aTmp = [];
+        foreach ($aData as $group => $aDetails) {
+            $aTmp2 = [];
+            foreach ($aDetails as $identifier => $aEntries) {
+                // $name = $aEntries['providerValues']['event']['title'];
+                $name = $aEntries['name'];
+                $aTmp2[$name] = $aEntries;
+            }
+
+            $arrayKeys = array_keys($aTmp2);
+            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+            $iAllEntries += count($aTmp2);
+            $aTmp[$group] = $aTmp2;
+            unset($aTmp2); // free memory
+        }
+
+        $aData = $aTmp;
+        unset($aTmp); // free memory
+
+
+        // if (!empty($hide_accordion)) {
+        //     // combine all entries and sort them
+        //     $aTmp = [];
+        //     foreach ($aData as $group => $aDetails) {
+        //         foreach ($aDetails as $aEntries) {
+        //             // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
+        //             $aTmp[$aEntries['name']] = $aEntries;
+        //         }
+        //     }
+        //     unset($aData); // free memory
+
+        //     $arrayKeys = array_keys($aTmp);
+        //     collator_sort($coll, $arrayKeys);
+        //     $aTmp2 = [];
+        //     foreach ($arrayKeys as $key) {
+        //         $aTmp2[$key] = $aTmp[$key];
+        //     }
+        //     unset($aTmp); // free memory
+        //     $aData = [];
+        //     $aData[] = $aTmp2;
+        //     $iAllEntries = count($aTmp2);
+        //     unset($aTmp2); // free memory
+        // } else {
+        // }
 
         Functions::console_log('Sort completed', $tsStart);
 
@@ -335,12 +332,6 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
-
-        // echo '<pre>';
-        // var_dump($aData);
-        // exit;
-
-
         foreach ($aData as $title => $aEntries) {
             $i = 1;
 
@@ -354,8 +345,11 @@ class Shortcode
                     $data['collapse_end'] = ($i == count($aEntries) ? true : false);
                     $data['color'] = $this->atts['color'];
                 } else {
+                    $data['type'] = (empty($hide_type) && ($i == 1) ? $title : false);
                     $data['first'] = $start;
                     $data['last'] = ($iCnt == $iAllEntries ? true : false);
+                    $data['ul_start'] = ($data['type'] || $data['first'] ? true : false);
+                    $data['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $data['last'] ? true : false);
                 }
 
                 $aTmp[] = $data;
@@ -391,30 +385,31 @@ class Shortcode
         return $content;
     }
 
-    private function normalize($atts){
+    private function normalize($atts)
+    {
         // fauorgnr
         if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
             $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
         }
 
-        if (!empty($atts['lecture_name'])){
+        if (!empty($atts['lecture_name'])) {
             $atts['lecture_name'] = trim($atts['lecture_name']);
         }
 
         // sem
-        if (empty($atts['sem'])){
+        if (empty($atts['sem'])) {
             $atts['sem'] = Functions::getSemester();
-        }else{
-            if (preg_match("/(\d{4})([w|s])/", trim(strtolower($atts['sem'])), $matches)){
+        } else {
+            if (preg_match("/(\d{4})([w|s])/", trim(strtolower($atts['sem'])), $matches)) {
                 // YYYYs YYYYw YYYYS YYYYW
                 $atts['sem'] = ($matches[2] == 'w' ? 'WiSe' : 'SoSe') . $matches[1];
-            }elseif (preg_match("/(ss|ws)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
+            } elseif (preg_match("/(ss|ws)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
                 // wsYYYY ssYYYY WSYYYY SSYYYY
                 $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
-            }elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)){
+            } elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
                 // invalid input
                 $atts['sem'] = Functions::getSemester();
-            }    
+            }
         }
 
         // no data
