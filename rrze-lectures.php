@@ -88,7 +88,6 @@ function setFAUOrgNr(){
     }
 }
 
-
 /**
  * Wird nach der Aktivierung des Plugins ausgeführt.
  */
