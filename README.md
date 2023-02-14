@@ -1,6 +1,6 @@
 # rrze-lectures
 
-- Version 1.x.x liefet nur eine Liste an Links zu Campo
+- Version 1.x.x liefert nur eine Liste an Links zu Campo
 
 ## Download
 GITHub-Repo: https://github.com/RRZE-Webteam/rrze-lectures
