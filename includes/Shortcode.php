@@ -357,14 +357,14 @@ class Shortcode
                 $start = true;
                 foreach ($aTypes as $type => $aLectures) {
                     foreach ($aLectures as $title => $aDetails) {
-                        $aDegree[$degree][$type][$title]['show_outer_title'] = (empty($hide_degree) ? true : !$hide_degree);
+                        $aDegree[$degree][$type][$title]['show_outer_title'] = (empty($hide_degree) && $start ? true : false);
                         $aDegree[$degree][$type][$title]['do_outer_accordion'] = !$this->atts['hide_outer_accordion'];
                         $aDegree[$degree][$type][$title]['outer_title'] = ($start ? $degree : false);
                         $aDegree[$degree][$type][$title]['outer_start'] = ($aDegree[$degree][$type][$title]['outer_title'] ? true : false);
                         $aDegree[$degree][$type][$title]['outer_end'] = false;
                         $aDegree[$degree][$type][$title]['hstart_outer'] = $this->atts['hstart_outer'];
+                        $start = false;
                     }
-                    $start = false;
                 }
                 $aDegree[$degree][$type][$title]['outer_end'] = true;
             }
@@ -397,6 +397,11 @@ class Shortcode
         }
         $aDegree[$degree][$type][$title]['last'] = true;
 
+        // echo '<pre>';
+        // var_dump($aDegree);
+        // exit;
+
+
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
         foreach ($aDegree as $degree => $aData) {
@@ -407,6 +412,7 @@ class Shortcode
             }
         }
         unset($aDegree); // free memory
+
 
         Functions::console_log('Template parsed', $tsStart);
 
