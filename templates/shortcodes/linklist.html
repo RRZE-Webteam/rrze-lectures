@@ -10,7 +10,11 @@
     {{/outer_title}}
 {{:do_outer_accordion}}
     {{outer_title}}
-        <H3>{{=outer_title}}</H3>
+        {{show_outer_title}}
+            <H{{=hstart_outer}}>{{=outer_title}}</H{{=hstart_outer}}>
+        {{:show_outer_title}}
+            <br>&nbsp;<br>
+        {{/show_outer_title}}
     {{/outer_title}}
 {{/do_outer_accordion}}
 {{do_inner_accordion}}
@@ -26,7 +30,7 @@
     {{/inner_title}}
 {{:do_inner_accordion}}
     {{inner_title}}
-        <H4>{{=inner_title}}</H3>
+        <H{{=hstart_inner}}>{{=inner_title}}</H{{=hstart_inner}}>
     {{/inner_title}}
 {{/do_inner_accordion}}
 {{inner_start}}

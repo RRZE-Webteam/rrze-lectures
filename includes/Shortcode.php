@@ -93,6 +93,7 @@ class Shortcode
                 $atts_default[$k] = $v['default'];
             }
         }
+
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
         // get cache
@@ -110,17 +111,6 @@ class Shortcode
             return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
         }
 
-        // dynamically generate hide vars
-        $hide_outer_accordion = false;
-        $hide_inner_accordion = false;
-        $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
-        foreach ($aHide as $val) {
-            ${'hide_' . $val} = 1;
-        }
-        if (!empty($hide_accordion)) {
-            $hide_outer_accordion = true;
-            $hide_inner_accordion = true;
-        }
 
         // check atts
         $this->atts['format'] = (in_array($this->atts['format'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
@@ -367,10 +357,12 @@ class Shortcode
                 $start = true;
                 foreach ($aTypes as $type => $aLectures) {
                     foreach ($aLectures as $title => $aDetails) {
-                        $aDegree[$degree][$type][$title]['do_outer_accordion'] = !$hide_outer_accordion;
+                        $aDegree[$degree][$type][$title]['show_outer_title'] = (empty($hide_degree) ? true : !$hide_degree);
+                        $aDegree[$degree][$type][$title]['do_outer_accordion'] = !$this->atts['hide_outer_accordion'];
                         $aDegree[$degree][$type][$title]['outer_title'] = ($start ? $degree : false);
                         $aDegree[$degree][$type][$title]['outer_start'] = ($aDegree[$degree][$type][$title]['outer_title'] ? true : false);
                         $aDegree[$degree][$type][$title]['outer_end'] = false;
+                        $aDegree[$degree][$type][$title]['hstart_outer'] = $this->atts['hstart_outer'];
                     }
                     $start = false;
                 }
@@ -388,15 +380,15 @@ class Shortcode
             foreach ($aData as $type => $aEntries) {
                 $i = 1;
                 foreach ($aEntries as $title => $aDetails) {
-                    $aDegree[$degree][$type][$title]['do_accordion'] = !($hide_outer_accordion && $hide_inner_accordion);
-                    $aDegree[$degree][$type][$title]['do_inner_accordion'] = !$hide_inner_accordion;
+                    $aDegree[$degree][$type][$title]['do_accordion'] = !($this->atts['hide_outer_accordion'] && $this->atts['hide_inner_accordion']);
+                    $aDegree[$degree][$type][$title]['do_inner_accordion'] = !$this->atts['hide_inner_accordion'];
                     $aDegree[$degree][$type][$title]['first'] = $first;
                     $aDegree[$degree][$type][$title]['last'] = false;
                     $aDegree[$degree][$type][$title]['inner_title'] = ($i == 1 ? $type : false);
                     $aDegree[$degree][$type][$title]['inner_start'] = ($aDegree[$degree][$type][$title]['inner_title'] ? true : false);
                     $aDegree[$degree][$type][$title]['inner_end'] = ($i == count($aEntries) ? true : false);
                     $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
-
+                    $aDegree[$degree][$type][$title]['hstart_inner'] = $this->atts['hstart_inner'];
                     $i++;
                     $first = false;
                     $iCnt++;
@@ -440,6 +432,22 @@ class Shortcode
             $atts[$key] = sanitize_text_field($val);
         }
 
+        // dynamically generate hide vars
+        $atts['hide_accordion'] = false;
+        $atts['hide_outer_accordion'] = false;
+        $atts['hide_inner_accordion'] = false;
+        $aHide = explode(',', str_replace(' ', '', $atts['hide']));
+        foreach ($aHide as $val) {
+            $atts['hide_' . $val] = true;
+        }
+        if ($atts['hide_accordion']) {
+            $atts['hide_outer_accordion'] = true;
+            $atts['hide_inner_accordion'] = true;
+        }
+        if ($atts['hide_outer_accordion'] && $atts['hide_inner_accordion']){
+            $atts['hide_accordion'] = true;
+        }
+
         // fauorgnr
         if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
             $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
@@ -472,15 +480,21 @@ class Shortcode
         }
 
         // hstart
-        if (!empty($atts['hstart'])) {
-            $atts['hstart'] = intval($atts['hstart']);
-        } else {
-            $atts['hstart'] = 2;
-        }
-        if (($atts['hstart'] < 1) || ($atts['hstart'] > 6)) {
-            $atts['hstart'] = 2;
+        $hstart = (empty($atts['hstart']) ? 2 : intval($atts['hstart']));
+
+        if ($atts['hide_outer_accordion']) {
+            $atts['hstart_outer'] = $hstart;
+            if (($atts['hstart_outer'] < 1) || ($atts['hstart_outer'] > 6)) {
+                $atts['hstart_outer'] = 2;
+            }
         }
 
+        if ($atts['hide_inner_accordion']) {
+            $atts['hstart_inner'] = ($atts['hide_outer_accordion'] ? $hstart + 1 : $hstart);
+            if (($atts['hstart_inner'] < 1) || ($atts['hstart_inner'] > 6)) {
+                $atts['hstart_inner'] = ($atts['hide_outer_accordion'] ? 2 : 3);
+            }
+        }
 
         return $atts;
     }
