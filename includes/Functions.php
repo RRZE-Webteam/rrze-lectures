@@ -58,6 +58,11 @@ class Functions
         }
     }
 
+    public static function isLastElement(array $aArr)
+    {
+      return next($aArr) !== false ?: key($aArr) !== null;
+    }
+
     public static function makeLQ($aIn)
     {
         $aLQ = [];

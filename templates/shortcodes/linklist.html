@@ -1,41 +1,51 @@
-{{do_accordion}}
-    {{collapsibles_start}}
-        <div class="rrze-lectures">
-        [collapsibles]
-    {{/collapsibles_start}}
-    {{collapse_start}}
-        [collapse title="{{=collapse_title}}" color="{{=color}}"]
-        <ul>
-    {{/collapse_start}}
-{{:do_accordion}}
-    {{first}}
-        <div class="rrze-lectures">
-    {{/first}}
-    {{type}}
-        <h{{=hstart}}>{{=type}}</h{{=hstart}}>
-    {{/type}}
-    {{ul_start}}
-        <ul>
-    {{/ul_start}}
-{{/do_accordion}}
+{{first}}
+    <div class="rrze-lectures">
+        {{do_accordion}}
+            [collapsibles hstart="{{=hstart}}"]
+        {{/do_accordion}}
+{{/first}}
 
-    <li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
+{{do_outer_accordion}}
+    {{outer_title}}
+        [collapse title="{{=outer_title}}" id="{{=outer_title}}_{{=identifier}}"]
+            <ul>
+    {{/outer_title}}
+{{/do_outer_accordion}}
 
-{{do_accordion}}
-    {{collapse_end}}
+{{do_inner_accordion}}
+    {{inner_title}}
+        {{do_outer_accordion}}
+            [accordion-item title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
+        {{:do_outer_accordion}}
+            [collapse title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
+            <ul>
+        {{/do_outer_accordion}}        
+    {{/inner_title}}
+{{/do_inner_accordion}}
+
+<li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
+
+{{do_inner_accordion}}
+    {{inner_end}}
+        {{do_outer_accordion}}
+            [/accordion-item]
+        {{:do_outer_accordion}}
             </ul>
-        [/collapse]
-    {{/collapse_end}}
-    {{collapsibles_end}}
-        [/collapsibles]
-        </div>
-    {{/collapsibles_end}}
-{{:do_accordion}}
-    {{ul_end}}
+            [/collapse]
+        {{/do_outer_accordion}}        
+    {{/inner_end}}
+{{/do_inner_accordion}}
+
+{{do_outer_accordion}}
+    {{outer_end}}
         </ul>
-    {{/ul_end}}
-    {{last}}
-            </ul>
-        </div>
-    {{/last}}
-{{/do_accordion}}
+        [/collapse]
+    {{/outer_end}}
+{{/do_outer_accordion}}
+
+{{last}}
+    {{do_accordion}}
+        [/collapsibles]
+    {{/do_accordion}}
+    </div>
+{{/last}}

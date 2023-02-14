@@ -111,9 +111,15 @@ class Shortcode
         }
 
         // dynamically generate hide vars
+        $hide_outer_accordion = false;
+        $hide_inner_accordion = false;
         $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
         foreach ($aHide as $val) {
             ${'hide_' . $val} = 1;
+        }
+        if (!empty($hide_accordion)) {
+            $hide_outer_accordion = true;
+            $hide_inner_accordion = true;
         }
 
         // check atts
@@ -319,22 +325,22 @@ class Shortcode
         // exit;
 
         // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
-        if (!empty($this->atts['degree'])){
+        if (!empty($this->atts['degree'])) {
             // group by degree
             $aGivenDegrees = array_map('trim', explode(',', $this->atts['degree']));
 
             $aTmp = [];
 
             foreach ($aData as $type => $aVal) {
-                foreach($aVal as $title => $aLectures){
+                foreach ($aVal as $title => $aLectures) {
                     foreach ($aLectures['providerValues']['module'] as $mNr => $aModules) {
                         foreach ($aModules['module_cos'] as $cNr => $aDetails) {
-                            if (in_array($aDetails['subject'], $aGivenDegrees)){
+                            if (in_array($aDetails['subject'], $aGivenDegrees)) {
                                 $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
                             }
                         }
                     }
-    
+
                 }
             }
             $aDegree = $aTmp;
@@ -364,91 +370,57 @@ class Shortcode
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
         $aTmp = [];
-        $start = true;
-        $iCnt = 1;
 
         if (empty($aData)) {
             return $this->atts['nodata'];
         }
 
-        if (!empty($this->atts['degree'])){
+        if (!empty($this->atts['degree'])) {
             if (empty($aDegree)) {
                 return $this->atts['nodata'];
             }
 
-            foreach ($aDegree as $degree => $aEntries) {
-                $i = 1;
-    
-
-                // 2DO: set template-instructions in different array as keys lead to errors
-                foreach ($aEntries as $type => $data) {
-                    if (empty($hide_accordion_degree)) {
-                        $data['accordion_title'] = ($i == 1 ? $degree : false);
-                        $data['accordion_start'] = ($data['accordion_title'] ? true : false);
-                        $data['accordion_end'] = ($i == count($aEntries) ? true : false);
-                        $aDegree[$degree][$type] = $data;
-                        // $data['color'] = $this->atts['color'];
-                    // } else {
-                    //     $data['type'] = (empty($hide_type) && ($i == 1) ? $title : false);
-                    //     $data['first'] = $start;
-                    //     $data['last'] = ($iCnt == $iAllEntries ? true : false);
-                    //     $data['ul_start'] = ($data['type'] || $data['first'] ? true : false);
-                    //     $data['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $data['last'] ? true : false);
-                    //     $data['hstart'] = $this->atts['hstart'];
+            foreach ($aDegree as $degree => $aTypes) {
+                $start = true;
+                foreach ($aTypes as $type => $aLectures) {
+                    foreach ($aLectures as $title => $aDetails) {
+                        $aDegree[$degree][$type][$title]['do_outer_accordion'] = !$hide_outer_accordion;
+                        $aDegree[$degree][$type][$title]['outer_title'] = ($start ? $degree : false);
+                        $aDegree[$degree][$type][$title]['outer_start'] = ($aDegree[$degree][$type][$title]['outer_title'] ? true : false);
+                        $aDegree[$degree][$type][$title]['outer_end'] = false;
                     }
-    
-                    // $aTmp[] = $data;
-                    $i++;
                     $start = false;
-                    $iCnt++;
                 }
+                $aDegree[$degree][$type][$title]['outer_end'] = true;
             }
-            // $aDegree = $aTmp;
-            // unset($aTmp); // free memory
-    
-        }else{
+        } else {
             $aDegree = [];
             $aDegree[] = $aData;
         }
 
-        // echo '<pre>';
-        // var_dump($aDegree);
-        // exit;
+        $iCnt = 0;
+        $first = true;
 
-
-
-        foreach($aDegree as $degree => $aData){
+        foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 $i = 1;
                 foreach ($aEntries as $title => $aDetails) {
-                    if (empty($hide_accordion)) {
-                        $aDetails['do_accordion'] = true;
-                        $aDetails['collapsibles_start'] = $start;
-                        $aDetails['collapse_title'] = ($i == 1 ? $type : false);
-                        $aDetails['collapsibles_end'] = ($iCnt == $iAllEntries ? true : false);
-                        $aDetails['collapse_start'] = ($aDetails['collapse_title'] ? true : false);
-                        $aDetails['collapse_end'] = ($i == count($aEntries) ? true : false);
-                        $aDetails['color'] = $this->atts['color'];
-                        $aDegree[$degree][$type][$title] = $aDetails;
-                    // } else {
-                    //     $aDegree[$degree][$type][$title]['type'] = (empty($hide_type) && ($i == 1) ? $type : false);
-                    //     $aDegree[$degree][$type][$title]['first'] = $start;
-                    //     $aDegree[$degree][$type][$title]['last'] = ($iCnt == $iAllEntries ? true : false);
-                    //     $aDegree[$degree][$type][$title]['ul_start'] = ($aDegree[$degree][$type][$title]['type'] || $aDegree[$degree][$type][$title]['first'] ? true : false);
-                    //     $aDegree[$degree][$type][$title]['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $aDegree[$degree][$type][$title]['last'] ? true : false);
-                    //     $aDegree[$degree][$type][$title]['hstart'] = $this->atts['hstart'];
-                    }
+                    $aDegree[$degree][$type][$title]['do_accordion'] = !$hide_outer_accordion && !$hide_inner_accordion;
+                    $aDegree[$degree][$type][$title]['do_inner_accordion'] = !$hide_inner_accordion;
+                    $aDegree[$degree][$type][$title]['first'] = $first;
+                    $aDegree[$degree][$type][$title]['last'] = false;
+                    $aDegree[$degree][$type][$title]['inner_title'] = ($i == 1 ? $type : false);
+                    $aDegree[$degree][$type][$title]['inner_start'] = ($aDegree[$degree][$type][$title]['inner_title'] ? true : false);
+                    $aDegree[$degree][$type][$title]['inner_end'] = ($i == count($aEntries) ? true : false);
+                    $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
 
-                    // $aTmp[] = $data;
                     $i++;
-                    $start = false;
+                    $first = false;
                     $iCnt++;
                 }
             }
-            // $aData = $aTmp;
-            // $aDegree[$nr] = $aTmp;
-            // unset($aTmp); // free memory
         }
+        $aDegree[$degree][$type][$title]['last'] = true;
 
         // echo '<pre>';
         // var_dump($aDegree);
@@ -457,9 +429,17 @@ class Shortcode
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
-        foreach($aDegree as $nr => $aData){
-            foreach ($aData as $data) {
-                $content .= Template::getContent($template, $data);
+        foreach ($aDegree as $degree => $aData) {
+            foreach ($aData as $type => $aEntries) {
+                foreach ($aEntries as $title => $aDetails) {
+
+                // echo '<pre>';
+                // var_dump($aDetails);
+                // exit;
+
+
+                $content .= Template::getContent($template, $aDetails);
+                }
             }
         }
         unset($aDegree); // free memory
@@ -484,7 +464,7 @@ class Shortcode
     private function normalize($atts)
     {
         // sanatize all fields
-        foreach($atts as $key => $val){
+        foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
         }
 
