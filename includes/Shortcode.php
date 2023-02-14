@@ -446,6 +446,9 @@ class Shortcode
 
         Functions::console_log('Template parsed', $tsStart);
 
+        // echo $content;
+        // exit;
+
         if (empty($hide_accordion)) {
             $content = do_shortcode($content);
         }

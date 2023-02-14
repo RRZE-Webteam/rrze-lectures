@@ -4,45 +4,43 @@
             [collapsibles hstart="{{=hstart}}"]
         {{/do_accordion}}
 {{/first}}
-
 {{do_outer_accordion}}
     {{outer_title}}
         [collapse title="{{=outer_title}}" id="{{=outer_title}}_{{=identifier}}"]
-            <ul>
     {{/outer_title}}
 {{/do_outer_accordion}}
-
 {{do_inner_accordion}}
     {{inner_title}}
         {{do_outer_accordion}}
+            {{outer_start}}
+                [accordion]
+            {{/outer_start}}
             [accordion-item title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
         {{:do_outer_accordion}}
             [collapse title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
-            <ul>
         {{/do_outer_accordion}}        
     {{/inner_title}}
 {{/do_inner_accordion}}
 
-<li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
+<a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a><br>
 
 {{do_inner_accordion}}
     {{inner_end}}
         {{do_outer_accordion}}
             [/accordion-item]
+            {{outer_end}}
+                [/accordion]
+            {{/outer_end}}
         {{:do_outer_accordion}}
-            </ul>
             [/collapse]
         {{/do_outer_accordion}}        
     {{/inner_end}}
 {{/do_inner_accordion}}
-
 {{do_outer_accordion}}
     {{outer_end}}
-        </ul>
         [/collapse]
     {{/outer_end}}
 {{/do_outer_accordion}}
-
 {{last}}
     {{do_accordion}}
         [/collapsibles]
