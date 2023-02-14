@@ -481,6 +481,8 @@ class Shortcode
 
         // hstart
         $hstart = (empty($atts['hstart']) ? 2 : intval($atts['hstart']));
+        $atts['hstart_outer'] = 0;
+        $atts['hstart_inner'] = 0;
 
         if ($atts['hide_outer_accordion']) {
             $atts['hstart_outer'] = $hstart;
