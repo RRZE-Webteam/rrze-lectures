@@ -21,9 +21,15 @@
         {{/do_outer_accordion}}        
     {{/inner_title}}
 {{/do_inner_accordion}}
+{{inner_start}}
+    <ul>
+{{/inner_start}}
 
-<a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a><br>
+<li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a>
 
+{{inner_end}}
+    </ul>
+{{/inner_end}}    
 {{do_inner_accordion}}
     {{inner_end}}
         {{do_outer_accordion}}
