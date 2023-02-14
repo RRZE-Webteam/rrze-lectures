@@ -8,6 +8,10 @@
     {{outer_title}}
         [collapse title="{{=outer_title}}" id="{{=outer_title}}_{{=identifier}}"]
     {{/outer_title}}
+{{:do_outer_accordion}}
+    {{outer_title}}
+        <H3>{{=outer_title}}</H3>
+    {{/outer_title}}
 {{/do_outer_accordion}}
 {{do_inner_accordion}}
     {{inner_title}}
@@ -19,6 +23,10 @@
         {{:do_outer_accordion}}
             [collapse title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
         {{/do_outer_accordion}}        
+    {{/inner_title}}
+{{:do_inner_accordion}}
+    {{inner_title}}
+        <H4>{{=inner_title}}</H3>
     {{/inner_title}}
 {{/do_inner_accordion}}
 {{inner_start}}

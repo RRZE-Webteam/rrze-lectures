@@ -185,7 +185,6 @@ class Shortcode
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
-        // $iAllEntries = 0;
 
         if (empty($data)) {
             $page = 1;
@@ -196,10 +195,7 @@ class Shortcode
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
-
                 $data = $response['content']['data'];
-
-                // $iAllEntries += $response['content']['pagination']['count'];
 
                 if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
@@ -319,11 +315,6 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-
-        // echo '<pre>';
-        // var_dump($aData);
-        // exit;
-
         // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
         if (!empty($this->atts['degree'])) {
             // group by degree
@@ -357,15 +348,7 @@ class Shortcode
             unset($aTmp);
         }
 
-        // echo '<pre>';
-        // var_dump($aDegree);
-        // exit;
-
-
         Functions::console_log('Sort completed', $tsStart);
-
-        // echo $this->atts['format'];
-        // exit;
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
@@ -405,7 +388,7 @@ class Shortcode
             foreach ($aData as $type => $aEntries) {
                 $i = 1;
                 foreach ($aEntries as $title => $aDetails) {
-                    $aDegree[$degree][$type][$title]['do_accordion'] = !$hide_outer_accordion && !$hide_inner_accordion;
+                    $aDegree[$degree][$type][$title]['do_accordion'] = !($hide_outer_accordion && $hide_inner_accordion);
                     $aDegree[$degree][$type][$title]['do_inner_accordion'] = !$hide_inner_accordion;
                     $aDegree[$degree][$type][$title]['first'] = $first;
                     $aDegree[$degree][$type][$title]['last'] = false;
@@ -422,32 +405,18 @@ class Shortcode
         }
         $aDegree[$degree][$type][$title]['last'] = true;
 
-        // echo '<pre>';
-        // var_dump($aDegree);
-        // exit;
-
-
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
-
-                // echo '<pre>';
-                // var_dump($aDetails);
-                // exit;
-
-
-                $content .= Template::getContent($template, $aDetails);
+                    $content .= Template::getContent($template, $aDetails);
                 }
             }
         }
         unset($aDegree); // free memory
 
         Functions::console_log('Template parsed', $tsStart);
-
-        // echo $content;
-        // exit;
 
         if (empty($hide_accordion)) {
             $content = do_shortcode($content);
