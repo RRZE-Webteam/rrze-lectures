@@ -32,8 +32,8 @@ Parameter:
 |**sem**|nein|Kürzel SoSe bzw WiSe und 4-stellige Jahreszahl|das aktuelle Semester wird verwendet|sem="WiSe2024" oder sem="SoSe2023"|
 |**guest**|nein|Für Gaststudium geeignet = 1 / nicht geeignet = 0|alle werden ausgegeben|guest="1"|
 |**max**|nein|Maximale Anzahl an Lehrveranstaltungen.||max="5"|
-|**hide**|nein|Die Anzeige von Teilen der Ausgabe können hiermit unterbunden werden. Derzeit: accordion, type||hide="accordion" oder hide="accordion, type"|
-|**hstart**|nein|wird accordion unterdrückt, type jedoch nicht, wird dieser Wert für die Hierarchie-Ebene der Überschrift genutzt|2 => <H2> |hstart="3"|
+|**hide**|nein|Die Anzeige von Teilen der Ausgabe können hiermit unterbunden werden. Derzeit: accordion, inner_accordion, outer_accordion, type||hide="accordion" oder hide="accordion, type" oder hide="inner_accordion"|
+|**hstart**|nein|Dieser Wert wird als Ausgangswert für die Hierachie-Ebene der Überschriften in Abhängigkeit von hide (accordion, inner_accordion, outer_accordion) genutzt|2|hstart="3"|
 |**color**|nein|med oder phil oder tf oder nat oder rw oder fau|fau|color="med"|
 |**nodata**|nein|Eine beliebige Zeichenkette|Der in den Settings vorgegebene Eintrag. Siehe /wp-admin/options-general.php?page=rrze-lectures |nodata="Es wurden keine Lehrveranstaltungen gefunden."|
 
