@@ -855,7 +855,7 @@ class Settings
         <br><br>
         <div class="wrap">
             <h3>
-                <?php echo __('Search for FAU Org Nr', 'rrze-lectures'); ?>
+                <?php echo __('Search for FAU Org Number', 'rrze-lectures'); ?>
             </h3>
             <form method="post" id="search-univis">
                 <table class="form-table" role="presentation" class="striped">

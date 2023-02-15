@@ -174,7 +174,7 @@ class Functions
         if (!is_array($aIn)) {
             return $aIn;
         }
-        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>FAU Org Nr</strong></td></td><td><strong>Name</strong></td></tr></thead>';
+        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . __('FAU Org Number', 'rrze-lectures') . '</strong></td></td><td><strong>' . __('Name of organization', 'rrze-lectures') . '</strong></td></tr></thead>';
 
         foreach ($aIn as $ID => $val) {
             $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
