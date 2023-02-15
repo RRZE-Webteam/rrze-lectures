@@ -19,8 +19,6 @@ class Shortcode
      */
     protected $pluginFile;
     protected $options;
-    protected $show = [];
-    protected $hide = [];
     protected $atts;
     protected $oDIP;
     private $settings = '';
@@ -256,8 +254,7 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-
-        if (!empty($hide_accordion) && !empty($hide_type) && empty($this->atts['type'])) {
+        if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type']) && empty($this->atts['type'])) {
             // combine all entries and sort them
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
@@ -354,7 +351,7 @@ class Shortcode
                 $start = true;
                 foreach ($aTypes as $type => $aLectures) {
                     foreach ($aLectures as $title => $aDetails) {
-                        $aDegree[$degree][$type][$title]['show_outer_title'] = (empty($hide_degree) && $start ? true : false);
+                        $aDegree[$degree][$type][$title]['show_outer_title'] = (empty($this->atts['hide_degree']) && $start ? true : false);
                         $aDegree[$degree][$type][$title]['do_outer_accordion'] = !$this->atts['hide_outer_accordion'];
                         $aDegree[$degree][$type][$title]['outer_title'] = ($start ? $degree : false);
                         $aDegree[$degree][$type][$title]['outer_start'] = ($aDegree[$degree][$type][$title]['outer_title'] ? true : false);
@@ -413,7 +410,7 @@ class Shortcode
 
         Functions::console_log('Template parsed', $tsStart);
 
-        if (empty($hide_accordion)) {
+        if (empty($this->atts['hide_accordion'])) {
             $content = do_shortcode($content);
         }
 
