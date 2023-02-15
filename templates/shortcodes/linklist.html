@@ -4,61 +4,61 @@
             [collapsibles hstart="{{=hstart}}"]
         {{/do_accordion}}
 {{/first}}
-{{do_outer_accordion}}
-    {{outer_title}}
-        [collapse title="{{=outer_title}}" id="{{=outer_title}}_{{=identifier}}"]
-    {{/outer_title}}
-{{:do_outer_accordion}}
-    {{outer_title}}
-        {{show_outer_title}}
-            <H{{=hstart_outer}}>{{=outer_title}}</H{{=hstart_outer}}>
-        {{:show_outer_title}}
+{{do_degree_accordion}}
+    {{degree_title}}
+        [collapse title="{{=degree_title}}" id="{{=degree_title}}_{{=identifier}}"]
+    {{/degree_title}}
+{{:do_degree_accordion}}
+    {{degree_title}}
+        {{show_degree_title}}
+            <H{{=degree_hstart}}>{{=degree_title}}</H{{=degree_hstart}}>
+        {{:show_degree_title}}
             <br>&nbsp;<br>
-        {{/show_outer_title}}
-    {{/outer_title}}
-{{/do_outer_accordion}}
-{{do_inner_accordion}}
-    {{inner_title}}
-        {{do_outer_accordion}}
-            {{outer_start}}
+        {{/show_degree_title}}
+    {{/degree_title}}
+{{/do_degree_accordion}}
+{{do_type_accordion}}
+    {{type_title}}
+        {{do_degree_accordion}}
+            {{degree_start}}
                 [accordion]
-            {{/outer_start}}
-            [accordion-item title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
-        {{:do_outer_accordion}}
-            [collapse title="{{=inner_title}}" id="{{=inner_title}}_{{=identifier}}"]
-        {{/do_outer_accordion}}        
-    {{/inner_title}}
-{{:do_inner_accordion}}
-    {{inner_title}}
-        <H{{=hstart_inner}}>{{=inner_title}}</H{{=hstart_inner}}>
-    {{/inner_title}}
-{{/do_inner_accordion}}
-{{inner_start}}
+            {{/degree_start}}
+            [accordion-item title="{{=type_title}}" id="{{=type_title}}_{{=identifier}}"]
+        {{:do_degree_accordion}}
+            [collapse title="{{=type_title}}" id="{{=type_title}}_{{=identifier}}"]
+        {{/do_degree_accordion}}        
+    {{/type_title}}
+{{:do_type_accordion}}
+    {{type_title}}
+        <H{{=type_hstart}}>{{=type_title}}</H{{=type_hstart}}>
+    {{/type_title}}
+{{/do_type_accordion}}
+{{type_start}}
     <ul>
-{{/inner_start}}
+{{/type_start}}
 
 <li><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
 
-{{inner_end}}
+{{type_end}}
     </ul>
-{{/inner_end}}    
-{{do_inner_accordion}}
-    {{inner_end}}
-        {{do_outer_accordion}}
+{{/type_end}}    
+{{do_type_accordion}}
+    {{type_end}}
+        {{do_degree_accordion}}
             [/accordion-item]
-            {{outer_end}}
+            {{degree_end}}
                 [/accordion]
-            {{/outer_end}}
-        {{:do_outer_accordion}}
+            {{/degree_end}}
+        {{:do_degree_accordion}}
             [/collapse]
-        {{/do_outer_accordion}}        
-    {{/inner_end}}
-{{/do_inner_accordion}}
-{{do_outer_accordion}}
-    {{outer_end}}
+        {{/do_degree_accordion}}        
+    {{/type_end}}
+{{/do_type_accordion}}
+{{do_degree_accordion}}
+    {{degree_end}}
         [/collapse]
-    {{/outer_end}}
-{{/do_outer_accordion}}
+    {{/degree_end}}
+{{/do_degree_accordion}}
 {{last}}
     {{do_accordion}}
         [/collapsibles]

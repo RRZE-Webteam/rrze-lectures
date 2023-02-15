@@ -254,7 +254,7 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-        if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type']) && empty($this->atts['type'])) {
+        if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
             // combine all entries and sort them
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
@@ -351,16 +351,16 @@ class Shortcode
                 $start = true;
                 foreach ($aTypes as $type => $aLectures) {
                     foreach ($aLectures as $title => $aDetails) {
-                        $aDegree[$degree][$type][$title]['show_outer_title'] = (empty($this->atts['hide_degree']) && $start ? true : false);
-                        $aDegree[$degree][$type][$title]['do_outer_accordion'] = !$this->atts['hide_outer_accordion'];
-                        $aDegree[$degree][$type][$title]['outer_title'] = ($start ? $degree : false);
-                        $aDegree[$degree][$type][$title]['outer_start'] = ($aDegree[$degree][$type][$title]['outer_title'] ? true : false);
-                        $aDegree[$degree][$type][$title]['outer_end'] = false;
-                        $aDegree[$degree][$type][$title]['hstart_outer'] = $this->atts['hstart_outer'];
+                        $aDegree[$degree][$type][$title]['show_degree_title'] = (empty($this->atts['hide_degree']) && $start ? true : false);
+                        $aDegree[$degree][$type][$title]['do_degree_accordion'] = !$this->atts['hide_degree_accordion'];
+                        $aDegree[$degree][$type][$title]['degree_title'] = ($start ? $degree : false);
+                        $aDegree[$degree][$type][$title]['degree_start'] = ($aDegree[$degree][$type][$title]['degree_title'] ? true : false);
+                        $aDegree[$degree][$type][$title]['degree_end'] = false;
+                        $aDegree[$degree][$type][$title]['degree_hstart'] = $this->atts['degree_hstart'];
                         $start = false;
                     }
                 }
-                $aDegree[$degree][$type][$title]['outer_end'] = true;
+                $aDegree[$degree][$type][$title]['degree_end'] = true;
             }
         } else {
             $aDegree = [];
@@ -374,15 +374,15 @@ class Shortcode
             foreach ($aData as $type => $aEntries) {
                 $i = 1;
                 foreach ($aEntries as $title => $aDetails) {
-                    $aDegree[$degree][$type][$title]['do_accordion'] = !($this->atts['hide_outer_accordion'] && $this->atts['hide_inner_accordion']);
-                    $aDegree[$degree][$type][$title]['do_inner_accordion'] = !$this->atts['hide_inner_accordion'];
+                    $aDegree[$degree][$type][$title]['do_accordion'] = !($this->atts['hide_degree_accordion'] && $this->atts['hide_type_accordion']);
+                    $aDegree[$degree][$type][$title]['do_type_accordion'] = !$this->atts['hide_type_accordion'];
                     $aDegree[$degree][$type][$title]['first'] = $first;
                     $aDegree[$degree][$type][$title]['last'] = false;
-                    $aDegree[$degree][$type][$title]['inner_title'] = ($i == 1 ? $type : false);
-                    $aDegree[$degree][$type][$title]['inner_start'] = ($aDegree[$degree][$type][$title]['inner_title'] ? true : false);
-                    $aDegree[$degree][$type][$title]['inner_end'] = ($i == count($aEntries) ? true : false);
+                    $aDegree[$degree][$type][$title]['type_title'] = ($i == 1 ? $type : false);
+                    $aDegree[$degree][$type][$title]['type_start'] = ($aDegree[$degree][$type][$title]['type_title'] ? true : false);
+                    $aDegree[$degree][$type][$title]['type_end'] = ($i == count($aEntries) ? true : false);
                     $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
-                    $aDegree[$degree][$type][$title]['hstart_inner'] = $this->atts['hstart_inner'];
+                    $aDegree[$degree][$type][$title]['type_hstart'] = $this->atts['type_hstart'];
                     $i++;
                     $first = false;
                     $iCnt++;
@@ -390,11 +390,6 @@ class Shortcode
             }
         }
         $aDegree[$degree][$type][$title]['last'] = true;
-
-        // echo '<pre>';
-        // var_dump($aDegree);
-        // exit;
-
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
@@ -434,17 +429,17 @@ class Shortcode
 
         // dynamically generate hide vars
         $atts['hide_accordion'] = false;
-        $atts['hide_outer_accordion'] = false;
-        $atts['hide_inner_accordion'] = false;
+        $atts['hide_degree_accordion'] = false;
+        $atts['hide_type_accordion'] = false;
         $aHide = explode(',', str_replace(' ', '', $atts['hide']));
         foreach ($aHide as $val) {
             $atts['hide_' . $val] = true;
         }
         if ($atts['hide_accordion']) {
-            $atts['hide_outer_accordion'] = true;
-            $atts['hide_inner_accordion'] = true;
+            $atts['hide_degree_accordion'] = true;
+            $atts['hide_type_accordion'] = true;
         }
-        if ($atts['hide_outer_accordion'] && $atts['hide_inner_accordion']){
+        if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']){
             $atts['hide_accordion'] = true;
         }
 
@@ -481,20 +476,20 @@ class Shortcode
 
         // hstart
         $hstart = (empty($atts['hstart']) ? 2 : intval($atts['hstart']));
-        $atts['hstart_outer'] = 0;
-        $atts['hstart_inner'] = 0;
+        $atts['degree_hstart'] = 0;
+        $atts['type_hstart'] = 0;
 
-        if ($atts['hide_outer_accordion']) {
-            $atts['hstart_outer'] = $hstart;
-            if (($atts['hstart_outer'] < 1) || ($atts['hstart_outer'] > 6)) {
-                $atts['hstart_outer'] = 2;
+        if ($atts['hide_degree_accordion']) {
+            $atts['degree_hstart'] = $hstart;
+            if (($atts['degree_hstart'] < 1) || ($atts['degree_hstart'] > 6)) {
+                $atts['degree_hstart'] = 2;
             }
         }
 
-        if ($atts['hide_inner_accordion']) {
-            $atts['hstart_inner'] = ($atts['hide_outer_accordion'] ? $hstart + 1 : $hstart);
-            if (($atts['hstart_inner'] < 1) || ($atts['hstart_inner'] > 6)) {
-                $atts['hstart_inner'] = ($atts['hide_outer_accordion'] ? 2 : 3);
+        if ($atts['hide_type_accordion']) {
+            $atts['type_hstart'] = ($atts['hide_degree_accordion'] ? $hstart + 1 : $hstart);
+            if (($atts['type_hstart'] < 1) || ($atts['type_hstart'] > 6)) {
+                $atts['type_hstart'] = ($atts['hide_degree_accordion'] ? 2 : 3);
             }
         }
 
