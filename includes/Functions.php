@@ -176,14 +176,11 @@ class Functions
         }
         $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>FAU Org Nr</strong></td></td><td><strong>Name</strong></td></tr></thead>';
 
-        // echo '<pre>';
-        // var_dump($aIn);
-        // exit;
-
         foreach ($aIn as $ID => $val) {
             $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
         }
         $ret .= '</table>';
+
         return $ret;
     }
 
@@ -208,6 +205,10 @@ class Functions
             return $ret;
         } else {
             $data = $response['content']['data'];
+
+            if (empty($data)){
+                return $ret;
+            }
 
             $ret = [];
 
