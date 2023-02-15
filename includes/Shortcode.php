@@ -19,8 +19,6 @@ class Shortcode
      */
     protected $pluginFile;
     protected $options;
-    protected $show = [];
-    protected $hide = [];
     protected $atts;
     protected $oDIP;
     private $settings = '';
@@ -93,6 +91,7 @@ class Shortcode
                 $atts_default[$k] = $v['default'];
             }
         }
+
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
         // get cache
@@ -110,11 +109,6 @@ class Shortcode
             return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
         }
 
-        // dynamically generate hide vars
-        $aHide = explode(',', str_replace(' ', '', $this->atts['hide']));
-        foreach ($aHide as $val) {
-            ${'hide_' . $val} = 1;
-        }
 
         // check atts
         $this->atts['format'] = (in_array($this->atts['format'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
@@ -166,39 +160,32 @@ class Shortcode
             }
 
             if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree']; // funktioniert nicht - liefert Module, die nicht zu subject passen
+                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
             }
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
-        // echo 'https://api.fau.de/pub/v1/vz/educationEvents/' . $dipParams;
-        // exit;
-
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
-        // $iAllEntries = 0;
 
         if (empty($data)) {
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse($dipParams . $page);
+            $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
             } else {
-
                 $data = $response['content']['data'];
-
-                // $iAllEntries += $response['content']['pagination']['count'];
 
                 if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
-                        $response = $this->oDIP->getResponse($dipParams . $page);
+                        $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
                         $data = array_merge($response['content']['data'], $data);
                         // $iAllEntries += $response['content']['pagination']['count'];
                     }
@@ -206,9 +193,6 @@ class Shortcode
             }
         }
 
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
 
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
@@ -270,8 +254,7 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-
-        if (!empty($hide_accordion) && !empty($hide_type) && empty($this->atts['type'])) {
+        if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
             // combine all entries and sort them
             $aTmp = [];
             foreach ($aData as $group => $aDetails) {
@@ -316,61 +299,113 @@ class Shortcode
             unset($aTmp); // free memory
         }
 
-        Functions::console_log('Sort completed', $tsStart);
+        // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
+        if (!empty($this->atts['degree'])) {
+            // group by degree
+            $aGivenDegrees = array_map('trim', explode(',', $this->atts['degree']));
 
-        // echo $this->atts['format'];
-        // exit;
+            $aTmp = [];
+
+            foreach ($aData as $type => $aVal) {
+                foreach ($aVal as $title => $aLectures) {
+                    foreach ($aLectures['providerValues']['module'] as $mNr => $aModules) {
+                        foreach ($aModules['module_cos'] as $cNr => $aDetails) {
+                            if (in_array($aDetails['subject'], $aGivenDegrees)) {
+                                $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
+                            }
+                        }
+                    }
+
+                }
+            }
+            $aDegree = $aTmp;
+            $aTmp = [];
+
+            // sort by given degrees
+            foreach ($aGivenDegrees as $degree) {
+                if (!empty($aDegree[$degree])) {
+                    $aTmp[$degree] = $aDegree[$degree];
+                }
+            }
+
+            $aDegree = $aTmp;
+            unset($aTmp);
+        }
+
+        Functions::console_log('Sort completed', $tsStart);
 
         $template = 'shortcodes/' . $this->atts['format'] . '.html';
 
         $aTmp = [];
-        $start = true;
-        $iCnt = 1;
 
         if (empty($aData)) {
             return $this->atts['nodata'];
         }
 
-        foreach ($aData as $title => $aEntries) {
-            $i = 1;
+        if (!empty($this->atts['degree'])) {
+            if (empty($aDegree)) {
+                return $this->atts['nodata'];
+            }
 
-            foreach ($aEntries as $tmp => $data) {
-                if (empty($hide_accordion)) {
-                    $data['accordion'] = true;
-                    $data['collapsibles_start'] = $start;
-                    $data['collapse_title'] = ($i == 1 ? $title : false);
-                    $data['collapsibles_end'] = ($iCnt == $iAllEntries ? true : false);
-                    $data['collapse_start'] = ($data['collapse_title'] ? true : false);
-                    $data['collapse_end'] = ($i == count($aEntries) ? true : false);
-                    $data['color'] = $this->atts['color'];
-                } else {
-                    $data['type'] = (empty($hide_type) && ($i == 1) ? $title : false);
-                    $data['first'] = $start;
-                    $data['last'] = ($iCnt == $iAllEntries ? true : false);
-                    $data['ul_start'] = ($data['type'] || $data['first'] ? true : false);
-                    $data['ul_end'] = (empty($hide_type) && ($i == count($aEntries)) || $data['last'] ? true : false);
-                    $data['hstart'] = $this->atts['hstart'];
+            foreach ($aDegree as $degree => $aTypes) {
+                $start = true;
+                foreach ($aTypes as $type => $aLectures) {
+                    foreach ($aLectures as $title => $aDetails) {
+                        $aDegree[$degree][$type][$title]['show_degree_title'] = (empty($this->atts['hide_degree']) && $start ? true : false);
+                        $aDegree[$degree][$type][$title]['do_degree_accordion'] = !$this->atts['hide_degree_accordion'];
+                        $aDegree[$degree][$type][$title]['degree_title'] = ($start ? $degree : false);
+                        $aDegree[$degree][$type][$title]['degree_start'] = ($aDegree[$degree][$type][$title]['degree_title'] ? true : false);
+                        $aDegree[$degree][$type][$title]['degree_end'] = false;
+                        $aDegree[$degree][$type][$title]['degree_hstart'] = $this->atts['degree_hstart'];
+                        $start = false;
+                    }
                 }
+                $aDegree[$degree][$type][$title]['degree_end'] = true;
+            }
+        } else {
+            $aDegree = [];
+            $aDegree[] = $aData;
+        }
 
-                $aTmp[] = $data;
-                $i++;
-                $start = false;
-                $iCnt++;
+        $iCnt = 0;
+        $first = true;
+
+        foreach ($aDegree as $degree => $aData) {
+            foreach ($aData as $type => $aEntries) {
+                $i = 1;
+                foreach ($aEntries as $title => $aDetails) {
+                    $aDegree[$degree][$type][$title]['do_accordion'] = !($this->atts['hide_degree_accordion'] && $this->atts['hide_type_accordion']);
+                    $aDegree[$degree][$type][$title]['do_type_accordion'] = !$this->atts['hide_type_accordion'];
+                    $aDegree[$degree][$type][$title]['first'] = $first;
+                    $aDegree[$degree][$type][$title]['last'] = false;
+                    $aDegree[$degree][$type][$title]['type_title'] = ($i == 1 ? $type : false);
+                    $aDegree[$degree][$type][$title]['type_start'] = ($aDegree[$degree][$type][$title]['type_title'] ? true : false);
+                    $aDegree[$degree][$type][$title]['type_end'] = ($i == count($aEntries) ? true : false);
+                    $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
+                    $aDegree[$degree][$type][$title]['type_hstart'] = $this->atts['type_hstart'];
+                    $i++;
+                    $first = false;
+                    $iCnt++;
+                }
             }
         }
-        $aData = $aTmp;
-        unset($aTmp); // free memory
+        $aDegree[$degree][$type][$title]['last'] = true;
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
-        foreach ($aData as $data) {
-            $content .= Template::getContent($template, $data);
+        foreach ($aDegree as $degree => $aData) {
+            foreach ($aData as $type => $aEntries) {
+                foreach ($aEntries as $title => $aDetails) {
+                    $content .= Template::getContent($template, $aDetails);
+                }
+            }
         }
-        unset($aData); // free memory
+        unset($aDegree); // free memory
+
 
         Functions::console_log('Template parsed', $tsStart);
 
-        if (empty($hide_accordion)) {
+        if (empty($this->atts['hide_accordion'])) {
             $content = do_shortcode($content);
         }
 
@@ -387,6 +422,27 @@ class Shortcode
 
     private function normalize($atts)
     {
+        // sanatize all fields
+        foreach ($atts as $key => $val) {
+            $atts[$key] = sanitize_text_field($val);
+        }
+
+        // dynamically generate hide vars
+        $atts['hide_accordion'] = false;
+        $atts['hide_degree_accordion'] = false;
+        $atts['hide_type_accordion'] = false;
+        $aHide = explode(',', str_replace(' ', '', $atts['hide']));
+        foreach ($aHide as $val) {
+            $atts['hide_' . $val] = true;
+        }
+        if ($atts['hide_accordion']) {
+            $atts['hide_degree_accordion'] = true;
+            $atts['hide_type_accordion'] = true;
+        }
+        if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']){
+            $atts['hide_accordion'] = true;
+        }
+
         // fauorgnr
         if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
             $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
@@ -419,15 +475,23 @@ class Shortcode
         }
 
         // hstart
-        if (!empty($atts['hstart'])) {
-            $atts['hstart'] = intval($atts['hstart']);
-        } else {
-            $atts['hstart'] = 2;
-        }
-        if (($atts['hstart'] < 1) || ($atts['hstart'] > 6)) {
-            $atts['hstart'] = 2;
+        $hstart = (empty($atts['hstart']) ? 2 : intval($atts['hstart']));
+        $atts['degree_hstart'] = 0;
+        $atts['type_hstart'] = 0;
+
+        if ($atts['hide_degree_accordion']) {
+            $atts['degree_hstart'] = $hstart;
+            if (($atts['degree_hstart'] < 1) || ($atts['degree_hstart'] > 6)) {
+                $atts['degree_hstart'] = 2;
+            }
         }
 
+        if ($atts['hide_type_accordion']) {
+            $atts['type_hstart'] = ($atts['hide_degree_accordion'] ? $hstart + 1 : $hstart);
+            if (($atts['type_hstart'] < 1) || ($atts['type_hstart'] > 6)) {
+                $atts['type_hstart'] = ($atts['hide_degree_accordion'] ? 2 : 3);
+            }
+        }
 
         return $atts;
     }

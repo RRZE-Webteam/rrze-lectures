@@ -154,9 +154,9 @@ function getShortcodeSettings()
     return [
         'lectures' => [
             'block' => [
-                'blocktype' => 'rrze-lectures/lecturelectures',
-                'blockname' => 'lecturelectures',
-                'title' => 'RRZE-DIP',
+                'blocktype' => 'rrze-lectures/lectures',
+                'blockname' => 'lectures',
+                'title' => 'RRZE-Lectures',
                 'category' => 'widgets',
                 'icon' => 'bank',
                 'tinymce_icon' => 'paste',

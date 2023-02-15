@@ -20,13 +20,13 @@ class Functions
 
     public function onLoaded()
     {
-        // add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
-        add_action('wp_ajax_GetLectureData', [$this, 'ajaxGetLectureData']);
-        add_action('wp_ajax_nopriv_GetLectureData', [$this, 'ajaxGetLectureData']);
-        add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetLectureDataForBlockelements']);
-        add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetLectureDataForBlockelements']);
-        add_action('wp_ajax_GenerateICS', [$this, 'ajaxGenerateICS']);
-        add_action('wp_ajax_nopriv_GenerateICS', [$this, 'ajaxGenerateICS']);
+        add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
+        add_action('wp_ajax_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
+        add_action('wp_ajax_nopriv_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
+        // add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
+        // add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
+        // add_action('wp_ajax_GenerateICS', [$this, 'ajaxGenerateICS']);
+        // add_action('wp_ajax_nopriv_GenerateICS', [$this, 'ajaxGenerateICS']);
     }
 
     public static function console_log($msg = '', $tsStart = 0)
@@ -58,11 +58,15 @@ class Functions
         }
     }
 
+    public static function isLastElement(array $aArr)
+    {
+      return next($aArr) !== false ?: key($aArr) !== null;
+    }
+
     public static function makeLQ($aIn)
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
-            $attVal = sanitize_text_field($attVal);
             $aTmp = array_map('trim', explode(',', $attVal));
 
             // check if 10 figures hex 
@@ -114,35 +118,6 @@ class Functions
     }
 
 
-    public function ajaxGenerateICS()
-    {
-        check_ajax_referer('lecture-ajax-ics-nonce', 'ics_nonce');
-        $inputs = filter_input(INPUT_GET, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
-        $aProps = json_decode(openssl_decrypt(base64_decode($inputs['v']), 'AES-256-CBC', hash('sha256', AUTH_KEY), 0, substr(hash('sha256', AUTH_SALT), 0, 16)), true);
-
-        $ics = new ICS($aProps);
-        $response = [
-            'icsData' => $ics->toString(),
-            'filename' => sanitize_file_name($aProps['FILENAME'] . '.ics')
-        ];
-
-        wp_send_json($response);
-    }
-
-    public function enqueueScripts()
-    {
-        wp_enqueue_script(
-            'rrze-lectures-ajax-frontend',
-            plugins_url('js/rrze-lectures-frontend.js', plugin_basename($this->pluginFile)),
-            ['jquery'],
-            null
-        );
-
-        wp_localize_script('rrze-lectures-ajax-frontend', 'lecture_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'ics_nonce' => wp_create_nonce('lecture-ajax-ics-nonce'),
-        ]);
-    }
 
     public function adminEnqueueScripts()
     {
@@ -160,18 +135,6 @@ class Functions
     }
 
 
-    public function getTableHTML($aIn)
-    {
-        if (!is_array($aIn)) {
-            return $aIn;
-        }
-        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><b><i>Univ</i>IS</b> ID</td><td><strong>Name</strong></td></tr></thead>';
-        foreach ($aIn as $ID => $val) {
-            $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
-        }
-        $ret .= '</table>';
-        return $ret;
-    }
 
     public static function setDataToCache($data, $aAtts = [])
     {
@@ -206,14 +169,59 @@ class Functions
         update_option(self::TRANSIENT_OPTION, '');
     }
 
+    public function getTableHTML($aIn)
+    {
+        if (!is_array($aIn)) {
+            return $aIn;
+        }
+        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . __('FAU Org Number', 'rrze-lectures') . '</strong></td></td><td><strong>' . __('Name of organization', 'rrze-lectures') . '</strong></td></tr></thead>';
 
-    public function ajaxGetLectureData()
+        foreach ($aIn as $ID => $val) {
+            $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
+        }
+        $ret .= '</table>';
+
+        return $ret;
+    }
+
+    public function ajaxGetFAUOrgNr()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
         $inputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
-        $response = $this->getTableHTML($this->getLectureData(null, $inputs['dataType'], $inputs['keyword']));
+        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']));
         wp_send_json($response);
     }
+
+    public function getFAUOrgNr($keyword = null)
+    {
+        $ret = __('No matching entries found.', 'rrze-lectures');
+
+        $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') .  '&q=' . urlencode(sanitize_text_field($keyword));
+
+        $oDIP = new DIPAPI();
+        $response = $oDIP->getResponse('organizations', $dipParams);
+
+        if (!$response['valid']) {
+            return $ret;
+        } else {
+            $data = $response['content']['data'];
+
+            if (empty($data)){
+                return $ret;
+            }
+
+            $ret = [];
+
+            foreach($data as $aDetails){
+                $ret[$aDetails['disambiguatingDescription']] = $aDetails['name'];
+            }
+
+
+        }
+
+        return $ret;
+    }
+
 
     public function getSelectHTML($aIn)
     {
@@ -228,75 +236,8 @@ class Functions
         return $ret;
     }
 
-    public function getLectureData($lectureOrgID = null, $dataType = '', $keyword = null)
-    {
-        $data = false;
-        $ret = __('No matching entries found.', 'rrze-lectures');
 
-        $options = get_option('rrze-lectures');
-        $data = 0;
-        $DIPURL = (!empty($options['basic_lecture_url']) ? $options['basic_lecture_url'] : 'https://lecture.uni-erlangen.de');
-        $lectureOrgID = (!empty($lectureOrgID) ? $lectureOrgID : (!empty($options['basic_DIPOrgNr']) ? $options['basic_DIPOrgNr'] : 0));
-
-        if ($DIPURL) {
-            $lecture = new DIPAPI($DIPURL, $lectureOrgID, null);
-            $data = $lecture->getData($dataType, $keyword);
-        } elseif (!$DIPURL) {
-            $ret = __('Link to DIP is missing.', 'rrze-lectures');
-        }
-
-        if ($data) {
-            $ret = [];
-            switch ($dataType) {
-                // case 'departmentByName':
-                //     foreach ($data as $entry) {
-                //         if (isset($entry['orgnr'])) {
-                //             $ret[$entry['orgnr']] = $entry['name'];
-                //         }
-                //     }
-                //     break;
-                // case 'personByName':
-                //     foreach ($data as $entry) {
-                //         if (isset($entry['person_id'])) {
-                //             $ret[$entry['person_id']] = $entry['lastname'] . ', ' . $entry['firstname'];
-                //         }
-                //     }
-                //     break;
-                // case 'personAll':
-                //     foreach ($data as $position => $entries) {
-                //         foreach ($entries as $entry) {
-                //             if (isset($entry['person_id'])) {
-                //                 $ret[$entry['person_id']] = $entry['lastname'] . ', ' . $entry['firstname'];
-                //             }
-                //         }
-                //     }
-                //     break;
-                case 'lectureByName':
-                    foreach ($data as $entry) {
-                        if (isset($entry['lecture_id'])) {
-                            $ret[$entry['lecture_id']] = $entry['name'];
-                        }
-                    }
-                    break;
-                case 'lectureByDepartment':
-                    foreach ($data as $type => $entries) {
-                        foreach ($entries as $entry) {
-                            if (isset($entry['lecture_id'])) {
-                                $ret[$entry['lecture_id']] = $entry['name'];
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    $ret = 'unknown dataType';
-                    break;
-            }
-        }
-
-        return $ret;
-    }
-
-    public function ajaxGetLectureDataForBlockelements()
+    public function ajaxGetDIPDataForBlockelements()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
         $inputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
