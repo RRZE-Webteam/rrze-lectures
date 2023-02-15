@@ -169,9 +169,6 @@ class Shortcode
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
-        // echo 'https://api.fau.de/pub/v1/vz/educationEvents/' . $dipParams;
-        // exit;
-
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
@@ -180,7 +177,7 @@ class Shortcode
             $page = 1;
 
             $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse($dipParams . $page);
+            $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -190,7 +187,7 @@ class Shortcode
                 if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
-                        $response = $this->oDIP->getResponse($dipParams . $page);
+                        $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
                         $data = array_merge($response['content']['data'], $data);
                         // $iAllEntries += $response['content']['pagination']['count'];
                     }

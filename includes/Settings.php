@@ -309,16 +309,18 @@ class Settings
         foreach ($this->settingsSections as $section) {
             if ($this->settingsPrefix . $section['id'] != $this->currentTab) {
                 continue;
-            }?>
+            } ?>
             <div id="<?php echo $this->settingsPrefix . $section['id']; ?>">
                 <form method="post" action="options.php">
-                    <?php settings_fields($this->settingsPrefix . $section['id']);?>
-                    <?php do_settings_sections($this->settingsPrefix . $section['id']);?>
-                    <?php submit_button();?>
+                    <?php settings_fields($this->settingsPrefix . $section['id']); ?>
+                    <?php do_settings_sections($this->settingsPrefix . $section['id']); ?>
+                    <?php submit_button(); ?>
                 </form>
             </div>
         <?php
-}
+        }
+
+        $this->getDIPSearchPage();
     }
 
     /**
@@ -845,6 +847,39 @@ class Settings
         $html .= $this->getFieldDescription($args);
 
         echo $html;
+    }
+
+    public function getDIPSearchPage()
+    {
+        ?>
+        <br><br>
+        <div class="wrap">
+            <h3>
+                <?php echo __('Search for FAU Org Nr', 'rrze-lectures'); ?>
+            </h3>
+            <form method="post" id="search-univis">
+                <table class="form-table" role="presentation" class="striped">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <?php echo __('Name of organization', 'rrze-lectures'); ?>
+                            </th>
+                            <td><input type="text" name="keyword" id="keyword" value=""></td>
+                        </tr>
+                        <tr>
+                            <td><input type="button" id="searchFAUOrgNr" class="button button-primary"
+                                    value="<?php echo __('Search', 'rrze-lectures'); ?>"></td>
+                            <td>
+                                <div id="loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div id="dip-search-result"></div>
+
+    <?php
     }
 
 }
