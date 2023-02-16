@@ -38,29 +38,103 @@ class Functions
     }
 
 
-    public static function getSemester(){
+    public static function getSemester($iSem = 0)
+    {
         // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
         // Das Wintersemester entsprechend vom 01.10. des Jahres bis zum 31.03. des folgenden Jahres
         $today = date('Y-m-d');
-        $thisMonth = date('m');
-        $thisYear = date('Y');
+        $curMonth = date('m');
+        $curQuarter = ceil($curMonth / 3);
+        $year = date('Y');
+        $sem = 'SoSe';
+        $ret = '';
+        $iSem = (int) $iSem;
 
-        $soseStart = date('Y-m-d', strtotime($thisYear . '-04-01'));
-        $soseEnd = date('Y-m-d', strtotime($thisYear . '-09-30'));
+        $soseStart = date('Y-m-d', strtotime($year . '-04-01'));
+        $soseEnd = date('Y-m-d', strtotime($year . '-09-30'));
 
-        if (($today >= $soseStart) && ($today <= $soseEnd)){
-            return 'SoSe'. $thisYear;
-        }else{
-            if ($thisMonth <= 3) {
-                $thisYear = date('Y', strtotime('-1 year'));
-            }    
-            return 'WiSe' . $thisYear;
+        if (($today >= $soseStart) && ($today <= $soseEnd)) {
+            $ret = $sem . $year;
+        } else {
+            if ($curQuarter == 1) {
+                $year -= 1;
+            }
+            $sem = 'WiSe';
+            $ret = $sem . $year;
         }
+
+        if ($iSem) {
+            // check if -2, -1, 1 or 2 and casting to int is already done in Shortcode->normalize()
+            $curQuarter = ceil($curMonth / 3);
+
+            switch ($iSem) {
+                case 1:
+                    switch ($curQuarter) {
+                        case 1:
+                            $sem = 'SoSe';
+                            $year += 1;
+                            break;
+                        case 2:
+                        case 3:
+                            $sem = 'WiSe'; // $year does not change
+                            break;
+                        // case 4: // neither $sem nor $year do change
+                    }
+                    break;
+                case 2:
+                    switch ($curQuarter) {
+                        case 1:
+                            $year += 1; // $sem does not change
+                            break;
+                        case 2:
+                        case 3:
+                            $sem = 'WiSe'; // $year does not change
+                            break;
+                        case 4: 
+                            $sem = 'SoSe';
+                            $year += 1;
+
+                            break;
+                    }
+                    break;
+                case -1:
+                    switch ($curQuarter) {
+                        // case 1: // neither $sem nor $year do change
+                        case 2:
+                        case 3:
+                            $sem = 'WiSe';
+                            $year -= 1;
+                            break;
+                        case 4:
+                            $sem = 'SoSe'; // $year does not change
+                            break;
+                    }
+                    break;
+                case -2:
+                    switch ($curQuarter) {
+                        case 1:
+                            $sem = 'SoSe'; // $year does not change
+                            break;
+                        case 2:
+                        case 3:
+                            $sem = 'WiSe';
+                            $year -= 1;
+                            break;
+                        case 4: // $sem does not change
+                            $year -= 1;
+                            break;
+                    }
+                    break;
+            }
+            $ret = $sem . $year;
+        }
+
+        return $ret;
     }
 
     public static function isLastElement(array $aArr)
     {
-      return next($aArr) !== false ?: key($aArr) !== null;
+        return next($aArr) !== false ?: key($aArr) !== null;
     }
 
     public static function makeLQ($aIn)
@@ -196,7 +270,7 @@ class Functions
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
 
-        $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') .  '&q=' . urlencode(sanitize_text_field($keyword));
+        $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') . '&q=' . urlencode(sanitize_text_field($keyword));
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
@@ -206,13 +280,13 @@ class Functions
         } else {
             $data = $response['content']['data'];
 
-            if (empty($data)){
+            if (empty($data)) {
                 return $ret;
             }
 
             $ret = [];
 
-            foreach($data as $aDetails){
+            foreach ($data as $aDetails) {
                 $ret[$aDetails['disambiguatingDescription']] = $aDetails['name'];
             }
 
@@ -257,9 +331,9 @@ class Functions
         ];
 
         if (empty($term['startdate']) || empty($term['enddate'])) {
-            $thisMonth = date('m');
+            $curMonth = date('m');
 
-            if ($thisMonth > 2 && $thisMonth < 8) {
+            if ($curMonth > 2 && $curMonth < 8) {
                 $sem = 'ss';
             } else {
                 $sem = 'ws';
