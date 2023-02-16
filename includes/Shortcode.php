@@ -463,8 +463,15 @@ class Shortcode
                 // wsYYYY ssYYYY WSYYYY SSYYYY
                 $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
             } elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
-                // invalid input
-                $atts['sem'] = Functions::getSemester();
+                $aAllowedSem = ['-2', '-1', '+1', '1', '+2', '2'];
+                if (in_array($atts['sem'], $aAllowedSem)){
+                    $atts['sem'] = (int)$atts['sem'];
+                    $atts['sem'] = Functions::getSemester($atts['sem']);
+
+                }else{
+                    // invalid input
+                    $atts['sem'] = Functions::getSemester();
+                }
             }
         }
 
