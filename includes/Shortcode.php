@@ -390,6 +390,11 @@ class Shortcode
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
+// echo '<pre>';
+// var_dump($aDegree);
+// exit;
+
+
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {

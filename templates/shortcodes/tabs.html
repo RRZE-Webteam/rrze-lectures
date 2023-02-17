@@ -39,12 +39,16 @@
     <ul>
 {{/type_start}}
 
-        <p><em>(Nur zum Debuggen: identifier = {{=identifier}})</em></p>
+        <p><em>(Nur zum Debuggen: identifier = {{=identifier}})<br><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">Link zu Campo</a></em></p>
         <h2><span itemprop="name">{{=name}}</span></h2>
 
 
         [tabs]
         [tab title="Grunddaten"]
+
+        Titel: {{=providerValues.event.title}}
+        Kurztext: {{=providerValues.event.shorttext}}
+
         {{providerValues.event_orgunit}}
         Organisationseinheit:
         <ul>
@@ -59,7 +63,11 @@
 
         <p>Veranstaltungsart: {{=providerValues.event.eventtype}}</p>
         <p>Turnus des Angebots: FEHLT</p>
-        <p>Semesterwochenstunden: FEHLT</p>
+        <p>Semesterwochenstunden: muss aus courses ermittelt werden</p>
+
+        {{providerValues.event.comment}}[alert style="warning"]{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
+
+        
 
 
         [/tab]
