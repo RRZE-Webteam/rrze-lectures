@@ -269,10 +269,10 @@ function getShortcodeSettings()
                         'id' => 'linklist',
                         'val' => 'linklist',
                     ],
-                    // [
-                    //     'id' => 'table',
-                    //     'val' => 'table',
-                    // ],
+                    [
+                        'id' => 'table',
+                        'val' => 'table',
+                    ],
                 ],
             ],
             'color' => [

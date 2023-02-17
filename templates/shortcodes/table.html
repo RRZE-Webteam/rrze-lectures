@@ -1,18 +1,43 @@
-{{accordion}}
-    {{collapsibles_start}}
-        <div class="rrze-lectures">
-        [collapsibles]
-    {{/collapsibles_start}}
-    {{collapse_start}}
-        [collapse title="{{=collapse_title}}" color="{{=color}}"]
+{{first}}
+    <div class="rrze-lectures">
         <div itemscope="" itemtype="https://schema.org/Course">
-    {{/collapse_start}}
-{{:accordion}}
-    {{first}}
-        <div class="rrze-lectures">
-            <div itemscope="" itemtype="https://schema.org/Course">
-    {{/first}}
-{{/accordion}}
+
+        {{do_accordion}}
+            [collapsibles hstart="{{=hstart}}"]
+        {{/do_accordion}}
+{{/first}}
+{{do_degree_accordion}}
+    {{degree_title}}
+        [collapse title="{{=degree_title}}" id="{{=degree_title}}_{{=identifier}}"]
+    {{/degree_title}}
+{{:do_degree_accordion}}
+    {{degree_title}}
+        {{show_degree_title}}
+            <H{{=degree_hstart}}>{{=degree_title}}</H{{=degree_hstart}}>
+        {{:show_degree_title}}
+            <br>&nbsp;<br>
+        {{/show_degree_title}}
+    {{/degree_title}}
+{{/do_degree_accordion}}
+{{do_type_accordion}}
+    {{type_title}}
+        {{do_degree_accordion}}
+            {{degree_start}}
+                [accordion]
+            {{/degree_start}}
+            [accordion-item title="{{=type_title}}" id="{{=type_title}}_{{=identifier}}"]
+        {{:do_degree_accordion}}
+            [collapse title="{{=type_title}}" id="{{=type_title}}_{{=identifier}}"]
+        {{/do_degree_accordion}}        
+    {{/type_title}}
+{{:do_type_accordion}}
+    {{type_title}}
+        <H{{=type_hstart}}>{{=type_title}}</H{{=type_hstart}}>
+    {{/type_title}}
+{{/do_type_accordion}}
+{{type_start}}
+    <ul>
+{{/type_start}}
 
         <p><em>(Nur zum Debuggen: identifier = {{=identifier}})</em></p>
         <h2><span itemprop="name">{{=name}}</span></h2>
@@ -144,19 +169,27 @@
         {{/providerValues.module}}
 
 
-{{accordion}}
-    {{collapse_end}}
-            </div>
-        [/collapse]
-    {{/collapse_end}}
-    {{collapsibles_end}}
-        [/collapsibles]
-        </div>
-    {{/collapsibles_end}}
-{{:accordion}}
-    {{last}}
-            </div>
-        </div>
-    {{/last}}
-{{/accordion}}
 
+        {{do_type_accordion}}
+    {{type_end}}
+        {{do_degree_accordion}}
+            [/accordion-item]
+            {{degree_end}}
+                [/accordion]
+            {{/degree_end}}
+        {{:do_degree_accordion}}
+            [/collapse]
+        {{/do_degree_accordion}}        
+    {{/type_end}}
+{{/do_type_accordion}}
+{{do_degree_accordion}}
+    {{degree_end}}
+        [/collapse]
+    {{/degree_end}}
+{{/do_degree_accordion}}
+{{last}}
+    {{do_accordion}}
+        [/collapsibles]
+    {{/do_accordion}}
+    </div>
+{{/last}}

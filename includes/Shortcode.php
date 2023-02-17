@@ -129,8 +129,6 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        // $attrs = ''; // TEST
-
         $aLQ = [];
 
         if (!empty($this->atts['lecture_name'])) {
@@ -192,7 +190,6 @@ class Shortcode
                 }
             }
         }
-
 
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
@@ -431,16 +428,20 @@ class Shortcode
         $atts['hide_accordion'] = false;
         $atts['hide_degree_accordion'] = false;
         $atts['hide_type_accordion'] = false;
-        $aHide = explode(',', str_replace(' ', '', $atts['hide']));
-        foreach ($aHide as $val) {
-            $atts['hide_' . $val] = true;
-        }
-        if ($atts['hide_accordion']) {
-            $atts['hide_degree_accordion'] = true;
-            $atts['hide_type_accordion'] = true;
-        }
-        if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']){
-            $atts['hide_accordion'] = true;
+
+        if (!empty($atts['hide'])) {
+            $aHide = explode(',', str_replace(' ', '', $atts['hide']));
+
+            foreach ($aHide as $val) {
+                $atts['hide_' . $val] = true;
+            }
+            if ($atts['hide_accordion']) {
+                $atts['hide_degree_accordion'] = true;
+                $atts['hide_type_accordion'] = true;
+            }
+            if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']) {
+                $atts['hide_accordion'] = true;
+            }
         }
 
         // fauorgnr
@@ -464,11 +465,11 @@ class Shortcode
                 $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
             } elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
                 $aAllowedSem = ['-2', '-1', '+1', '1', '+2', '2'];
-                if (in_array($atts['sem'], $aAllowedSem)){
-                    $atts['sem'] = (int)$atts['sem'];
+                if (in_array($atts['sem'], $aAllowedSem)) {
+                    $atts['sem'] = (int) $atts['sem'];
                     $atts['sem'] = Functions::getSemester($atts['sem']);
 
-                }else{
+                } else {
                     // invalid input
                     $atts['sem'] = Functions::getSemester();
                 }
