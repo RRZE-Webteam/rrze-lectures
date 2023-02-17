@@ -43,9 +43,8 @@
         <h2><span itemprop="name">{{=name}}</span></h2>
 
 
-
-        <strong>Campo-Reiter "Grunddaten"</strong>
-
+        [tabs]
+        [tab title="Grunddaten"]
         {{providerValues.event_orgunit}}
         Organisationseinheit:
         <ul>
@@ -63,11 +62,8 @@
         <p>Semesterwochenstunden: FEHLT</p>
 
 
-
-        <strong>Campo-Reiter "Parallelgruppen / Termine"</strong>
-        
-
-
+        [/tab]
+        [tab title="Parallelgruppen / Termine"]
 
         Verantwortliche/-r
         <ul>
@@ -87,7 +83,6 @@
 
 
         <br>&nbsp;<br>
-
 
         {{providerValues.planned_dates}}
         <table>
@@ -128,12 +123,12 @@
         </table>
         {{/providerValues.planned_dates}}
 
-
-        <br>&nbsp;<br>
+        [/tab]
 
         {{providerValues.module}}
-        <strong>Campo-Reiter "Module / Studiengänge"</strong>
-        
+
+        [tab title="Module / Studiengänge"]
+
         <table>
             <tr>
                 <td>Abschluss</td>
@@ -166,7 +161,11 @@
             {{/@_val.module_cos}}
             {{/@providerValues.module}}
         </table>
+
+        [/tab]
+
         {{/providerValues.module}}
+    [/tabs]
 
 
 

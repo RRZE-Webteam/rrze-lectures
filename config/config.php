@@ -270,8 +270,8 @@ function getShortcodeSettings()
                         'val' => 'linklist',
                     ],
                     [
-                        'id' => 'table',
-                        'val' => 'table',
+                        'id' => 'tabs',
+                        'val' => 'tabs',
                     ],
                 ],
             ],

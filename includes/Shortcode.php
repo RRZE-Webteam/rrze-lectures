@@ -117,14 +117,14 @@ class Shortcode
 
         switch ($this->atts['format']) {
             case 'linklist':
-                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
                 if (!empty($this->atts['degree'])) {
                     $attrs .= ';providerValues.module.module_cos.subject';
                 }
                 break;
-            default:
+            case 'tabs':
+                default:
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
                 $attrs = ''; // TEST
         }
@@ -402,7 +402,7 @@ class Shortcode
 
         Functions::console_log('Template parsed', $tsStart);
 
-        if (empty($this->atts['hide_accordion'])) {
+        if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
             $content = do_shortcode($content);
         }
 
