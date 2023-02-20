@@ -105,8 +105,8 @@ class Shortcode
         }
 
         // either lecture_name or fauorgnr or basic_FAUOrgNr (options) must be given - see normalize()
-        if (empty($this->atts['lecture_name']) && empty($this->atts['fauorgnr'])) {
-            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+        if (empty($this->atts['fauorgnr']) && empty($this->atts['lecture_name']) && empty($this->atts['lecturer_idm']) && empty($this->atts['lecturer_identifier'])) {
+            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures');
         }
 
 
@@ -130,36 +130,29 @@ class Shortcode
         }
 
         $aLQ = [];
+        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
-        if (!empty($this->atts['lecture_name'])) {
+        if (!empty($this->atts['lecturer_idm'])) {
+            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
+        }elseif (!empty($this->atts['lecturer_identifier'])) {
+            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+        }elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['name'] = $this->atts['lecture_name'];
-
-            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+        }
 
-            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+        if (!empty($this->atts['type'])) {
+            $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
+        }
 
-            if (!empty($this->atts['lecturer_idm'])) {
-                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-            }
+        if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
+            // we cannot use empty() because it can contain 0
+            $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
+        }
 
-            if (!empty($this->atts['lecturer_identifier'])) {
-                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
-            }
-
-            if (!empty($this->atts['type'])) {
-                $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
-            }
-
-            if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
-                // we cannot use empty() because it can contain 0
-                $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
-            }
-
-            if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
-            }
+        if (!empty($this->atts['degree'])) {
+            $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset

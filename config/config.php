@@ -265,10 +265,10 @@ function getShortcodeSettings()
                         'id' => 'linklist',
                         'val' => 'linklist',
                     ],
-                    [
-                        'id' => 'tabs',
-                        'val' => 'tabs',
-                    ],
+                    // [
+                    //     'id' => 'tabs',
+                    //     'val' => 'tabs',
+                    // ],
                 ],
             ],
             'color' => [
