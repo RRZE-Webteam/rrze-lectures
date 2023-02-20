@@ -105,8 +105,8 @@ class Shortcode
         }
 
         // either lecture_name or fauorgnr or basic_FAUOrgNr (options) must be given - see normalize()
-        if (empty($this->atts['lecture_name']) && empty($this->atts['fauorgnr'])) {
-            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use the shortcode attribute fauorgnr', 'rrze-lectures');
+        if (empty($this->atts['fauorgnr']) && empty($this->atts['lecture_name']) && empty($this->atts['lecturer_idm']) && empty($this->atts['lecturer_identifier'])) {
+            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures');
         }
 
 
@@ -117,51 +117,42 @@ class Shortcode
 
         switch ($this->atts['format']) {
             case 'linklist':
-                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event.eventtype';
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
                 if (!empty($this->atts['degree'])) {
                     $attrs .= ';providerValues.module.module_cos.subject';
                 }
                 break;
-            default:
+            case 'tabs':
+                default:
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
                 $attrs = ''; // TEST
         }
 
-        // $attrs = ''; // TEST
-
         $aLQ = [];
+        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
-        if (!empty($this->atts['lecture_name'])) {
+        if (!empty($this->atts['lecturer_idm'])) {
+            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
+        }elseif (!empty($this->atts['lecturer_identifier'])) {
+            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+        }elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['name'] = $this->atts['lecture_name'];
-
-            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+        }
 
-            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+        if (!empty($this->atts['type'])) {
+            $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
+        }
 
-            if (!empty($this->atts['lecturer_idm'])) {
-                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-            }
+        if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
+            // we cannot use empty() because it can contain 0
+            $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
+        }
 
-            if (!empty($this->atts['lecturer_identifier'])) {
-                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
-            }
-
-            if (!empty($this->atts['type'])) {
-                $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
-            }
-
-            if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
-                // we cannot use empty() because it can contain 0
-                $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
-            }
-
-            if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
-            }
+        if (!empty($this->atts['degree'])) {
+            $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
@@ -193,7 +184,6 @@ class Shortcode
             }
         }
 
-
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
             foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
@@ -205,6 +195,12 @@ class Shortcode
             }
 
         }
+
+
+        // 2DO: bilingual
+        // |**display_language**|nein|"de" oder "en" oder "en:de" - Mit "en" werden die Felder nicht angezeigt, zu denen keine Übersetzung vorliegt. Soll in diesem Fall der deutsche Inhalt ausgeben werden, muss "en:de" verwendet werden.|Ist die Website nicht auf Deutsch eingestellt, werden die Lehrveranstaltungen samt Beschriftungen auf Englisch ausgeben, andernfalls auf Deutsch. Erfolgt die Ausgabe auf Englisch, wurden jedoch keine entsprechenden Übersetzungen in Campo eingegeben, werden diese Informationen nicht ausgegeben. Falls die deutsche Variante in diesen Fällen ausgeben werden soll, dann muss display_language="en:de" verwendet werden.|display_language="en" oder display_language="de" oder display_language="en:de"|
+        // website language can be de_DE, de_DE_formal ...
+
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
@@ -405,7 +401,7 @@ class Shortcode
 
         Functions::console_log('Template parsed', $tsStart);
 
-        if (empty($this->atts['hide_accordion'])) {
+        if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
             $content = do_shortcode($content);
         }
 
@@ -431,16 +427,20 @@ class Shortcode
         $atts['hide_accordion'] = false;
         $atts['hide_degree_accordion'] = false;
         $atts['hide_type_accordion'] = false;
-        $aHide = explode(',', str_replace(' ', '', $atts['hide']));
-        foreach ($aHide as $val) {
-            $atts['hide_' . $val] = true;
-        }
-        if ($atts['hide_accordion']) {
-            $atts['hide_degree_accordion'] = true;
-            $atts['hide_type_accordion'] = true;
-        }
-        if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']){
-            $atts['hide_accordion'] = true;
+
+        if (!empty($atts['hide'])) {
+            $aHide = explode(',', str_replace(' ', '', $atts['hide']));
+
+            foreach ($aHide as $val) {
+                $atts['hide_' . $val] = true;
+            }
+            if ($atts['hide_accordion']) {
+                $atts['hide_degree_accordion'] = true;
+                $atts['hide_type_accordion'] = true;
+            }
+            if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']) {
+                $atts['hide_accordion'] = true;
+            }
         }
 
         // fauorgnr
@@ -464,11 +464,11 @@ class Shortcode
                 $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
             } elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
                 $aAllowedSem = ['-2', '-1', '+1', '1', '+2', '2'];
-                if (in_array($atts['sem'], $aAllowedSem)){
-                    $atts['sem'] = (int)$atts['sem'];
+                if (in_array($atts['sem'], $aAllowedSem)) {
+                    $atts['sem'] = (int) $atts['sem'];
                     $atts['sem'] = Functions::getSemester($atts['sem']);
 
-                }else{
+                } else {
                     // invalid input
                     $atts['sem'] = Functions::getSemester();
                 }

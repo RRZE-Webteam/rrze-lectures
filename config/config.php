@@ -173,12 +173,6 @@ function getShortcodeSettings()
                 'label' => __('Lecture\'s name', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            // 'lecturer_name' => [
-            //     'default' => '',
-            //     'field_type' => 'text',
-            //     'label' => __('Firstname, Lastname', 'rrze-lectures'),
-            //     'type' => 'string',
-            // ],
             'lecturer_idm' => [
                 'default' => '',
                 'field_type' => 'text',
@@ -203,30 +197,32 @@ function getShortcodeSettings()
                 'label' => __('Degree', 'rrze-lectures'), // Studiengang
                 'type' => 'string',
             ],
-            // 'order' => [
-            //     'default' => '',
-            //     'field_type' => 'text',
-            //     'label' => __('Sort by type f.e. "vorl,ueb"', 'rrze-lectures'),
-            //     'type' => 'string',
-            // ],
             'sem' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lang' => [
+            'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Language', 'rrze-lectures'),
-                'type' => 'string',
+                'label' => __('Display language', 'rrze-lectures'),
+                'type' => 'array',
+                'values' => [
+                    [
+                        'id' => '',
+                        'val' => __('don\'t filter', 'rrze-lectures'),
+                    ],
+                    [
+                        'id' => 'en',
+                        'val' => __('English', 'rrze-lectures'),
+                    ],
+                    [
+                        'id' => 'de',
+                        'val' => __('German', 'rrze-lectures'),
+                    ],
+                ],
             ],
-            // 'show' => [
-            //     'default' => '',
-            //     'field_type' => 'text',
-            //     'label' => __('Show', 'rrze-lectures'),
-            //     'type' => 'string',
-            // ],
             'guest' => [
                 'default' => '',
                 'field_type' => 'text',
@@ -270,8 +266,8 @@ function getShortcodeSettings()
                         'val' => 'linklist',
                     ],
                     // [
-                    //     'id' => 'table',
-                    //     'val' => 'table',
+                    //     'id' => 'tabs',
+                    //     'val' => 'tabs',
                     // ],
                 ],
             ],
@@ -286,28 +282,28 @@ function getShortcodeSettings()
                         'val' => __('Kein', 'rrze-lectures'),
                     ],
                     [
+                        'id' => 'fau',
+                        'val' => __('FAU: Dunkelblau', 'rrze-lectures'),
+                    ],
+                    [
                         'id' => 'med',
                         'val' => __('Med: Blau', 'rrze-lectures'),
-                    ],
-                    [
-                        'id' => 'phil',
-                        'val' => __('Phil: Ocker', 'rrze-lectures'),
-                    ],
-                    [
-                        'id' => 'tf',
-                        'val' => __('TF: Silbern', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'nat',
                         'val' => __('Nat: Meeresgrün', 'rrze-lectures'),
                     ],
                     [
+                        'id' => 'phil',
+                        'val' => __('Phil: Ocker', 'rrze-lectures'),
+                    ],
+                    [
                         'id' => 'rw',
                         'val' => __('RW: Bordeaurot', 'rrze-lectures'),
                     ],
                     [
-                        'id' => 'fau',
-                        'val' => __('FAU: Dunkelblau', 'rrze-lectures'),
+                        'id' => 'tf',
+                        'val' => __('TF: Silbern', 'rrze-lectures'),
                     ],
                 ],
             ],
@@ -318,7 +314,6 @@ function getShortcodeSettings()
                 'step' => '1',
                 'field_type' => 'number',
             ],
-
             'nodata' => [
                 'default' => '',
                 'field_type' => 'text',
