@@ -62,10 +62,9 @@
 
 
         <p>Veranstaltungsart: {{=providerValues.event.eventtype}}</p>
-        <p>Turnus des Angebots: FEHLT</p>
-        <p>Semesterwochenstunden: muss aus courses ermittelt werden</p>
+        <p>Turnus des Angebots: Feld FEHLT (Stand: 2023-02-21)</p>
 
-        {{providerValues.event.comment}}[alert style="warning"]{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
+        {{providerValues.event.comment}}[alert style="warning"]<strong>Kommentar</strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
 
         
 
@@ -82,12 +81,27 @@
             {{/@providerValues.event_responsible}}
         </ul>
 
-        {{description}}<h4>Inhalt</h4>
-        <p itemprop="description">{{=description}}</p>{{/description}}
+        <p>Semesterwochenstunden: {{=providerValues.courses.hours_per_week}}</p>
 
+        <p>Lehrsprache: {{=providerValues.courses.teaching_language_txt}} (2DO: 1. long txt / 2. translate)</p>
+
+
+        <h4>Inhalt</h4>
+        <p itemprop="description">{{providerValues.courses.contents}}{{=providerValues.courses.contents}}{{:providerValues.courses.contents}}providerValues.courses.contents ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.contents}}</p>
+
+        <h4>Literaturhinweise</h4>
+        <p>{{providerValues.courses.literature}}{{=providerValues.courses.literature}}{{:providerValues.courses.literature}}providerValues.courses.literature ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.literature}}</p>
+
+        <h4>Empfohlene Voraussetzungen / Organisatorisches</h4>
+        <p>{{providerValues.courses.compulsory_requirement}}{{=providerValues.courses.compulsory_requirement}}{{:providerValues.courses.compulsory_requirement}}providerValues.courses.compulsory_requirement ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.compulsory_requirement}}</p>
+
+        <h4>Maximale Anzahl Teilnehmer/-innen</h4>
+        <p>{{providerValues.courses.attendee_maximum}}{{=providerValues.courses.attendee_maximum}}{{:providerValues.courses.attendee_maximum}}providerValues.courses.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.attendee_maximum}}</p>
+        <h4>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung</h4>
+        <p>{{providerValues.courses.attendee_minimum}}{{=providerValues.courses.attendee_minimum}}{{:providerValues.courses.attendee_minimum}}Feld FEHLT (Stand: 2023-02-21) (Vorschlag: providerValues.courses.attendee_minimum){{/providerValues.courses.attendee_minimum}}</p>
 
         {{maximumAttendeeCapacity}}<p>Maximale Anzahl Teilnehmer/-innen: {{=maximumAttendeeCapacity}}</p>{{/maximumAttendeeCapacity}}
-        <p>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung: FEHLT (vermutlich minimumAttendeeCapacity)</p>
+        <p>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung: Feld FEHLT (Stand: 2023-02-21) (Vorschlag: minimumAttendeeCapacity)</p>
 
 
         <br>&nbsp;<br>

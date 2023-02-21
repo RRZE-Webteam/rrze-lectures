@@ -61,8 +61,19 @@ class Sanitizer
                 }
             }
 
+            // event type
             if (!empty($data[$nr]['providerValues']['event']['eventtype'])) {
                 $data[$nr]['providerValues']['event']['eventtype'] = sanitize_text_field($data[$nr]['providerValues']['event']['eventtype']);
+            }
+
+            // set teaching_language_txt
+            if (!empty($data[$nr]['providerValues']['courses']['teaching_language'])) {
+
+                // echo '<pre>';
+                // var_dump($data[$nr]['providerValues']['courses']['teaching_language']);
+                // exit;
+
+                $data[$nr]['providerValues']['courses']['teaching_language_txt'] = implode(' or ', $data[$nr]['providerValues']['courses']['teaching_language']);
             }
 
             // convert dates

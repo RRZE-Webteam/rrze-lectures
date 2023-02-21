@@ -56,6 +56,11 @@ class DIPAPI
                 ]
             ];
 
+        if (isset($_GET["debug"])){
+            echo $this->api . $endpoint . '/' . $sParam . '<br>';
+        }
+
+
         $apiResponse = wp_remote_get($this->api . $endpoint . '/' . $sParam, $aGetArgs);
 
         if ($apiResponse['response']['code'] != 200){
