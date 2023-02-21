@@ -106,44 +106,46 @@
 
         <br>&nbsp;<br>
 
-        {{providerValues.planned_dates}}
+        {{providerValues.courses.planned_dates}}
         <table>
             <tr>
                 <td>Rhythmus</td>
                 <td>Wochentag</td>
                 <td>Von - Bis</td>
-                <td>Ausfalltermin</td>
+                <td>Ausfalltermin (2DO: sort - via API request!</td>
                 <td>Startdatum - Enddatum</td>
                 <td>Erw. Tn.</td>
                 <td>Bemerkung</td>
                 <td>Durchführende/-r</td>
                 <td>Raum</td>
             </tr>
+            {{@providerValues.courses.planned_dates}}
             <tr>
-                <td>{{providerValues.planned_dates.rhythm}}{{=providerValues.planned_dates.rhythm}}{{/providerValues.planned_dates.rhythm}}</td>
-                <td>{{providerValues.planned_dates.weekday}}{{=providerValues.planned_dates.weekday}}{{/providerValues.planned_dates.weekday}}</td>
-                <td>{{providerValues.planned_dates.starttime}}{{=providerValues.planned_dates.starttime}}{{/providerValues.planned_dates.starttime}}
+                <td>{{_val.rhythm}}{{=_val.rhythm}}{{/_val.rhythm}}</td>
+                <td>{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}} (2DO: translate)</td>
+                <td>{{_val.starttime}}{{=_val.starttime}}{{/_val.starttime}}
                     -
-                    {{providerValues.planned_dates.endtime}}{{=providerValues.planned_dates.endtime}}{{/providerValues.planned_dates.endtime}}
+                    {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}
                 </td>
-                <td>{{@providerValues.planned_dates.misseddates}}{{=_val}}<br>{{/@providerValues.planned_dates.misseddates}}</td>
-                <td>{{providerValues.planned_dates.startdate}}{{=providerValues.planned_dates.startdate}}{{/providerValues.planned_dates.startdate}}
+                <td>{{@_val.misseddates}}{{=_val}}<br>{{/@_val.misseddates}}</td>
+                <td>{{_val.startdate}}{{=_val.startdate}}{{/_val.startdate}}
                     -
-                    {{providerValues.planned_dates.enddate}}{{=providerValues.planned_dates.enddate}}{{/providerValues.planned_dates.enddate}}
+                    {{_val.enddate}}{{=_val.enddate}}{{/_val.enddate}}
                 </td>
-                <td>{{providerValues.planned_dates.expected_attendees_count}}{{=providerValues.planned_dates.expected_attendees_count}}{{/providerValues.planned_dates.expected_attendees_count}}
+                <td>{{_val.expected_attendees_count}}{{=_val.expected_attendees_count}}{{/_val.expected_attendees_count}}
                 </td>
-                <td>{{providerValues.planned_dates.comment}}{{=providerValues.planned_dates.comment}}{{/providerValues.planned_dates.comment}}
+                <td>{{_val.comment}}{{=_val.comment}}{{/_val.comment}}
                 </td>
-                <td>individual_instructor => falls Array gefüllt ist</td>
-                <td>{{providerValues.planned_dates.famos_request}}{{=providerValues.planned_dates.famos_request}}{{/providerValues.planned_dates.famos_request}}
+                <td>individual_instructor => falls Array gefüllt ist (2DO: LV finden mit !empty(roviderValues.courses.planned_dates.instructor)</td>
+                <td>{{_val.famos_request}}{{=_val.famos_request}}{{/_val.famos_request}} (2DO: famos_request URL FEHLT oder kann Link mit dieser Nr auf Map / Details-Page gesetzt werden?)
                 </td>
             </tr>
-            <tr>
-                <td colspan="9">alle weitere Elemente im Array planned_dates FEHLEN</td>
-            </tr>
+            {{/@providerValues.courses.planned_dates}}
+
         </table>
-        {{/providerValues.planned_dates}}
+        {{:providerValues.courses.planned_dates}}
+        Es sind noch keine Termine geplant. (2DO: Text von Campo)
+        {{/providerValues.courses.planned_dates}}
 
         [/tab]
 
@@ -153,14 +155,14 @@
 
         <table>
             <tr>
-                <td>Studiengang</td>
+                <td>Standardtext</td>
+                <td>Typ</td>
                 <td>Abschluss</td>
                 <td>Fach</td>
                 <td>Vertiefung</td>
-                <td>Prüfungsordnungsversion</td>
-
                 <td>Schwerpunkt</td>
                 <td>Fachkennzeichen</td>
+                <td>Prüfungsordnungsversion</td>
                 <td>Studienform</td>
                 <td>Studienort</td>
                 <td>Studienart</td>
@@ -170,17 +172,17 @@
             {{@_val.module_cos}}
 
             <tr>
+                <td>FEHLT (Stand: 2023-02-21)</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>
                 <td>{{=_val.degree}}</td>
                 <td>{{=_val.subject}}</td>
-                <td>{{=_val.subject_indicator}}</td>
                 <td>{{=_val.major}}</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>
+                <td>{{=_val.subject_indicator}}</td>
                 <td>{{=_val.version}}</td>
-
-                <td>FEHLT (Stand: 2023-02-21)</td>
-                <td>FEHLT (Stand: 2023-02-21)</td>
-                <td>FEHLT (Stand: 2023-02-21)</td>
                 <td>FEHLT (Stand: 2023-02-21)</td>                
                 <td>FEHLT (Stand: 2023-02-21)</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>                
             </tr>
             {{/@_val.module_cos}}
             {{/@providerValues.module}}
