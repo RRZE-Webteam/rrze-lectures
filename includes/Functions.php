@@ -139,27 +139,24 @@ class Functions
         return next($aArr) !== false ?: key($aArr) !== null;
     }
 
-    public static function makeLQ($aIn, $bSanitized = false)
+    public static function makeLQ($aIn)
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
-            if ($bSanitized){
-                // used in class Shortcode all $attVal are sanitized already
+            if (!empty($attVal)){
                 $aTmp = array_map('trim', explode(',', $attVal));
-            }else{
-                $aTmp = array_map('trim', explode(',', sanitize_text_field($attVal)));
-            }
 
-            // check if 10 figures hex 
-            if ($dipField == 'providerValues.courses.course_responsible.identifier') {
-                foreach ($aTmp as $nr => $val) {
-                    if (!(ctype_xdigit($val) && strlen($val) == 10)) {
-                        unset($aTmp[$nr]);
+                // check if 10 figures hex 
+                if ($dipField == 'providerValues.courses.course_responsible.identifier') {
+                    foreach ($aTmp as $nr => $val) {
+                        if (!(ctype_xdigit($val) && strlen($val) == 10)) {
+                            unset($aTmp[$nr]);
+                        }
                     }
                 }
+    
+                $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
             }
-
-            $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
         }
 
         return implode('&', $aLQ);
@@ -250,12 +247,13 @@ class Functions
         update_option(self::TRANSIENT_OPTION, '');
     }
 
-    public function getTableHTML($aIn)
+    public function getTableHTML($aIn, $aFieldnames)
     {
         if (!is_array($aIn)) {
             return $aIn;
         }
-        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . __('FAU Org Number', 'rrze-lectures') . '</strong></td></td><td><strong>' . __('Name of organization', 'rrze-lectures') . '</strong></td></tr></thead>';
+
+        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . $aFieldnames[0] . '</strong></td></td><td><strong>' . $aFieldnames[1] . '</strong></td></tr></thead>';
 
         foreach ($aIn as $ID => $val) {
             $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
@@ -269,7 +267,13 @@ class Functions
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
         $inputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
-        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']));
+
+        $aFieldnames = [
+            __('FAU Org Number', 'rrze-lectures'),
+            __('Name of organization', 'rrze-lectures')
+        ];
+
+        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']), $aFieldnames);
         wp_send_json($response);
     }
 
@@ -306,8 +310,14 @@ class Functions
     public function ajaxGetLecturerIdentifier()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
-        $inputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
-        $response = $this->getTableHTML($this->getLecturerIdentifier($inputs));
+        $aInputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+
+        $aFieldnames = [
+            __('Identifier', 'rrze-lectures'),
+            __('Name', 'rrze-lectures')
+        ];
+
+        $response = $this->getTableHTML($this->getLecturerIdentifier($aInputs), $aFieldnames);
         wp_send_json($response);
     }
 
@@ -315,13 +325,12 @@ class Functions
     public function getLecturerIdentifier($aParams = [])
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
-
-        $lq = self::makeLQ($aParams, false);
+        $lq = self::makeLQ($aParams);
 
         $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName') . '&lq=' . urlencode($lq);
 
         $oDIP = new DIPAPI();
-        $response = $oDIP->getResponse('organizations', $dipParams);
+        $response = $oDIP->getResponse('persons', $dipParams);
 
         if (!$response['valid']) {
             return $ret;

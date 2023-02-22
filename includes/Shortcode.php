@@ -159,7 +159,7 @@ class Shortcode
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
-        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ, true)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
 

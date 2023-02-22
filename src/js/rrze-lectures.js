@@ -1,15 +1,16 @@
 "use strict";
 
 jQuery(document).ready(function($){
-    var $loading = $('div#loading').hide();
+    // var loading1 = $('div#loading1').hide();
+    // var loading2 = $('div#loading2').hide();
 
     $(document)
-        .ajaxStart(function () {
-            $loading.show();
-        })
-        .ajaxStop(function () {
-         $loading.hide();
-        });
+        // .ajaxStart(function () {
+        //     loading.show();
+        // })
+        // .ajaxStop(function () {
+        //     loading.hide();
+        // });
 
         $('#searchFAUOrgNr').click(getFAUOrgNr);
         $('#searchLecturerIdentifier').click(getLecturerIdentifier);
@@ -17,20 +18,20 @@ jQuery(document).ready(function($){
     });
 
 function getFAUOrgNr() {
-    var $keyword = jQuery('input#keyword');
-    var $keywordVal = $keyword.val();
-    var $resultTab = jQuery('div#dip-search-result');
+    var keyword = jQuery('input#keyword');
+    var keywordVal = keyword.val();
+    var resultTab = jQuery('div#dip-fauorgnr-result');
 
-    if ($keywordVal){
-        $resultTab.html();
-        $keyword.val();
+    if (keywordVal){
+        resultTab.html();
+        keyword.val();
         
         jQuery.post(lecture_ajax.ajax_url, { 
             _ajax_nonce: lecture_ajax.nonce,
             action: 'GetFAUOrgNr',
-            data: {'keyword':$keywordVal},               
+            data: {'keyword':keywordVal},               
         }, function(result) {
-            $resultTab.html(result);
+            resultTab.html(result);
             jQuery('div#loading').hide();
         });
     }
@@ -43,7 +44,7 @@ function getLecturerIdentifier() {
     var givenNameVal = givenName.val();
     var email = jQuery('input#email');
     var emailVal = email.val();
-    var resultTab = jQuery('div#dip-search-result');
+    var resultTab = jQuery('div#dip-identifier-result');
 
     if (familyNameVal || emailVal){
         // we don't want users to search by givenName only
@@ -52,7 +53,7 @@ function getLecturerIdentifier() {
         givenName.val();
         email.val();
 
-        var data = { 
+        var aIn = { 
             "familyName": familyNameVal, 
             "givenName": givenNameVal, 
             "email": emailVal
@@ -61,9 +62,9 @@ function getLecturerIdentifier() {
         jQuery.post(lecture_ajax.ajax_url, { 
             _ajax_nonce: lecture_ajax.nonce,
             action: 'GetLecturerIdentifier',
-            data: {'data' : data},               
+            data: aIn,               
         }, function(result) {
-            $resultTab.html(result);
+            resultTab.html(result);
             jQuery('div#loading').hide();
         });
     }

@@ -853,7 +853,7 @@ class Settings
     {
         ?>
         <br><br>
-        <!-- <div class="wrap">
+        <div class="wrap">
             <h3>
                 <?php echo __('Search for FAU Org Number', 'rrze-lectures'); ?>
             </h3>
@@ -868,15 +868,18 @@ class Settings
                         </tr>
                         <tr>
                             <td><input type="button" id="searchFAUOrgNr" class="button button-primary"
-                                    value="<?php echo __('Search', 'rrze-lectures'); ?>"></td>
-                            <td>
-                                <div id="loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                                    value="<?php echo __('Search', 'rrze-lectures'); ?>">
                             </td>
+                            <!-- <td>
+                                <div id="loading1"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                            </td> -->
                         </tr>
                     </tbody>
                 </table>
             </form>
-        </div> -->
+        </div>
+        <div id="dip-fauorgnr-result"></div>
+        <div>&nbsp;</div>
         <div class="wrap">
             <h3>
                 <?php echo __('Search for identifier', 'rrze-lectures'); ?>
@@ -904,16 +907,17 @@ class Settings
                         </tr>
                         <tr>
                             <td><input type="button" id="searchLecturerIdentifier" class="button button-primary"
-                                    value="<?php echo __('Search', 'rrze-lectures'); ?>"></td>
-                            <td>
-                                <div id="loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                                    value="<?php echo __('Search', 'rrze-lectures'); ?>">
                             </td>
+                            <!-- <td>
+                                <div id="loadin2"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                            </td> -->
                         </tr>
                     </tbody>
                 </table>
             </form>
         </div>
-        <div id="dip-search-result"></div>
+        <div id="dip-identifier-result"></div>
 
     <?php
     }
