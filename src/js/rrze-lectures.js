@@ -1,5 +1,6 @@
 "use strict";
 
+
 jQuery(document).ready(function ($) {
     var loading1 = $('div#loading1').hide();
     var loading2 = $('div#loading2').hide();

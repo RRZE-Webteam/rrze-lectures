@@ -197,6 +197,7 @@ class Functions
 
     public function adminEnqueueScripts()
     {
+        
         wp_enqueue_script(
             'rrze-lectures-ajax',
             plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
