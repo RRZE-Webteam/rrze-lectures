@@ -201,7 +201,7 @@ class Functions
     {
         wp_enqueue_script(
             'rrze-lectures-ajax',
-            plugins_url('src/js/rrze-lectures.js', plugin_basename($this->pluginFile)),
+            plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
             ['jquery'],
             null
         );
