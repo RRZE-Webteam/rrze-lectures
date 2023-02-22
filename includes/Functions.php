@@ -195,8 +195,6 @@ class Functions
         return $ret;
     }
 
-
-
     public function adminEnqueueScripts()
     {
         wp_enqueue_script(
@@ -211,8 +209,6 @@ class Functions
             'nonce' => wp_create_nonce('lecture-ajax-nonce'),
         ]);
     }
-
-
 
     public static function setDataToCache($data, $aAtts = [])
     {

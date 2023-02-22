@@ -852,9 +852,9 @@ class Settings
     public function getDIPSearchPage()
     {
         ?>
-        <br><br>
+        <br><hr><br>
         <div class="wrap">
-            <h3>
+        <h3>
                 <?php echo __('Search for FAU Org Number', 'rrze-lectures'); ?>
             </h3>
             <form method="post" id="search-univis">
@@ -870,20 +870,23 @@ class Settings
                             <td><input type="button" id="searchFAUOrgNr" class="button button-primary"
                                     value="<?php echo __('Search', 'rrze-lectures'); ?>">
                             </td>
-                            <!-- <td>
+                            <td>
                                 <div id="loading1"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
-                            </td> -->
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </form>
         </div>
         <div id="dip-fauorgnr-result"></div>
-        <div>&nbsp;</div>
+        <br><hr><br>
         <div class="wrap">
             <h3>
                 <?php echo __('Search for identifier', 'rrze-lectures'); ?>
             </h3>
+            <p>
+                <?php echo __('Fill in one or more of the following fields. A search by given name only is not possible.', 'rrze-lectures'); ?>
+            </p>
             <form method="post" id="search-univis">
                 <table class="form-table" role="presentation" class="striped">
                     <tbody>
@@ -909,9 +912,9 @@ class Settings
                             <td><input type="button" id="searchLecturerIdentifier" class="button button-primary"
                                     value="<?php echo __('Search', 'rrze-lectures'); ?>">
                             </td>
-                            <!-- <td>
-                                <div id="loadin2"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
-                            </td> -->
+                            <td>
+                                <div id="loading2"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
