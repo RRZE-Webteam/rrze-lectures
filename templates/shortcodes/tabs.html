@@ -62,10 +62,9 @@
 
 
         <p>Veranstaltungsart: {{=providerValues.event.eventtype}}</p>
-        <p>Turnus des Angebots: FEHLT</p>
-        <p>Semesterwochenstunden: muss aus courses ermittelt werden</p>
+        <p>Turnus des Angebots: Feld FEHLT (Stand: 2023-02-21)</p>
 
-        {{providerValues.event.comment}}[alert style="warning"]{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
+        {{providerValues.event.comment}}[alert style="warning"]<strong>Kommentar</strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
 
         
 
@@ -82,54 +81,71 @@
             {{/@providerValues.event_responsible}}
         </ul>
 
-        {{description}}<h4>Inhalt</h4>
-        <p itemprop="description">{{=description}}</p>{{/description}}
+        <p>Semesterwochenstunden: {{=providerValues.courses.hours_per_week}}</p>
 
+        <p>Lehrsprache: {{=providerValues.courses.teaching_language_txt}} (2DO: 1. long txt / 2. translate)</p>
+
+
+        <h4>Inhalt</h4>
+        <p itemprop="description">{{providerValues.courses.contents}}{{=providerValues.courses.contents}}{{:providerValues.courses.contents}}providerValues.courses.contents ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.contents}}</p>
+
+        <h4>Literaturhinweise</h4>
+        <p>{{providerValues.courses.literature}}{{=providerValues.courses.literature}}{{:providerValues.courses.literature}}providerValues.courses.literature ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.literature}}</p>
+
+        <h4>Empfohlene Voraussetzungen / Organisatorisches</h4>
+        <p>{{providerValues.courses.compulsory_requirement}}{{=providerValues.courses.compulsory_requirement}}{{:providerValues.courses.compulsory_requirement}}providerValues.courses.compulsory_requirement ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.compulsory_requirement}}</p>
+
+        <h4>Maximale Anzahl Teilnehmer/-innen</h4>
+        <p>{{providerValues.courses.attendee_maximum}}{{=providerValues.courses.attendee_maximum}}{{:providerValues.courses.attendee_maximum}}providerValues.courses.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.attendee_maximum}}</p>
+        <h4>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung</h4>
+        <p>{{providerValues.courses.attendee_minimum}}{{=providerValues.courses.attendee_minimum}}{{:providerValues.courses.attendee_minimum}}Feld FEHLT (Stand: 2023-02-21) (Vorschlag: providerValues.courses.attendee_minimum){{/providerValues.courses.attendee_minimum}}</p>
 
         {{maximumAttendeeCapacity}}<p>Maximale Anzahl Teilnehmer/-innen: {{=maximumAttendeeCapacity}}</p>{{/maximumAttendeeCapacity}}
-        <p>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung: FEHLT (vermutlich minimumAttendeeCapacity)</p>
+        <p>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung: Feld FEHLT (Stand: 2023-02-21) (Vorschlag: minimumAttendeeCapacity)</p>
 
 
         <br>&nbsp;<br>
 
-        {{providerValues.planned_dates}}
+        {{providerValues.courses.planned_dates}}
         <table>
             <tr>
                 <td>Rhythmus</td>
                 <td>Wochentag</td>
                 <td>Von - Bis</td>
-                <td>Ausfalltermin</td>
+                <td>Ausfalltermin (2DO: sort - via API request!</td>
                 <td>Startdatum - Enddatum</td>
                 <td>Erw. Tn.</td>
                 <td>Bemerkung</td>
                 <td>Durchführende/-r</td>
                 <td>Raum</td>
             </tr>
+            {{@providerValues.courses.planned_dates}}
             <tr>
-                <td>{{providerValues.planned_dates.rhythm}}{{=providerValues.planned_dates.rhythm}}{{/providerValues.planned_dates.rhythm}}</td>
-                <td>{{providerValues.planned_dates.weekday}}{{=providerValues.planned_dates.weekday}}{{/providerValues.planned_dates.weekday}}</td>
-                <td>{{providerValues.planned_dates.starttime}}{{=providerValues.planned_dates.starttime}}{{/providerValues.planned_dates.starttime}}
+                <td>{{_val.rhythm}}{{=_val.rhythm}}{{/_val.rhythm}}</td>
+                <td>{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}} (2DO: translate)</td>
+                <td>{{_val.starttime}}{{=_val.starttime}}{{/_val.starttime}}
                     -
-                    {{providerValues.planned_dates.endtime}}{{=providerValues.planned_dates.endtime}}{{/providerValues.planned_dates.endtime}}
+                    {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}
                 </td>
-                <td>{{@providerValues.planned_dates.misseddates}}{{=_val}}<br>{{/@providerValues.planned_dates.misseddates}}</td>
-                <td>{{providerValues.planned_dates.startdate}}{{=providerValues.planned_dates.startdate}}{{/providerValues.planned_dates.startdate}}
+                <td>{{@_val.misseddates}}{{=_val}}<br>{{/@_val.misseddates}}</td>
+                <td>{{_val.startdate}}{{=_val.startdate}}{{/_val.startdate}}
                     -
-                    {{providerValues.planned_dates.enddate}}{{=providerValues.planned_dates.enddate}}{{/providerValues.planned_dates.enddate}}
+                    {{_val.enddate}}{{=_val.enddate}}{{/_val.enddate}}
                 </td>
-                <td>{{providerValues.planned_dates.expected_attendees_count}}{{=providerValues.planned_dates.expected_attendees_count}}{{/providerValues.planned_dates.expected_attendees_count}}
+                <td>{{_val.expected_attendees_count}}{{=_val.expected_attendees_count}}{{/_val.expected_attendees_count}}
                 </td>
-                <td>{{providerValues.planned_dates.comment}}{{=providerValues.planned_dates.comment}}{{/providerValues.planned_dates.comment}}
+                <td>{{_val.comment}}{{=_val.comment}}{{/_val.comment}}
                 </td>
-                <td>individual_instructor => falls Array gefüllt ist</td>
-                <td>{{providerValues.planned_dates.famos_request}}{{=providerValues.planned_dates.famos_request}}{{/providerValues.planned_dates.famos_request}}
+                <td>individual_instructor => falls Array gefüllt ist (2DO: LV finden mit !empty(roviderValues.courses.planned_dates.instructor)</td>
+                <td>{{_val.famos_request}}{{=_val.famos_request}}{{/_val.famos_request}} (2DO: famos_request URL FEHLT oder kann Link mit dieser Nr auf Map / Details-Page gesetzt werden?)
                 </td>
             </tr>
-            <tr>
-                <td colspan="9">alle weitere Elemente im Array planned_dates FEHLEN</td>
-            </tr>
+            {{/@providerValues.courses.planned_dates}}
+
         </table>
-        {{/providerValues.planned_dates}}
+        {{:providerValues.courses.planned_dates}}
+        Es sind noch keine Termine geplant. (2DO: Text von Campo)
+        {{/providerValues.courses.planned_dates}}
 
         [/tab]
 
@@ -139,6 +155,8 @@
 
         <table>
             <tr>
+                <td>Standardtext</td>
+                <td>Typ</td>
                 <td>Abschluss</td>
                 <td>Fach</td>
                 <td>Vertiefung</td>
@@ -154,17 +172,17 @@
             {{@_val.module_cos}}
 
             <tr>
-                <td>FEHLT</td>
-                <td>FEHLT</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>
                 <td>{{=_val.degree}}</td>
                 <td>{{=_val.subject}}</td>
                 <td>{{=_val.major}}</td>
-                <td>FEHLT</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>
                 <td>{{=_val.subject_indicator}}</td>
                 <td>{{=_val.version}}</td>
-                <td>FEHLT</td>
-                <td>FEHLT</td>
-                <td>FEHLT</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>                
+                <td>FEHLT (Stand: 2023-02-21)</td>
+                <td>FEHLT (Stand: 2023-02-21)</td>                
             </tr>
             {{/@_val.module_cos}}
             {{/@providerValues.module}}

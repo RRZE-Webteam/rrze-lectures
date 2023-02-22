@@ -23,6 +23,8 @@ class Functions
         add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
         add_action('wp_ajax_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
         add_action('wp_ajax_nopriv_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
+        add_action('wp_ajax_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']);
+        add_action('wp_ajax_nopriv_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']);
         // add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
         // add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
         // add_action('wp_ajax_GenerateICS', [$this, 'ajaxGenerateICS']);
@@ -141,18 +143,20 @@ class Functions
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
-            $aTmp = array_map('trim', explode(',', $attVal));
+            if (!empty($attVal)){
+                $aTmp = array_map('trim', explode(',', $attVal));
 
-            // check if 10 figures hex 
-            if ($dipField == 'providerValues.courses.course_responsible.identifier') {
-                foreach ($aTmp as $nr => $val) {
-                    if (!(ctype_xdigit($val) && strlen($val) == 10)) {
-                        unset($aTmp[$nr]);
+                // check if 10 figures hex 
+                if ($dipField == 'providerValues.courses.course_responsible.identifier') {
+                    foreach ($aTmp as $nr => $val) {
+                        if (!(ctype_xdigit($val) && strlen($val) == 10)) {
+                            unset($aTmp[$nr]);
+                        }
                     }
                 }
+    
+                $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
             }
-
-            $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
         }
 
         return implode('&', $aLQ);
@@ -191,8 +195,6 @@ class Functions
         return $ret;
     }
 
-
-
     public function adminEnqueueScripts()
     {
         wp_enqueue_script(
@@ -207,8 +209,6 @@ class Functions
             'nonce' => wp_create_nonce('lecture-ajax-nonce'),
         ]);
     }
-
-
 
     public static function setDataToCache($data, $aAtts = [])
     {
@@ -243,12 +243,13 @@ class Functions
         update_option(self::TRANSIENT_OPTION, '');
     }
 
-    public function getTableHTML($aIn)
+    public function getTableHTML($aIn, $aFieldnames)
     {
         if (!is_array($aIn)) {
             return $aIn;
         }
-        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . __('FAU Org Number', 'rrze-lectures') . '</strong></td></td><td><strong>' . __('Name of organization', 'rrze-lectures') . '</strong></td></tr></thead>';
+
+        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . $aFieldnames[0] . '</strong></td></td><td><strong>' . $aFieldnames[1] . '</strong></td></tr></thead>';
 
         foreach ($aIn as $ID => $val) {
             $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
@@ -262,7 +263,13 @@ class Functions
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
         $inputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
-        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']));
+
+        $aFieldnames = [
+            __('FAU Org Number', 'rrze-lectures'),
+            __('Name of organization', 'rrze-lectures')
+        ];
+
+        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']), $aFieldnames);
         wp_send_json($response);
     }
 
@@ -291,6 +298,50 @@ class Functions
             }
 
 
+        }
+
+        return $ret;
+    }
+
+    public function ajaxGetLecturerIdentifier()
+    {
+        check_ajax_referer('lecture-ajax-nonce', 'nonce');
+        $aInputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+
+        $aFieldnames = [
+            __('Identifier', 'rrze-lectures'),
+            __('Name', 'rrze-lectures')
+        ];
+
+        $response = $this->getTableHTML($this->getLecturerIdentifier($aInputs), $aFieldnames);
+        wp_send_json($response);
+    }
+
+
+    public function getLecturerIdentifier($aParams = [])
+    {
+        $ret = __('No matching entries found.', 'rrze-lectures');
+        $lq = self::makeLQ($aParams);
+
+        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName') . '&lq=' . urlencode($lq);
+
+        $oDIP = new DIPAPI();
+        $response = $oDIP->getResponse('persons', $dipParams);
+
+        if (!$response['valid']) {
+            return $ret;
+        } else {
+            $data = $response['content']['data'];
+
+            if (empty($data)) {
+                return $ret;
+            }
+
+            $ret = [];
+
+            foreach ($data as $aDetails) {
+                $ret[$aDetails['identifier']] = $aDetails['familyName'] . ', ' . $aDetails['givenName'];
+            }
         }
 
         return $ret;
