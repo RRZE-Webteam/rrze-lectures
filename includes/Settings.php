@@ -853,7 +853,7 @@ class Settings
     {
         ?>
         <br><br>
-        <div class="wrap">
+        <!-- <div class="wrap">
             <h3>
                 <?php echo __('Search for FAU Org Number', 'rrze-lectures'); ?>
             </h3>
@@ -868,6 +868,42 @@ class Settings
                         </tr>
                         <tr>
                             <td><input type="button" id="searchFAUOrgNr" class="button button-primary"
+                                    value="<?php echo __('Search', 'rrze-lectures'); ?>"></td>
+                            <td>
+                                <div id="loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div> -->
+        <div class="wrap">
+            <h3>
+                <?php echo __('Search for identifier', 'rrze-lectures'); ?>
+            </h3>
+            <form method="post" id="search-univis">
+                <table class="form-table" role="presentation" class="striped">
+                    <tbody>
+                    <tr>
+                            <th scope="row">
+                                <?php echo __('Family name', 'rrze-lectures'); ?>
+                            </th>
+                            <td><input type="text" name="familyName" id="familyName" value=""></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <?php echo __('Given name', 'rrze-lectures'); ?>
+                            </th>
+                            <td><input type="text" name="givenName" id="givenName" value=""></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <?php echo __('eMail', 'rrze-lectures'); ?>
+                            </th>
+                            <td><input type="text" name="email" id="email" value=""></td>
+                        </tr>
+                        <tr>
+                            <td><input type="button" id="searchLecturerIdentifier" class="button button-primary"
                                     value="<?php echo __('Search', 'rrze-lectures'); ?>"></td>
                             <td>
                                 <div id="loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>

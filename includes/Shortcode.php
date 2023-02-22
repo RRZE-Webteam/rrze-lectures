@@ -129,6 +129,9 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
+        // echo '$attrs = ' . $attrs;
+        // exit;
+
         $aLQ = [];
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
@@ -156,7 +159,7 @@ class Shortcode
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
-        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ, true)) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -200,16 +203,17 @@ class Shortcode
         // |**display_language**|nein|"de" oder "en" oder "en:de" - Mit "en" werden die Felder nicht angezeigt, zu denen keine Übersetzung vorliegt. Soll in diesem Fall der deutsche Inhalt ausgeben werden, muss "en:de" verwendet werden.|Ist die Website nicht auf Deutsch eingestellt, werden die Lehrveranstaltungen samt Beschriftungen auf Englisch ausgeben, andernfalls auf Deutsch. Erfolgt die Ausgabe auf Englisch, wurden jedoch keine entsprechenden Übersetzungen in Campo eingegeben, werden diese Informationen nicht ausgegeben. Falls die deutsche Variante in diesen Fällen ausgeben werden soll, dann muss display_language="en:de" verwendet werden.|display_language="en" oder display_language="de" oder display_language="en:de"|
         // website language can be de_DE, de_DE_formal ...
 
-
-        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
-        Sanitizer::sanitizeLectures($data);
-
         if (isset($_GET["debug"])){
-            echo 'after sanitizeLectures<br>';
+            echo 'before sanitizeLectures<br>';
             echo '<pre>';
             var_dump($data);
             exit;
         }
+
+
+        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+        Sanitizer::sanitizeLectures($data);
+
 
 
         Functions::console_log('Fetched data from DIP', $tsStart);
