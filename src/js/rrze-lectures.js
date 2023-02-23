@@ -12,7 +12,7 @@ jQuery(document).ready(function ($) {
         });
 
     $('#searchFAUOrgNr').click(getFAUOrgNr);
-    $('#searchLecturerIdentifier').click(getLecturerIdentifier);
+    // $('#searchLecturerIdentifier').click(getLecturerIdentifier);
 
 });
 
@@ -38,37 +38,33 @@ function getFAUOrgNr() {
     }
 }
 
-function getLecturerIdentifier() {
-    var familyName = jQuery('input#familyName');
-    var familyNameVal = familyName.val();
-    var givenName = jQuery('input#givenName');
-    var givenNameVal = givenName.val();
-    var email = jQuery('input#email');
-    var emailVal = email.val();
-    var resultTab = jQuery('div#dip-identifier-result');
+// function getLecturerIdentifier() {
+//     var familyName = jQuery('input#familyName');
+//     var familyNameVal = familyName.val();
+//     var givenName = jQuery('input#givenName');
+//     var givenNameVal = givenName.val();
+//     var resultTab = jQuery('div#dip-identifier-result');
 
-    if (familyNameVal || emailVal) {
-        // we don't want users to search by givenName only
-        var loading = jQuery('div#loading2');
-        loading.show();
-        resultTab.html();
-        familyName.val('');
-        givenName.val('');
-        email.val('');
+//     if (familyNameVal) {
+//         // we don't want users to search by givenName only
+//         var loading = jQuery('div#loading2');
+//         loading.show();
+//         resultTab.html();
+//         familyName.val('');
+//         givenName.val('');
 
-        var aIn = {
-            "familyName": familyNameVal,
-            "givenName": givenNameVal,
-            "email": emailVal
-        };
+//         var aIn = {
+//             "familyName": familyNameVal,
+//             "givenName": givenNameVal
+//         };
 
-        jQuery.post(lecture_ajax.ajax_url, {
-            _ajax_nonce: lecture_ajax.nonce,
-            action: 'GetLecturerIdentifier',
-            data: aIn,
-        }, function (result) {
-            resultTab.html(result);
-            jQuery('div#loading').hide();
-        });
-    }
-}
+//         jQuery.post(lecture_ajax.ajax_url, {
+//             _ajax_nonce: lecture_ajax.nonce,
+//             action: 'GetLecturerIdentifier',
+//             data: aIn,
+//         }, function (result) {
+//             resultTab.html(result);
+//             jQuery('div#loading').hide();
+//         });
+//     }
+// }

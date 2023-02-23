@@ -879,7 +879,7 @@ class Settings
             </form>
         </div>
         <div id="dip-fauorgnr-result"></div>
-        <br><hr><br>
+        <!-- <br><hr><br>
         <div class="wrap">
             <h3>
                 <?php echo __('Search for identifier', 'rrze-lectures'); ?>
@@ -903,12 +903,6 @@ class Settings
                             <td><input type="text" name="givenName" id="givenName" value=""></td>
                         </tr>
                         <tr>
-                            <th scope="row">
-                                <?php echo __('eMail', 'rrze-lectures'); ?>
-                            </th>
-                            <td><input type="text" name="email" id="email" value=""></td>
-                        </tr>
-                        <tr>
                             <td><input type="button" id="searchLecturerIdentifier" class="button button-primary"
                                     value="<?php echo __('Search', 'rrze-lectures'); ?>">
                             </td>
@@ -920,7 +914,7 @@ class Settings
                 </table>
             </form>
         </div>
-        <div id="dip-identifier-result"></div>
+        <div id="dip-identifier-result"></div> -->
 
     <?php
     }
