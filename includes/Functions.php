@@ -202,7 +202,7 @@ class Functions
             'rrze-lectures-ajax',
             plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
             ['jquery'],
-            null
+            '1.6.2'
         );
 
         wp_localize_script('rrze-lectures-ajax', 'lecture_ajax', [
