@@ -43,7 +43,6 @@ class Translator
             'event_orgunit' => [
                 // providerValues.event_orgunit.orgunit (falls es dazu überhaupt zwei Sprachen gibt)
                 'orgunit',
-
             ],
             'event' => [
                 // providerValues.event.eventtype
