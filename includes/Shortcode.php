@@ -162,6 +162,10 @@ class Shortcode
             $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
         }
 
+        if (!empty($this->atts['teaching_language'])) {
+            $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
+        }
+
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
