@@ -5,8 +5,8 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
+use RRZE\Lectures\Translator;
 use RRZE\Lectures\Template;
-
 
 /**
  * Shortcode
@@ -203,10 +203,6 @@ class Shortcode
 
         }
 
-        // 2DO: bilingual
-        // |**display_language**|nein|"de" oder "en" oder "en:de" - Mit "en" werden die Felder nicht angezeigt, zu denen keine Übersetzung vorliegt. Soll in diesem Fall der deutsche Inhalt ausgeben werden, muss "en:de" verwendet werden.|Ist die Website nicht auf Deutsch eingestellt, werden die Lehrveranstaltungen samt Beschriftungen auf Englisch ausgeben, andernfalls auf Deutsch. Erfolgt die Ausgabe auf Englisch, wurden jedoch keine entsprechenden Übersetzungen in Campo eingegeben, werden diese Informationen nicht ausgegeben. Falls die deutsche Variante in diesen Fällen ausgeben werden soll, dann muss display_language="en:de" verwendet werden.|display_language="en" oder display_language="de" oder display_language="en:de"|
-        // website language can be de_DE, de_DE_formal ...
-
         if (isset($_GET["debug"])){
             echo 'before sanitizeLectures<br>';
             echo '<pre>';
@@ -218,7 +214,9 @@ class Shortcode
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
 
-
+        // get the array elements of multilanguage fields from API:
+        $translator = new Translator($this->atts['display_language']);
+        $translator->setTranslations($data);
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -404,8 +402,6 @@ class Shortcode
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
-
-
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
@@ -443,6 +439,13 @@ class Shortcode
         // sanatize all fields
         foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
+        }
+
+        // set display_language / default: website's language
+        if (empty($atts['display_language'])) {
+            $atts['display_language'] = substr(get_locale(), 0, 2);
+        }else{
+            $atts['display_language'] = strtolower($atts['display_language']);
         }
 
         // dynamically generate hide vars
