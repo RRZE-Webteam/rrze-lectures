@@ -72,8 +72,9 @@ class Shortcode
      */
     public function shortcodeLectures($atts, $content = NULL)
     {
-
-        return "Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.";
+        if (Functions::isMaintenanceMode()){
+            return "Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.";
+        }
         
         $tsStart = microtime(true);
         // show link to DIP only

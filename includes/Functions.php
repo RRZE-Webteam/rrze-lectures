@@ -348,6 +348,17 @@ class Functions
     //     return $ret;
     // }
 
+    public static function isMaintenanceMode(){        
+        if(is_multisite()){
+            $settingsOptions = get_site_option('rrze_settings');
+            if (!empty($settingsOptions->plugins->dip_maintenance_mode)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
     public function getSelectHTML($aIn)
     {

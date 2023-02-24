@@ -27,7 +27,6 @@ class DIPAPI
         $this->setAPI();
     }
 
-
     private function getKey(){
         $lectureOptions = get_option('rrze-lectures');
 
