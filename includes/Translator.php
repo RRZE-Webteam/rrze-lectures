@@ -24,6 +24,7 @@ class Translator
         $this->multlangFields = $this->getMultilangFields();
     }
 
+    
     private function getMultilangFields()
     {
 

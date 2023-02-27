@@ -1,6 +1,6 @@
 {
   "name": "rrze-lectures",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "description": "Anzeige aufbereiteter Daten zu Lehrveranstaltungen von Campo über DIP",
   "main": "rrze-lectures.php",
   "textdomain": "rrze-lectures",

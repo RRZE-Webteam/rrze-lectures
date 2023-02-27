@@ -39,7 +39,6 @@ class Functions
         }
     }
 
-
     public static function getSemester($iSem = 0)
     {
         // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
