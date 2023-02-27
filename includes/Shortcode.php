@@ -72,6 +72,7 @@ class Shortcode
      */
     public function shortcodeLectures($atts, $content = NULL)
     {
+
         if (Functions::isMaintenanceMode()){
             return "Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.";
         }
@@ -219,8 +220,8 @@ class Shortcode
         Sanitizer::sanitizeLectures($data);
 
         // get the array elements of multilanguage fields from API:
-        $translator = new Translator($this->atts['display_language']);
-        $translator->setTranslations($data);
+        // $translator = new Translator($this->atts['display_language']);
+        // $translator->setTranslations($data);
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -440,6 +441,9 @@ class Shortcode
 
     private function normalize($atts)
     {
+        // website's language
+        $siteLang = substr(get_locale(), 0, 2);
+
         // sanatize all fields
         foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
@@ -447,7 +451,7 @@ class Shortcode
 
         // set display_language / default: website's language
         if (empty($atts['display_language'])) {
-            $atts['display_language'] = substr(get_locale(), 0, 2);
+            $atts['display_language'] = $siteLang;
         }else{
             $atts['display_language'] = strtolower($atts['display_language']);
         }
@@ -505,9 +509,9 @@ class Shortcode
         }
 
         // no data
-        if (empty($atts['nodata']) && !empty($this->options['basic_nodata'])) {
+        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $siteLang])) {
             // we allow nodata to be empty in case users don't want any output 
-            $atts['nodata'] = $this->options['basic_nodata'];
+            $atts['nodata'] = $this->options['basic_nodata_' . $siteLang];
         }
 
         // hstart

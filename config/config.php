@@ -44,13 +44,13 @@ function getConstants()
 
     $aTmp = getShortcodeSettings();
 
-    foreach($aTmp['lectures']['color']['values'] as $aVals){
-        if (!empty($aVals['id'])){
+    foreach ($aTmp['lectures']['color']['values'] as $aVals) {
+        if (!empty($aVals['id'])) {
             $options['colors'][] = $aVals['id'];
         }
     }
 
-    foreach($aTmp['lectures']['format']['values'] as $aVals){
+    foreach ($aTmp['lectures']['format']['values'] as $aVals) {
         $options['formats'][] = $aVals['id'];
     }
 
@@ -87,13 +87,39 @@ function getSections()
     ];
 }
 
+
 /**
  * Gibt die Einstellungen der Optionsfelder zurück.
  * @return array [description]
  */
 function getFields()
 {
-    return [
+
+    // generate fields for nodata by available languages
+    $aNodata = [];
+    // echo '<pre>';
+    // var_dump(get_available_languages());
+    // exit;
+
+    $aLanguageLocals = array_map(function ($item) {
+        return substr($item, 0, 2);
+    }, get_available_languages());
+    $aLanguageLocals = array_unique($aLanguageLocals);
+    sort($aLanguageLocals, SORT_NATURAL);
+
+    foreach ($aLanguageLocals as $lang) {
+        $aNodata[] = [
+            'name' => 'nodata_' . $lang,
+            'label' => __('No data for language', 'rrze-lectures') . ' ' . strtoupper($lang),
+            'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
+            'placeholder' => '',
+            'type' => 'text',
+            'default' => __('No matching entries found.', 'rrze-lectures'),
+            'sanitize_callback' => 'sanitize_text_field',
+        ];
+    }
+
+    $aRet = [
         'basic' => [
             [
                 'name' => 'ApiKey',
@@ -113,17 +139,12 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
-            [
-                'name' => 'nodata',
-                'label' => __('No data', 'rrze-lectures'),
-                'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
-                'placeholder' => '',
-                'type' => 'text',
-                'default' => __('No matching entries found.', 'rrze-lectures'),
-                'sanitize_callback' => 'sanitize_text_field',
-            ],
         ],
     ];
+
+    $aRet['basic'] = array_merge($aRet['basic'], $aNodata);
+
+    return $aRet;
 }
 
 /**
@@ -176,7 +197,8 @@ function getShortcodeSettings()
             'degree' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Degree', 'rrze-lectures'), // Studiengang
+                'label' => __('Degree', 'rrze-lectures'),
+                // Studiengang
                 'type' => 'string',
             ],
             'sem' => [
@@ -292,7 +314,8 @@ function getShortcodeSettings()
     ];
 }
 
-function getSanitizerMap(){
+function getSanitizerMap()
+{
     return [
         'startdate' => 'date',
         'enddate' => 'date',
