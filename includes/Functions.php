@@ -91,7 +91,7 @@ class Functions
                         case 3:
                             $sem = 'WiSe'; // $year does not change
                             break;
-                        case 4: 
+                        case 4:
                             $sem = 'SoSe';
                             $year += 1;
 
@@ -142,19 +142,38 @@ class Functions
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
-            if (!empty($attVal)){
-                $aTmp = array_map('trim', explode(',', $attVal));
-
-                // check if 10 figures hex 
-                if ($dipField == 'providerValues.courses.course_responsible.identifier') {
-                    foreach ($aTmp as $nr => $val) {
-                        if (!(ctype_xdigit($val) && strlen($val) == 10)) {
-                            unset($aTmp[$nr]);
+            if (!empty($attVal)) {
+                if ($dipField == 'lecturerName') {
+                    $aLecturers = array_map('trim', explode(';', $attVal));
+                    foreach($aLecturers as $lectureName){
+                        $aParts = array_map('trim', explode(',', $lectureName));
+                        $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . $aParts[0];
+                        if (!empty($aParts[1])){
+                            $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '[in]=' : '=') . $aParts[1];
                         }
                     }
+
+                    // 2DO:
+                    // (lastname1 AND firstname1) OR (lastname2) OR (lastname3 AND firstname3)
+                    // see:
+                    // use [or] to or value criteria
+                    // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
+
+                } else {
+                    $aTmp = array_map('trim', explode(',', $attVal));
+
+                    // check if 10 figures hex 
+                    if ($dipField == 'providerValues.courses.course_responsible.identifier') {
+                        foreach ($aTmp as $nr => $val) {
+                            if (!(ctype_xdigit($val) && strlen($val) == 10)) {
+                                unset($aTmp[$nr]);
+                            }
+                        }
+                    }
+
+                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
+
                 }
-    
-                $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
             }
         }
 
@@ -196,7 +215,7 @@ class Functions
 
     public function adminEnqueueScripts()
     {
-        
+
         wp_enqueue_script(
             'rrze-lectures-ajax',
             plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
@@ -347,10 +366,11 @@ class Functions
     //     return $ret;
     // }
 
-    public static function isMaintenanceMode(){        
-        if(is_multisite()){
+    public static function isMaintenanceMode()
+    {
+        if (is_multisite()) {
             $settingsOptions = get_site_option('rrze_settings');
-            if (!empty($settingsOptions->plugins->dip_maintenance_mode)){
+            if (!empty($settingsOptions->plugins->dip_maintenance_mode)) {
                 return true;
             }
         }
