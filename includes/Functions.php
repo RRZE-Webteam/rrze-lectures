@@ -281,7 +281,10 @@ class Functions
     public function ajaxGetFAUOrgNr()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
-        $inputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+
+        $inputs = array_map(function($a){
+            return sanitize_text_field($a);
+        }, $_POST['data']);
 
         $aFieldnames = [
             __('FAU Org Number', 'rrze-lectures'),
@@ -296,10 +299,14 @@ class Functions
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
 
-        $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') . '&q=' . urlencode(sanitize_text_field($keyword));
+        $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') . '&q=' . urlencode($keyword);
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
+
+        // echo "<pre>";
+        // var_dump($response);
+        // exit;
 
         if (!$response['valid']) {
             return $ret;

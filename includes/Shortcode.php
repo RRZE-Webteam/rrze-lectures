@@ -125,25 +125,29 @@ class Shortcode
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
                 if (!empty($this->atts['degree'])) {
-                    $attrs .= ';providerValues.module.module_cos.subject';
+                    $attrs .= ';providerValues.modules.modules_cos.subject';
                 }
                 break;
             case 'tabs':
                 default:
-                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
+                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.modules';
                 $attrs = ''; // TEST
         }
 
         // echo '$attrs = ' . $attrs;
         // exit;
+        $attrs = ''; // TEST
 
         $aLQ = [];
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
-        if (!empty($this->atts['lecturer_idm'])) {
-            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        }elseif (!empty($this->atts['lecturer_identifier'])) {
-            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+        if (!empty($this->atts['lecturer_name'])) {
+            
+            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_name'];
+        }elseif (!empty($this->atts['lecturer_idm'])) {
+                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
+            }elseif (!empty($this->atts['lecturer_identifier'])) {
+                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         }elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['name'] = $this->atts['lecture_name'];
         } else {
@@ -160,7 +164,7 @@ class Shortcode
         }
 
         if (!empty($this->atts['degree'])) {
-            $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
+            $aLQ['providerValues.modules.modules_cos.subject'] = $this->atts['degree'];
         }
 
         if (!empty($this->atts['teaching_language'])) {
@@ -196,6 +200,13 @@ class Shortcode
             }
         }
 
+        if (isset($_GET["debug"])){
+            echo 'pure DIP feedback before anything else<br>';
+            echo '<pre>';
+            var_dump($data);
+            exit;
+        }
+
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
             foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
@@ -207,6 +218,7 @@ class Shortcode
             }
 
         }
+
 
         if (isset($_GET["debug"])){
             echo 'before sanitizeLectures<br>';
@@ -220,8 +232,8 @@ class Shortcode
         Sanitizer::sanitizeLectures($data);
 
         // get the array elements of multilanguage fields from API:
-        // $translator = new Translator($this->atts['display_language']);
-        // $translator->setTranslations($data);
+        $translator = new Translator($this->atts['display_language']);
+        $translator->setTranslations($data);
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -297,6 +309,11 @@ class Shortcode
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
+
+                    // echo '<pre>';
+                    // var_dump($aEntries);
+                    // exit;
+
                     // $name = $aEntries['providerValues']['event']['title'];
                     $name = $aEntries['name'];
                     $aTmp2[$name] = $aEntries;
@@ -322,8 +339,8 @@ class Shortcode
 
             foreach ($aData as $type => $aVal) {
                 foreach ($aVal as $title => $aLectures) {
-                    foreach ($aLectures['providerValues']['module'] as $mNr => $aModules) {
-                        foreach ($aModules['module_cos'] as $cNr => $aDetails) {
+                    foreach ($aLectures['providerValues']['modules'] as $mNr => $aModules) {
+                        foreach ($aModules['modules_cos'] as $cNr => $aDetails) {
                             if (in_array($aDetails['subject'], $aGivenDegrees)) {
                                 $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
                             }
