@@ -5,8 +5,8 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
+// use RRZE\Lectures\Translator;
 use RRZE\Lectures\Template;
-
 
 /**
  * Shortcode
@@ -72,8 +72,9 @@ class Shortcode
      */
     public function shortcodeLectures($atts, $content = NULL)
     {
+
         if (Functions::isMaintenanceMode()){
-            return "Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.";
+            return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
         }
         
         $tsStart = microtime(true);
@@ -124,25 +125,29 @@ class Shortcode
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
                 if (!empty($this->atts['degree'])) {
-                    $attrs .= ';providerValues.module.module_cos.subject';
+                    $attrs .= ';providerValues.modules.modules_cos.subject';
                 }
                 break;
             case 'tabs':
                 default:
-                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.module';
+                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.modules';
                 $attrs = ''; // TEST
         }
 
         // echo '$attrs = ' . $attrs;
         // exit;
+        $attrs = ''; // TEST
 
         $aLQ = [];
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
-        if (!empty($this->atts['lecturer_idm'])) {
-            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        }elseif (!empty($this->atts['lecturer_identifier'])) {
-            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+        if (!empty($this->atts['lecturer_name'])) {
+            
+            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_name'];
+        }elseif (!empty($this->atts['lecturer_idm'])) {
+                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
+            }elseif (!empty($this->atts['lecturer_identifier'])) {
+                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         }elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['name'] = $this->atts['lecture_name'];
         } else {
@@ -159,7 +164,11 @@ class Shortcode
         }
 
         if (!empty($this->atts['degree'])) {
-            $aLQ['providerValues.module.module_cos.subject'] = $this->atts['degree'];
+            $aLQ['providerValues.modules.modules_cos.subject'] = $this->atts['degree'];
+        }
+
+        if (!empty($this->atts['teaching_language'])) {
+            $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset
@@ -191,6 +200,13 @@ class Shortcode
             }
         }
 
+        // if (isset($_GET["debug"])){
+        //     echo 'pure DIP feedback before anything else<br>';
+        //     echo '<pre>';
+        //     var_dump($data);
+        //     exit;
+        // }
+
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
             foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
@@ -203,22 +219,21 @@ class Shortcode
 
         }
 
-        // 2DO: bilingual
-        // |**display_language**|nein|"de" oder "en" oder "en:de" - Mit "en" werden die Felder nicht angezeigt, zu denen keine Übersetzung vorliegt. Soll in diesem Fall der deutsche Inhalt ausgeben werden, muss "en:de" verwendet werden.|Ist die Website nicht auf Deutsch eingestellt, werden die Lehrveranstaltungen samt Beschriftungen auf Englisch ausgeben, andernfalls auf Deutsch. Erfolgt die Ausgabe auf Englisch, wurden jedoch keine entsprechenden Übersetzungen in Campo eingegeben, werden diese Informationen nicht ausgegeben. Falls die deutsche Variante in diesen Fällen ausgeben werden soll, dann muss display_language="en:de" verwendet werden.|display_language="en" oder display_language="de" oder display_language="en:de"|
-        // website language can be de_DE, de_DE_formal ...
 
-        if (isset($_GET["debug"])){
-            echo 'before sanitizeLectures<br>';
-            echo '<pre>';
-            var_dump($data);
-            exit;
-        }
+        // if (isset($_GET["debug"])){
+        //     echo 'before sanitizeLectures<br>';
+        //     echo '<pre>';
+        //     var_dump($data);
+        //     exit;
+        // }
 
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
 
-
+        // get the array elements of multilanguage fields from API:
+        // $translator = new Translator($this->atts['display_language']);
+        // $translator->setTranslations($data);
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -294,6 +309,11 @@ class Shortcode
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
+
+                    // echo '<pre>';
+                    // var_dump($aEntries);
+                    // exit;
+
                     // $name = $aEntries['providerValues']['event']['title'];
                     $name = $aEntries['name'];
                     $aTmp2[$name] = $aEntries;
@@ -319,8 +339,8 @@ class Shortcode
 
             foreach ($aData as $type => $aVal) {
                 foreach ($aVal as $title => $aLectures) {
-                    foreach ($aLectures['providerValues']['module'] as $mNr => $aModules) {
-                        foreach ($aModules['module_cos'] as $cNr => $aDetails) {
+                    foreach ($aLectures['providerValues']['modules'] as $mNr => $aModules) {
+                        foreach ($aModules['modules_cos'] as $cNr => $aDetails) {
                             if (in_array($aDetails['subject'], $aGivenDegrees)) {
                                 $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
                             }
@@ -404,16 +424,14 @@ class Shortcode
 
         Functions::console_log('Accordion & first/last values set for template', $tsStart);
 
-
-
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
-                    if (isset($_GET["debug"])){
-                        echo '<pre>';
-                        var_dump($aDetails);
-                        exit;
-                    }
+                    // if (isset($_GET["debug"])){
+                    //     echo '<pre>';
+                    //     var_dump($aDetails);
+                    //     exit;
+                    // }
                     $content .= Template::getContent($template, $aDetails);
                 }
             }
@@ -440,9 +458,19 @@ class Shortcode
 
     private function normalize($atts)
     {
+        // website's language
+        $siteLang = substr(get_locale(), 0, 2);
+
         // sanatize all fields
         foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
+        }
+
+        // set display_language / default: website's language
+        if (empty($atts['display_language'])) {
+            $atts['display_language'] = $siteLang;
+        }else{
+            $atts['display_language'] = strtolower($atts['display_language']);
         }
 
         // dynamically generate hide vars
@@ -498,9 +526,9 @@ class Shortcode
         }
 
         // no data
-        if (empty($atts['nodata']) && !empty($this->options['basic_nodata'])) {
+        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $siteLang])) {
             // we allow nodata to be empty in case users don't want any output 
-            $atts['nodata'] = $this->options['basic_nodata'];
+            $atts['nodata'] = $this->options['basic_nodata_' . $siteLang];
         }
 
         // hstart

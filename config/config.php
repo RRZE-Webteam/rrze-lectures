@@ -15,6 +15,13 @@ function getOptionName()
     return 'rrze-lectures';
 }
 
+function getAvailableLanguages()
+{
+    return class_exists('\RRZE\Multilang\Locale') ? \RRZE\Multilang\Locale::getAvailableLanguages() : null;
+}
+
+
+// getLanguageNativeName
 function getConstants()
 {
     $options = array(
@@ -44,13 +51,13 @@ function getConstants()
 
     $aTmp = getShortcodeSettings();
 
-    foreach($aTmp['lectures']['color']['values'] as $aVals){
-        if (!empty($aVals['id'])){
+    foreach ($aTmp['lectures']['color']['values'] as $aVals) {
+        if (!empty($aVals['id'])) {
             $options['colors'][] = $aVals['id'];
         }
     }
 
-    foreach($aTmp['lectures']['format']['values'] as $aVals){
+    foreach ($aTmp['lectures']['format']['values'] as $aVals) {
         $options['formats'][] = $aVals['id'];
     }
 
@@ -87,32 +94,15 @@ function getSections()
     ];
 }
 
+
 /**
  * Gibt die Einstellungen der Optionsfelder zurück.
  * @return array [description]
  */
 function getFields()
 {
-    return [
+    $aRet = [
         'basic' => [
-            // [
-            //     'name' => 'url',
-            //     'label' => __('Link to DIP', 'rrze-lectures'),
-            //     'desc' => __('Hier fehlt noch der Link zur Doku oder doch zum Vorlesungsverzeichnis. Dieser Link wird nur als Anzeige verwendet, nicht als API', 'rrze-lectures'),
-            //     'placeholder' => 'https://api.fau.de/pub/v1/vz/',
-            //     'type' => 'text',
-            //     'default' => 'https://api.fau.de/pub/v1/vz/',
-            //     'sanitize_callback' => 'sanitize_url',
-            // ],
-            // [
-            //     'name' => 'linkTxt',
-            //     'label' => __('Text for the link to DIP (oder zum Vorlesungsverzeichnis', 'rrze-lectures'),
-            //     'desc' => __('', 'rrze-lectures'),
-            //     'placeholder' => __('', 'rrze-lectures'),
-            //     'type' => 'text',
-            //     'default' => __('Link to DIP', 'rrze-lectures'),
-            //     'sanitize_callback' => 'sanitize_text_field',
-            // ],
             [
                 'name' => 'ApiKey',
                 'label' => __('DIP API-Key', 'rrze-lectures'),
@@ -131,17 +121,27 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
-            [
-                'name' => 'nodata',
-                'label' => __('No data', 'rrze-lectures'),
-                'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
-                'placeholder' => '',
-                'type' => 'text',
-                'default' => __('No matching entries found.', 'rrze-lectures'),
-                'sanitize_callback' => 'sanitize_text_field',
-            ],
         ],
     ];
+
+    // generate fields for nodata by available languages
+    $aNodata = [];
+
+    foreach (getAvailableLanguages() as $local => $lang) {
+        $aNodata[] = [
+            'name' => 'nodata_' . substr($local, 0, 2),
+            'label' => __('No data', 'rrze-lectures') . ' - ' . preg_replace('/\((.+?)\)/', '', $lang),
+            'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
+            'placeholder' => '',
+            'type' => 'text',
+            'default' => __('No matching entries found.', 'rrze-lectures'),
+            'sanitize_callback' => 'sanitize_text_field',
+        ];
+    }
+
+    $aRet['basic'] = array_merge($aRet['basic'], $aNodata);
+
+    return $aRet;
 }
 
 /**
@@ -185,6 +185,12 @@ function getShortcodeSettings()
                 'label' => __('Lecturer identifier', 'rrze-lectures'),
                 'type' => 'string',
             ],
+            'lecturer_name' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Lecture\'s name (format: "family name, given name", separate names by semicolon. F.e.: "family name A, given nameA; family name B, given name B; given name C" ', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
@@ -194,7 +200,8 @@ function getShortcodeSettings()
             'degree' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Degree', 'rrze-lectures'), // Studiengang
+                'label' => __('Degree', 'rrze-lectures'),
+                // Studiengang
                 'type' => 'string',
             ],
             'sem' => [
@@ -206,22 +213,8 @@ function getShortcodeSettings()
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Display language', 'rrze-lectures'),
-                'type' => 'array',
-                'values' => [
-                    [
-                        'id' => '',
-                        'val' => __('don\'t filter', 'rrze-lectures'),
-                    ],
-                    [
-                        'id' => 'en',
-                        'val' => __('English', 'rrze-lectures'),
-                    ],
-                    [
-                        'id' => 'de',
-                        'val' => __('German', 'rrze-lectures'),
-                    ],
-                ],
+                'label' => __('Teaching language (f.e. "en" or "de". "en:de" <= fallback is set to "de"', 'rrze-lectures'),
+                'type' => 'string',
             ],
             'guest' => [
                 'default' => '',
@@ -324,7 +317,8 @@ function getShortcodeSettings()
     ];
 }
 
-function getSanitizerMap(){
+function getSanitizerMap()
+{
     return [
         'startdate' => 'date',
         'enddate' => 'date',
