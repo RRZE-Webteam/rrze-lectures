@@ -183,6 +183,9 @@ class Shortcode
 
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
+            // echo '<pre>';
+            // var_dump($response);
+            // exit;
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -200,11 +203,15 @@ class Shortcode
             }
         }
 
+        if (empty($data)) {
+            return $this->atts['nodata'];
+        }
+
         // if (isset($_GET["debug"])){
         //     echo 'pure DIP feedback before anything else<br>';
-        //     echo '<pre>';
-        //     var_dump($data);
-        //     exit;
+            // echo '<pre>';
+            // var_dump($data);
+            // exit;
         // }
 
         // delete all courses that don't fit to given semester
@@ -220,20 +227,23 @@ class Shortcode
         }
 
 
-        // if (isset($_GET["debug"])){
-        //     echo 'before sanitizeLectures<br>';
-        //     echo '<pre>';
-        //     var_dump($data);
-        //     exit;
-        // }
+        if (isset($_GET["debug"])){
+            echo 'before sanitizeLectures<br>';
+            echo '<pre>';
+            var_dump($data);
+            exit;
+        }
 
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
 
         // get the array elements of multilanguage fields from API:
-        // $translator = new Translator($this->atts['display_language']);
-        // $translator->setTranslations($data);
+        $translator = new Translator($this->atts['display_language']);
+        $translator->setTranslations($data);
+
+        exit;
+
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
