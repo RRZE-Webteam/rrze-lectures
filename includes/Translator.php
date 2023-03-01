@@ -242,16 +242,16 @@ class Translator
 // exit;
 
 // exit;
-        $aData = array_walk_recursive($aData, function(&$item, $key) use (&$aAlLangCodes){
-            echo '<pre>asdf';
-            var_dump($aAlLangCodes);
-            exit;
+        // $aData = array_walk_recursive($aData, function(&$item, $key) use (&$aAlLangCodes){
+        //     echo '<pre>asdf';
+        //     var_dump($aAlLangCodes);
+        //     exit;
 
-            if (in_array($key, $aAlLangCodes)){
-                // 2-letter digit => might be a language code what DIP delivers as array key
-                $item = $this->getTranslation();
-            }
-        });
+        //     if (in_array($key, $aAlLangCodes)){
+        //         // 2-letter digit => might be a language code what DIP delivers as array key
+        //         $item = $this->getTranslation();
+        //     }
+        // });
 
 
         // array_walk multidimensional
@@ -522,9 +522,9 @@ Improve
 
 
                 foreach ($this->multlangFields['courses'] as $field) {
-                    echo '<pre>' . $field . '<br>' . 
-                    // $this->getTranslation($aCourses[$field]) . ' +';
-                    var_dump($aData[$nr]['providerValues']['courses'][$cNr]);
+                    // echo '<pre>' . $field . '<br>' . 
+                    // // $this->getTranslation($aCourses[$field]) . ' +';
+                    // var_dump($aData[$nr]['providerValues']['courses'][$cNr]);
                     // exit;
                     $aData[$nr]['providerValues']['courses'][$cNr][$field] = $this->getTranslation($aCourses[$field]);
                 }

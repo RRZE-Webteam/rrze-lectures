@@ -5,7 +5,7 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
-use RRZE\Lectures\Translator;
+// use RRZE\Lectures\Translator;
 use RRZE\Lectures\Template;
 
 /**
@@ -74,7 +74,7 @@ class Shortcode
     {
 
         if (Functions::isMaintenanceMode()){
-            return "Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.";
+            return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
         }
         
         $tsStart = microtime(true);
@@ -200,12 +200,12 @@ class Shortcode
             }
         }
 
-        if (isset($_GET["debug"])){
-            echo 'pure DIP feedback before anything else<br>';
-            echo '<pre>';
-            var_dump($data);
-            exit;
-        }
+        // if (isset($_GET["debug"])){
+        //     echo 'pure DIP feedback before anything else<br>';
+        //     echo '<pre>';
+        //     var_dump($data);
+        //     exit;
+        // }
 
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
@@ -220,20 +220,20 @@ class Shortcode
         }
 
 
-        if (isset($_GET["debug"])){
-            echo 'before sanitizeLectures<br>';
-            echo '<pre>';
-            var_dump($data);
-            exit;
-        }
+        // if (isset($_GET["debug"])){
+        //     echo 'before sanitizeLectures<br>';
+        //     echo '<pre>';
+        //     var_dump($data);
+        //     exit;
+        // }
 
 
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Sanitizer::sanitizeLectures($data);
 
         // get the array elements of multilanguage fields from API:
-        $translator = new Translator($this->atts['display_language']);
-        $translator->setTranslations($data);
+        // $translator = new Translator($this->atts['display_language']);
+        // $translator->setTranslations($data);
 
         Functions::console_log('Fetched data from DIP', $tsStart);
 
@@ -427,11 +427,11 @@ class Shortcode
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
-                    if (isset($_GET["debug"])){
-                        echo '<pre>';
-                        var_dump($aDetails);
-                        exit;
-                    }
+                    // if (isset($_GET["debug"])){
+                    //     echo '<pre>';
+                    //     var_dump($aDetails);
+                    //     exit;
+                    // }
                     $content .= Template::getContent($template, $aDetails);
                 }
             }
