@@ -36,21 +36,6 @@ class Translator
 
     }
 
-    // public function current()
-    // {
-    //     $current = parent::current();
-    //     switch($this->key()) {
-    //         case 'de':
-    //             $current = strtolower($current) . ' JUHU';
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    //     return $current;
-    // }
-
-
-    
     /* returns translations by language (given attribute and/or settings value) or '' */
     private function getTranslation(&$aIn)
     {
@@ -69,180 +54,86 @@ class Translator
     }
 
 
-    // private function maybeSetTranslation(&$item, $key)
-    // {
-    //     $this->aPath .= $key . '/';
-    //     // if (in_array($key, $this->all_language_codes)) {
-    //     //     $item = 'PHP Rocks'; // Do This!
-    //     //     var_dump($this->aPath);
-    //     //     exit;
-    //     //     // prev($this->mirrorData); 
-
-    //     // }
-    //     var_dump($this->aPath);
-
-    // }
-
-
     public function setTranslations(&$aData)
     {
-
-        // echo '<pre>';
-        // var_dump($aData);
-
         foreach ($aData as $nr => $aLecture) {
-            foreach ($aLecture['main'] as $key => $field) {
-                if (in_array($key, $this->all_language_codes)) {
-                    $aData[$nr]['main'][$field] = $this->getTranslation($aData[$nr]['main'][$field][$key]);
-                    echo '<pre>';
-                    echo 'translated! ';
-                    var_dump($aData);
-                    exit;
+            foreach ($aLecture as $fieldName => $field) {
+                // main part
+                if (is_array($field)) {
+                    foreach ($field as $fKey => $val) {
+                        if (in_array($fKey, $this->all_language_codes)) {
+                            $translated = $this->getTranslation($aData[$nr][$fieldName]);
+                            unset($aData[$nr][$fieldName]); // drop array with all languages
+                            $aData[$nr][$fieldName] = $translated;
+                        }
+                    }
+                }
+            }
+
+            foreach ($aLecture['providerValues']['event'] as $fieldName => $field) {
+                // event part
+                if (is_array($field)) {
+                    foreach ($field as $fKey => $val) {
+                        if (in_array($fKey, $this->all_language_codes)) {
+                            $translated = $this->getTranslation($aData[$nr]['providerValues']['event'][$fieldName]);
+                            unset($aData[$nr]['providerValues']['event'][$fieldName]); // drop array with all languages
+                            $aData[$nr]['providerValues']['event'][$fieldName] = $translated;
+                        }
+                    }
+                }
+            }
+
+            $aSubs = [
+                'courses',
+                'modules',
+            ];
+
+            foreach ($aSubs as $subName) {
+                foreach ($aLecture['providerValues'][$subName] as $cNr => $aCourse) {
+                    foreach ($aCourse as $coursefieldName => $aTranslatable) {
+                        if (is_array($aTranslatable)) {
+                            foreach ($aTranslatable as $lang => $val) {
+                                if (in_array($lang, $this->all_language_codes)) {
+                                    $translated = $this->getTranslation($aLecture['providerValues'][$subName][$coursefieldName]);
+                                    unset($aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName]); // drop all other languages
+                                    $aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName] = $translated;
+                                }
+                            }
+                        }
+
+                        if ($coursefieldName == 'planned_dates') {
+                            foreach ($aTranslatable as $planed_datesNr => $aPlanedDatesFields) {
+                                foreach ($aPlanedDatesFields as $fieldName => $aVals) {
+                                    if (is_array($aVals)) {
+                                        foreach ($aVals as $lang => $val) {
+                                            if (in_array($lang, $this->all_language_codes)) {
+                                                $translated = $this->getTranslation($aLecture['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName]);
+                                                unset($aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName]); // drop all other languages
+                                                $aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName] = $translated;
+                                            }
+                                        }
+                                    }
+                                    if ($fieldName == 'individual_dates') {
+                                        foreach ($aVals as $dateNr => $aDateDetails) {
+                                            foreach ($aDateDetails as $fN => $aV) {
+                                                if (is_array($aV)) {
+                                                    foreach ($aV as $lang => $val) {
+                                                        if (in_array($lang, $this->all_language_codes)) {
+                                                            $translated = $this->getTranslation($aLecture['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN]);
+                                                            unset($aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN]); // drop all other languages
+                                                            $aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN] = $translated;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-
-
-            // // echo '<pre>';
-            // // var_dump($aLecture['providerValues']['courses']);
-            // // exit;
-
-            // // foreach($aLectures as $lNr => $aLecture){
-
-            // foreach ($aLecture['providerValues']['event_orgunit'] as $eNr => $aDetails) {
-
-            //     foreach ($this->multlangFields['event_orgunit'] as $field) {
-            //         $aData[$nr]['providerValues']['event_orgunit'][$eNr][$field] = $this->getTranslation($aDetails[$field]);
-            //     }
-            // }
-
-            // // foreach($aLecture['providerValues']['event'] as $eNr => $aDetails){
-            // //     foreach($this->multlangFields['event'] as $field){
-            // //         $aData[$nr]['providerValues']['event'][$eNr][$field] = $this->getTranslation($aDetails[$field]);
-            // //     }
-            // // }
-
-            // foreach ($aLecture['providerValues']['courses'] as $cNr => $aCourses) {
-            //     // echo '<pre>';
-            //     // var_dump($aLecture['providerValues']);
-            //     // exit;
-
-
-            //     foreach ($this->multlangFields['courses'] as $field) {
-            //         // echo '<pre>' . $field . '<br>' . 
-            //         // // $this->getTranslation($aCourses[$field]) . ' +';
-            //         // var_dump($aData[$nr]['providerValues']['courses'][$cNr]);
-            //         // exit;
-            //         $aData[$nr]['providerValues']['courses'][$cNr][$field] = $this->getTranslation($aCourses[$field]);
-            //     }
-
-            //     // if (!empty($aCourses['planned_dates'])){
-            //     //     echo '<pre>';
-            //     //     var_dump($aCourses['planned_dates']);
-            //     //     exit;
-            //     // }else{
-            //     //     echo '<pre>';
-            //     //     var_dump($aCourses);
-            //     //     exit;
-
-            //     // }
-
-            //     if (!empty($aCourses['planned_dates'])) {
-            //         foreach ($aCourses['planned_dates'] as $pNr => $aDetails) {
-            //             foreach ($this->multlangFields['planned_dates'] as $field) {
-            //                 $aData[$nr]['providerValues']['courses'][$cNr]['planned_dates'][$pNr][$field] = $this->getTranslation($aDetails[$field]);
-            //             }
-            //         }
-            //     }
-            // }
-
-            // foreach ($aLecture['providerValues']['modules'] as $mNr => $aModule) {
-            //     foreach ($this->multlangFields['modules'] as $field) {
-            //         $aData[$nr]['providerValues']['modules'][$mNr][$field] = $this->getTranslation($aModule[$field]);
-            //     }
-            //     foreach ($aModule['modules_cos'] as $iNr => $aDetails) {
-            //         foreach ($this->multlangFields['modules_cos'] as $field) {
-            //             $aData[$nr]['providerValues']['modules'][$mNr]['modules_cos'][$iNr][$field] = $this->getTranslation($aDetails[$field]);
-            //         }
-            //     }
-            //     foreach ($aModule['stud'] as $iNr => $aDetails) {
-            //         foreach ($this->multlangFields['stud'] as $field) {
-            //             $aData[$nr]['providerValues']['modules'][$mNr]['stud'][$iNr][$field] = $this->getTranslation($aDetails[$field]);
-            //         }
-            //     }
-            //     foreach ($aModule['modules_restrictions'] as $iNr => $aDetails) {
-            //         foreach ($this->multlangFields['stud'] as $field) {
-            //             $aData[$nr]['providerValues']['modules'][$mNr]['modules_restrictions'][$iNr][$field] = $this->getTranslation($aDetails[$field]);
-            //         }
-            //     }
-            // }
-            // }
-        }
-    }
-
-
-
-
-
-
-
-        // $test = json_decode(json_encode($aData));
-        // $iterator = new Translator(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($test), \RecursiveIteratorIterator::SELF_FIRST));
-
-
-        // $iterator = new Translator(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($aData), \RecursiveIteratorIterator::SELF_FIRST));
-        // foreach ($iterator as $k => $v) {
-
-        //     // // if (is_array($k)){
-        //     // //     echo 'key ist ein array';
-        //     // //     exit;
-        //     // // }
-        //     // // if (is_array($v)){
-        //     // //     echo 'value ist ein array bei key=' . $k;
-        //     // //     exit;
-        //     // // }
-        //     // // echo "key = " . $k . ' ';
-        //     // if (is_array($v)) {
-        //     //     // echo '<pre>';
-        //     //     // var_dump($v);
-
-        //     //     if (!empty(array_intersect(array_keys($v), $this->all_language_codes))){
-        //     //         // echo 'found';
-        //     //         // exit;
-
-        //     //         // $k = $this->getTranslation($v);
-        //     //         // echo '<pre>';
-        //     //         // var_dump($k);
-        //     //         // exit;
-
-        //     //         // $iterator->getInnerIterator()->offsetSet($k, 0);
-        //     //         $iterator[$k] = 'JUHU';
-
-        //     //         // exit;
-
-        //     //     }
-        //     // }
-
-        //     // echo '<hr>';
-        // }
-
-        // echo '<pre>test ist ';
-        // var_dump($aData);
-        // // var_dump($iterator->getArrayCopy());
-        // // var_dump($iterator);
-
-
-        // echo 'setTranslations()<br>';
-
-        // // var_dump($aData);
-        // exit;
-
-        // // array_walk_recursive($aData, [$this, 'maybeSetTranslation']);
-
-        // // var_dump($aData);
-        // // exit;
-
-
-
     }
 }

@@ -54,9 +54,10 @@ class DIPAPI
                 'X-Api-Key' => $this->getKey(),
                 ]
             ];
-
-            // echo $this->api . $endpoint . '/' . $sParam;
-            // exit;
+            
+        if (isset($_GET["debug"])){
+            echo $this->api . $endpoint . '/' . $sParam;
+        }
 
         $apiResponse = wp_remote_get($this->api . $endpoint . '/' . $sParam, $aGetArgs);
 
