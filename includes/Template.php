@@ -108,14 +108,6 @@ class Template
 
     public static function makeCollapseTitle(&$data, &$group)
     {
-
-
-        // echo '<pre>';
-        // var_dump($data);
-        // exit;
-
-        // $ret = '?';
-
         $name = htmlentities($data['name']);
 
         switch ($group) {

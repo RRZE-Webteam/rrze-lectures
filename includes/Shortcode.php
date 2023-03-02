@@ -136,7 +136,7 @@ class Shortcode
 
         // echo '$attrs = ' . $attrs;
         // exit;
-        $attrs = ''; // TEST
+        // $attrs = ''; // TEST
 
         $aLQ = [];
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
@@ -177,6 +177,9 @@ class Shortcode
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
+        // echo $dipParams;
+        // exit;
+
         Functions::console_log('Set params for DIP', $tsStart);
 
         $data = [];
@@ -186,9 +189,6 @@ class Shortcode
 
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
-            // echo '<pre>';
-            // var_dump($response);
-            // exit;
 
             if (!$response['valid']) {
                 return $this->atts['nodata'];
@@ -237,21 +237,12 @@ class Shortcode
         // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         
+
         Sanitizer::sanitizeLectures($data);
-
-        // echo '<pre>';
-
-        // echo 'VORHER<br>';
-        // var_dump($data);
 
         // get the array elements of multilanguage fields from API:
         $translator = new Translator($this->atts['display_language']);
         $translator->setTranslations($data);
-
-        // echo 'NAVHHER<br>';
-        // var_dump($data);
-        // exit;
-
 
         Functions::console_log('after Translator ' . json_encode($data), $tsStart);
 
@@ -327,12 +318,6 @@ class Shortcode
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
-
-                    // echo '<pre>';
-                    // var_dump($aEntries);
-                    // exit;
-
-                    // $name = $aEntries['providerValues']['event']['title'];
                     $name = $aEntries['name'];
                     $aTmp2[$name] = $aEntries;
                 }

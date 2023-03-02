@@ -85,43 +85,45 @@ class Translator
 
             $aSubs = [
                 'courses',
-                'modules',
+                'modules', // depending on $format not all DIP fields are avaliable
             ];
 
             foreach ($aSubs as $subName) {
-                foreach ($aLecture['providerValues'][$subName] as $cNr => $aCourse) {
-                    foreach ($aCourse as $coursefieldName => $aTranslatable) {
-                        if (is_array($aTranslatable)) {
-                            foreach ($aTranslatable as $lang => $val) {
-                                if (in_array($lang, $this->all_language_codes)) {
-                                    $translated = $this->getTranslation($aLecture['providerValues'][$subName][$coursefieldName]);
-                                    unset($aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName]); // drop all other languages
-                                    $aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName] = $translated;
+                if (!empty($aLecture['providerValues'][$subName])) { // depending on $format not all DIP fields are avaliable
+                    foreach ($aLecture['providerValues'][$subName] as $cNr => $aCourse) {
+                        foreach ($aCourse as $coursefieldName => $aTranslatable) {
+                            if (is_array($aTranslatable)) {
+                                foreach ($aTranslatable as $lang => $val) {
+                                    if (in_array($lang, $this->all_language_codes)) {
+                                        $translated = $this->getTranslation($aLecture['providerValues'][$subName][$coursefieldName]);
+                                        unset($aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName]); // drop all other languages
+                                        $aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName] = $translated;
+                                    }
                                 }
                             }
-                        }
 
-                        if ($coursefieldName == 'planned_dates') {
-                            foreach ($aTranslatable as $planed_datesNr => $aPlanedDatesFields) {
-                                foreach ($aPlanedDatesFields as $fieldName => $aVals) {
-                                    if (is_array($aVals)) {
-                                        foreach ($aVals as $lang => $val) {
-                                            if (in_array($lang, $this->all_language_codes)) {
-                                                $translated = $this->getTranslation($aLecture['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName]);
-                                                unset($aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName]); // drop all other languages
-                                                $aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName] = $translated;
+                            if ($coursefieldName == 'planned_dates') {
+                                foreach ($aTranslatable as $planed_datesNr => $aPlanedDatesFields) {
+                                    foreach ($aPlanedDatesFields as $fieldName => $aVals) {
+                                        if (is_array($aVals)) {
+                                            foreach ($aVals as $lang => $val) {
+                                                if (in_array($lang, $this->all_language_codes)) {
+                                                    $translated = $this->getTranslation($aLecture['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName]);
+                                                    unset($aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName]); // drop all other languages
+                                                    $aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr][$fieldName] = $translated;
+                                                }
                                             }
                                         }
-                                    }
-                                    if ($fieldName == 'individual_dates') {
-                                        foreach ($aVals as $dateNr => $aDateDetails) {
-                                            foreach ($aDateDetails as $fN => $aV) {
-                                                if (is_array($aV)) {
-                                                    foreach ($aV as $lang => $val) {
-                                                        if (in_array($lang, $this->all_language_codes)) {
-                                                            $translated = $this->getTranslation($aLecture['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN]);
-                                                            unset($aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN]); // drop all other languages
-                                                            $aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN] = $translated;
+                                        if ($fieldName == 'individual_dates') {
+                                            foreach ($aVals as $dateNr => $aDateDetails) {
+                                                foreach ($aDateDetails as $fN => $aV) {
+                                                    if (is_array($aV)) {
+                                                        foreach ($aV as $lang => $val) {
+                                                            if (in_array($lang, $this->all_language_codes)) {
+                                                                $translated = $this->getTranslation($aLecture['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN]);
+                                                                unset($aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN]); // drop all other languages
+                                                                $aData[$nr]['providerValues']['courses'][$cNr][$coursefieldName][$planed_datesNr]['individual_dates'][$dateNr][$fN] = $translated;
+                                                            }
                                                         }
                                                     }
                                                 }

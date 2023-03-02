@@ -306,10 +306,6 @@ class Functions
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
 
-        // echo "<pre>";
-        // var_dump($response);
-        // exit;
-
         if (!$response['valid']) {
             return $ret;
         } else {
