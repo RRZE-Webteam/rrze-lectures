@@ -134,13 +134,7 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        // echo '$attrs = ' . $attrs;
-        // exit;
-        // $attrs = ''; // TEST
-
         $aLQ = [];
-        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
-
 
         // uses fauorgnr only if not looking for explicite lectures or lecturers
         if (!empty($this->atts['lecturer_name'])) {
@@ -156,6 +150,9 @@ class Shortcode
         }
 
         // all the other filters
+        // sem
+        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+
         // type
         if (!empty($this->atts['type'])) {
             $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
@@ -176,9 +173,6 @@ class Shortcode
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
-
-        // echo $dipParams;
-        // exit;
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -232,12 +226,9 @@ class Shortcode
         }
 
 
-
-
-        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+        // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+    
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
-        
-
         Sanitizer::sanitizeLectures($data);
 
         // get the array elements of multilanguage fields from API:
