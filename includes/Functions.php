@@ -23,8 +23,10 @@ class Functions
         add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
         add_action('wp_ajax_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
         add_action('wp_ajax_nopriv_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
+        
         // add_action('wp_ajax_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); // deactivated 2023-02-23 because it's not yet settled by CIO if we can present identifiers 
         // add_action('wp_ajax_nopriv_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); // deactivated 2023-02-23 because it's not yet settled by CIO if we can present identifiers 
+
         // add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
         // add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
         // add_action('wp_ajax_GenerateICS', [$this, 'ajaxGenerateICS']);
@@ -303,10 +305,6 @@ class Functions
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
-
-        // echo "<pre>";
-        // var_dump($response);
-        // exit;
 
         if (!$response['valid']) {
             return $ret;

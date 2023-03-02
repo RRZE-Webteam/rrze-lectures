@@ -134,15 +134,10 @@ class Shortcode
                 $attrs = ''; // TEST
         }
 
-        // echo '$attrs = ' . $attrs;
-        // exit;
-        $attrs = ''; // TEST
-
         $aLQ = [];
-        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
+        // uses fauorgnr only if not looking for explicite lectures or lecturers
         if (!empty($this->atts['lecturer_name'])) {
-            
             $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_name'];
         }elseif (!empty($this->atts['lecturer_idm'])) {
                 $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
@@ -154,24 +149,29 @@ class Shortcode
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
         }
 
+        // all the other filters
+        // sem
+        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+
+        // type
         if (!empty($this->atts['type'])) {
             $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
         }
-
+        // guest
         if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
             // we cannot use empty() because it can contain 0
             $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
         }
-
+        // degree
         if (!empty($this->atts['degree'])) {
             $aLQ['providerValues.modules.modules_cos.subject'] = $this->atts['degree'];
         }
-
+        // teaching_language (display_language works differently - it is not an attribute for the DIP-Campo-API)
         if (!empty($this->atts['teaching_language'])) {
             $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
         }
 
-        // we cannot use API parameter "sort" because it sorts per page not the complete dataset
+        // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
@@ -200,42 +200,42 @@ class Shortcode
             }
         }
 
-        // if (isset($_GET["debug"])){
-        //     echo 'pure DIP feedback before anything else<br>';
-        //     echo '<pre>';
-        //     var_dump($data);
-        //     exit;
-        // }
+        if (empty($data)) {
+            return $this->atts['nodata'];
+        }
+
+        Functions::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
 
         // delete all courses that don't fit to given semester
         foreach ($data as $nr => $aVal) {
             foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
-                if ($aDetails['semester'] != $this->atts['sem']) {
-                    unset($data[$nr]['providerValues']['courses'][$cNr]);
-                } else {
-                    $data[$nr]['providerValues']['courses'] = $aDetails;
+                if ($aDetails['semester'] == $this->atts['sem']) {
+                    if (empty($data[$nr]['providerValues']['courses_cleaned'])){
+                        $data[$nr]['providerValues']['courses_cleaned'] = [];
+                    }
+                    $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
                 }
+                unset($data[$nr]['providerValues']['courses'][$cNr]);
+            }
+            // clean up so we have exactly the same schema in $data again as given by DIP
+            if (!empty($data[$nr]['providerValues']['courses_cleaned'])){
+                $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
+                unset($data[$nr]['providerValues']['courses_cleaned']);
             }
 
         }
 
 
-        // if (isset($_GET["debug"])){
-        //     echo 'before sanitizeLectures<br>';
-        //     echo '<pre>';
-        //     var_dump($data);
-        //     exit;
-        // }
-
-
-        // 2DO: API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+        // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
+    
+        Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data);
 
         // get the array elements of multilanguage fields from API:
-        // $translator = new Translator($this->atts['display_language']);
-        // $translator->setTranslations($data);
+        $translator = new Translator($this->atts['display_language']);
+        $translator->setTranslations($data);
 
-        Functions::console_log('Fetched data from DIP', $tsStart);
+        Functions::console_log('after Translator ' . json_encode($data), $tsStart);
 
         if (empty($data)) {
             return $this->atts['nodata'];
@@ -309,12 +309,6 @@ class Shortcode
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
-
-                    // echo '<pre>';
-                    // var_dump($aEntries);
-                    // exit;
-
-                    // $name = $aEntries['providerValues']['event']['title'];
                     $name = $aEntries['name'];
                     $aTmp2[$name] = $aEntries;
                 }
@@ -427,11 +421,6 @@ class Shortcode
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
-                    // if (isset($_GET["debug"])){
-                    //     echo '<pre>';
-                    //     var_dump($aDetails);
-                    //     exit;
-                    // }
                     $content .= Template::getContent($template, $aDetails);
                 }
             }

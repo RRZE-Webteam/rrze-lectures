@@ -50,22 +50,9 @@ class Sanitizer
 
     public static function sanitizeLectures(&$data)
     {
+        array_walk_recursive($data, 'sanitize_text_field');
+        
         foreach ($data as $nr => $aEntries) {
-
-            // 2DO: sanitize_text_field() all other fields for output
-            if (!empty($data[$nr]['providerValues']['event_orgunit'])) {
-                foreach ($data[$nr]['providerValues']['event_orgunit'] as $oNr => $aOrgunit) {
-                    if (!empty($aOrgunit[$oNr]['orgunit'])) {
-                        $data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit'] = sanitize_text_field($data[$nr]['providerValues']['event_orgunit'][$oNr]['orgunit']);
-                    }
-                }
-            }
-
-            // event type
-            if (!empty($data[$nr]['providerValues']['event']['eventtype'])) {
-                $data[$nr]['providerValues']['event']['eventtype'] = sanitize_text_field($data[$nr]['providerValues']['event']['eventtype']);
-            }
-
             // set display_language_txt
             if (!empty($data[$nr]['providerValues']['courses']['display_language'])) {
                 $data[$nr]['providerValues']['courses']['display_language_txt'] = implode(' or ', $data[$nr]['providerValues']['courses']['display_language']);
