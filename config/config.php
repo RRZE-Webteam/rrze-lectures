@@ -17,7 +17,7 @@ function getOptionName()
 
 function getAvailableLanguages()
 {
-    return class_exists('\RRZE\Multilang\Locale') ? \RRZE\Multilang\Locale::getAvailableLanguages() : null;
+    return class_exists('\RRZE\Multilang\Locale') ? \RRZE\Multilang\Locale::getAvailableLanguages() : [];
 }
 
 
