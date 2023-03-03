@@ -252,6 +252,7 @@ class Shortcode
         // group & sort
         $aData = [];
 
+        // group by type
         foreach ($data as $nr => $aEntries) {
             $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
         }
