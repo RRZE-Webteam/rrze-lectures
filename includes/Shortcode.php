@@ -125,7 +125,7 @@ class Shortcode
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
 
                 if (!empty($this->atts['degree'])) {
-                    $attrs .= ';providerValues.modules.modules_cos.subject';
+                    $attrs .= ';providerValues.modules.module_cos.subject';
                 }
                 break;
             case 'tabs':
@@ -153,19 +153,24 @@ class Shortcode
         // sem
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
+        // BK 2023-03-03: type deactivated until DIP has fixed search by type (multilang)
         // type
-        if (!empty($this->atts['type'])) {
-            $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
-        }
+        // if (!empty($this->atts['type'])) {
+        //     $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
+        // }
+
         // guest
         if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
             // we cannot use empty() because it can contain 0
             $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
         }
+
+        // BK 2023-03-03: degree deactivated until DIP has fixed search by type (multilang)
         // degree
-        if (!empty($this->atts['degree'])) {
-            $aLQ['providerValues.modules.modules_cos.subject'] = $this->atts['degree'];
-        }
+        // if (!empty($this->atts['degree'])) {
+        //     $aLQ['providerValues.modules.modules_cos.subject'] = $this->atts['degree'];
+        // }
+
         // teaching_language (display_language works differently - it is not an attribute for the DIP-Campo-API)
         if (!empty($this->atts['teaching_language'])) {
             $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
@@ -228,6 +233,8 @@ class Shortcode
 
         // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
     
+
+
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data);
 
@@ -334,7 +341,7 @@ class Shortcode
             foreach ($aData as $type => $aVal) {
                 foreach ($aVal as $title => $aLectures) {
                     foreach ($aLectures['providerValues']['modules'] as $mNr => $aModules) {
-                        foreach ($aModules['modules_cos'] as $cNr => $aDetails) {
+                        foreach ($aModules['module_cos'] as $cNr => $aDetails) {
                             if (in_array($aDetails['subject'], $aGivenDegrees)) {
                                 $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
                             }
