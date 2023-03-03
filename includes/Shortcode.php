@@ -256,9 +256,6 @@ class Shortcode
             $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
         }
         unset($data); // free memory
-        // echo '<pre>nach eventtype group';
-        // var_dump($aData);
-        // exit;
 
         Functions::console_log('Group by eventtype completed', $tsStart);
 
