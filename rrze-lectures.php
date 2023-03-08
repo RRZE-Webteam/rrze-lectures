@@ -106,14 +106,14 @@ function activation()
     setFAUOrgNr();
 
     // Endpoint hinzufügen
-    add_endpoint(true);
+    // add_endpoint(true);
     flush_rewrite_rules();
 }
 
-function add_endpoint()
-{
-    add_rewrite_endpoint('lv_id', EP_PERMALINK | EP_PAGES);
-}
+// function add_endpoint()
+// {
+//     add_rewrite_endpoint('lv_id', EP_PERMALINK | EP_PAGES);
+// }
 
 /**
  * Wird durchgeführt, nachdem das Plugin deaktiviert wurde.
