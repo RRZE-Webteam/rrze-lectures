@@ -1,7 +1,7 @@
 # rrze-lectures
 
 - Version 1.x.x liefert nur eine Liste an Links zu Campo
-- ACHTUNG! Dieses Readme.md enthält auch Informationen zu Features, die noch nicht zur Verfügung stehen. Beachten Sie zu den Attributen den Hinweis **in Entwicklung** in der Spalte "Hinweis". Nutzen Sie bitte unsere Anleitung unter https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/ 
+- ACHTUNG! Dieses Readme.md enthält auch Informationen zu Features, die noch nicht zur Verfügung stehen. Beachten Sie zu den Attributen den Hinweisin der Spalte "**Hinweis**". Nutzen Sie bitte unsere Anleitung unter https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/ 
 - DIESES PLUGIN STELLT DERZEIT LEDIGLICH EINE LINKLISTE ZUR VERFÜGUNG. ALLE DARAN BETEILIGTEN ABTEILUNGEN BEMÜHEN SICH UM RASCHE UMSETZUNG ALLER ANFORDERUNGEN. ES KANN LEIDER VORKOMMEN, DASS ORGANISATORISCHER KLÄRUNGSBEDARF BESTEHT, DER DAZU FÜHRT, DASS FEATURES VORÜBERGEHEND DEAKTIVIERT WERDEN MÜSSEN. DIES IST BEI DER SUCHE NACH IDENTIFIER, IDM-KENNUNG SOWIE BEI DER FILTERUNG NACH SPRACHE DER FALL. AKTUELLE INFORMATIONEN HIERZU FINDEN SIE STETS AUF https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
 
 
