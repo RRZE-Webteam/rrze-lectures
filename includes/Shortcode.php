@@ -123,7 +123,6 @@ class Shortcode
         switch ($this->atts['format']) {
             case 'linklist':
                 $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
-
                 if (!empty($this->atts['degree'])) {
                     $attrs .= ';providerValues.modules.module_cos.subject';
                 }
@@ -133,6 +132,9 @@ class Shortcode
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.modules';
                 $attrs = ''; // TEST
         }
+
+        // $attrs = ''; // TEST
+
 
         $aLQ = [];
 
@@ -144,7 +146,7 @@ class Shortcode
             }elseif (!empty($this->atts['lecturer_identifier'])) {
                 $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         }elseif (!empty($this->atts['lecture_name'])) {
-            $aLQ['name'] = $this->atts['lecture_name'];
+            $aLQ['names'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
         }
@@ -153,11 +155,10 @@ class Shortcode
         // sem
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
-        // BK 2023-03-03: type deactivated until DIP has fixed search by type (multilang)
         // type
-        // if (!empty($this->atts['type'])) {
-        //     $aLQ['providerValues.event.eventtype'] = $this->atts['type'];
-        // }
+        if (!empty($this->atts['type'])) {
+            $aLQ['providerValues.event.eventtypes'] = $this->atts['type'];
+        }
 
         // guest
         if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
@@ -165,11 +166,10 @@ class Shortcode
             $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
         }
 
-        // BK 2023-03-03: degree deactivated until DIP has fixed search by type (multilang)
         // degree
-        // if (!empty($this->atts['degree'])) {
-        //     $aLQ['providerValues.modules.modules_cos.subject'] = $this->atts['degree'];
-        // }
+        if (!empty($this->atts['degree'])) {
+            $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
+        }
 
         // teaching_language (display_language works differently - it is not an attribute for the DIP-Campo-API)
         if (!empty($this->atts['teaching_language'])) {
