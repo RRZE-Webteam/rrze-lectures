@@ -1,8 +1,7 @@
 # rrze-lectures
 
 - Version 1.x.x liefert nur eine Liste an Links zu Campo
-- ACHTUNG! Dieses Readme.md enthält auch Informationen zu Features, die noch nicht zur Verfügung stehen. Beachten Sie zu den Attributen den Hinweisin der Spalte "**Hinweis**". Nutzen Sie bitte unsere Anleitung unter https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/ 
-- DIESES PLUGIN STELLT DERZEIT LEDIGLICH EINE LINKLISTE ZUR VERFÜGUNG, DA WIR IHNEN ALS UNSERE KUNDEN NUR SO SCHNELLSTMÖGLICH EIN TOOL ANBIETEN KONNTEN - WIR BITTEN UM VERSTÄNDNIS, DASS ES DERZEIT NUR RUDIMENTÄRE FUNKTIONALITÄT BIETET. ALLE DARAN BETEILIGTEN ABTEILUNGEN BEMÜHEN SICH UM RASCHE UMSETZUNG ALLER ANFORDERUNGEN. ES KANN LEIDER VORKOMMEN, DASS ORGANISATORISCHER KLÄRUNGSBEDARF BESTEHT, DER DAZU FÜHRT, DASS FEATURES VORÜBERGEHEND DEAKTIVIERT WERDEN MÜSSEN. DIES IST BEI DER SUCHE NACH IDENTIFIER, IDM-KENNUNG SOWIE BEI DER FILTERUNG NACH SPRACHE DER FALL. AKTUELLE INFORMATIONEN HIERZU FINDEN SIE STETS AUF https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
+- Dieses Plugin stellt derzeit lediglich allererste Versin da, um Ihnen schnellstmöglich ein Tool anbieten zu können. Wir bitten um Verständnis, dass es derzeit nur rudimentäre Funktionalität bietet. Alle daran beteiligten Abteilungen bemühen sich um rasche Umsetzung aller bereits bekannten Anforderungen. Es kann leider vorkommen, dass organisatorischer Klärungsbedarf besteht, der dazu führt, dass Features vorübergehend deaktiviert werden müssen. Aktuelle Informationen hierzu finden Sie stets auf https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
 
 
 ## Download
@@ -29,7 +28,7 @@ Parameter:
 |**type**||nein|Art der Lehrveranstaltung. Mehrere Werte müssen durch Komma getrennt werden. Die Reihenfolge bestimmt die Sortierung|alle Typen werden ausgegeben||type="Vorlesung, Vorlesung mit Übung, Tutorium"|
 |**degree**||nein|Studiengänge. Mehrere Werte müssen durch Komma getrennt werden. Die Reihenfolge bestimmt die Sortierung. Wird degree angegeben, wird zuerst nach Studiengängen gruppiert und innerhalb dieser nach Lehrveranstaltungstypen.|alle Studiengänge werden ausgegeben|degree="Informatik, Artificial Intelligence, Mathematik"|
 |**fauorgnr**|Eine Suchmaske dazu finden Sie unter Einstellungen: /wp-admin/options-general.php?page=rrze-lectures |nein|ist dieser Parameter gesetzt, wird er anstelle der FAU Org Nr in den Settings verwendet|Wert, der in den Einstellungen gesetzt ist|fauorgnr="123"|
-|**lecture_name**|funktionierte, ist jetzt in Entwicklung (Grund: Datenstruktur der API hat sich geändert)|nein|Name der Lehrveranstaltung||lecture_name="Diskrete Optimierung I"|
+|**lecture_name**||nein|Name der Lehrveranstaltung||lecture_name="Diskrete Optimierung I"|
 |**lecturer_idm**|Die Suchmaske hierfür ist vorübergehend(?) deaktiviert (Grund: organisatorischer Klärungsbedarf mit dazu verantwortlichen Personen)|nein|IDM-Kennung einer oder mehrere verantwortlicher Personen. Mehrere Werte müssen durch Komma getrennt werden.||lecturer_idm="idm1abc, idm2def"|
 |**lecturer_identifier**|Die Suchmaske hierfür ist vorübergehend(?) deaktiviert (Grund: organisatorischer Klärungsbedarf mit dazu verantwortlichen Personen)|nein|Identifier einer oder mehrere verantwortlicher Personen. Mehrere Werte müssen durch Komma getrennt werden.||lecturer_identifier="1234567890, 0987654321"|
 |**lecturer_name**|in Entwicklung|nein|Name einer oder mehrerer veranwortlicher Personen. Mehrere müssen mit Semikolon getrennt werden. Nachname von Vorname mit Komma trennen.||lecturer_name="Nachname A, Vorname A; Nachname B; Nachname C, Vorname C"|
