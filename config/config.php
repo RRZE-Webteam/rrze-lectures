@@ -179,6 +179,12 @@ function getShortcodeSettings()
                 'label' => __('Lecturer identifier', 'rrze-lectures'),
                 'type' => 'string',
             ],
+            'lecturer_idm' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Lecturer IdM', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
