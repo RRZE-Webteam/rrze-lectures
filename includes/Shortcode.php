@@ -109,7 +109,7 @@ class Shortcode
             }
         }
 
-        // either lecture_name or fauorgnr or basic_FAUOrgNr (options) must be given - see normalize()
+        // one of these values must be given - see normalize()
         if (empty($this->atts['fauorgnr']) && empty($this->atts['lecture_name']) && empty($this->atts['lecturer_idm']) && empty($this->atts['lecturer_identifier'])) {
             return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures');
         }
@@ -139,12 +139,10 @@ class Shortcode
         $aLQ = [];
 
         // uses fauorgnr only if not looking for explicite lectures or lecturers
-        if (!empty($this->atts['lecturer_name'])) {
-            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_name'];
+        if (!empty($this->atts['lecturer_identifier'])) {
+            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         }elseif (!empty($this->atts['lecturer_idm'])) {
-                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-            }elseif (!empty($this->atts['lecturer_identifier'])) {
-                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
         }elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['names'] = $this->atts['lecture_name'];
         } else {

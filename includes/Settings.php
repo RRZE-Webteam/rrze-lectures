@@ -857,7 +857,7 @@ class Settings
         <h3>
                 <?php echo __('Search for FAU Org Number', 'rrze-lectures'); ?>
             </h3>
-            <form method="post" id="search-univis">
+            <form method="post" id="search-dip">
                 <table class="form-table" role="presentation" class="striped">
                     <tbody>
                         <tr>
@@ -879,7 +879,7 @@ class Settings
             </form>
         </div>
         <div id="dip-fauorgnr-result"></div>
-        <!-- <br><hr><br>
+        <br><hr><br>
         <div class="wrap">
             <h3>
                 <?php echo __('Search for identifier', 'rrze-lectures'); ?>
@@ -887,7 +887,7 @@ class Settings
             <p>
                 <?php echo __('Fill in one or more of the following fields. A search by given name only is not possible.', 'rrze-lectures'); ?>
             </p>
-            <form method="post" id="search-univis">
+            <form method="post" id="search-dip">
                 <table class="form-table" role="presentation" class="striped">
                     <tbody>
                     <tr>
@@ -914,7 +914,7 @@ class Settings
                 </table>
             </form>
         </div>
-        <div id="dip-identifier-result"></div> -->
+        <div id="dip-identifier-result"></div>
 
     <?php
     }
