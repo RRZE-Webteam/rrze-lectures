@@ -18,9 +18,12 @@ GNU General Public License (GPL) Version 3
 als Shortcode:
 
 Standard Ausgabe:
+
 `[lectures]`
 
+
 Alle Attribute:
+
 `[lectures format="" type="" degree="" fauorgnr="" lecturer_identifier="" lecturer_idm="" lecture_name="" sem="" guest="" max="" hide="" hstart="" color="" nodata=""]`
 
 
