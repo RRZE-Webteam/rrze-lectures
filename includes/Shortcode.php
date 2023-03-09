@@ -139,12 +139,8 @@ class Shortcode
         $aLQ = [];
 
         // uses fauorgnr only if not looking for explicite lectures or lecturers
-        if (!empty($this->atts['lecturer_name'])) {
-            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_name'];
-        }elseif (!empty($this->atts['lecturer_idm'])) {
-                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-            }elseif (!empty($this->atts['lecturer_identifier'])) {
-                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+        if (!empty($this->atts['lecturer_identifier'])) {
+            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         }elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['names'] = $this->atts['lecture_name'];
         } else {

@@ -173,22 +173,10 @@ function getShortcodeSettings()
                 'label' => __('Lecture\'s name', 'rrze-lectures'),
                 'type' => 'string',
             ],
-            'lecturer_idm' => [
-                'default' => '',
-                'field_type' => 'text',
-                'label' => __('Lecturer IdM', 'rrze-lectures'),
-                'type' => 'string',
-            ],
             'lecturer_identifier' => [
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Lecturer identifier', 'rrze-lectures'),
-                'type' => 'string',
-            ],
-            'lecturer_name' => [
-                'default' => '',
-                'field_type' => 'text',
-                'label' => __('Lecture\'s name (format: "family name, given name", separate names by semicolon. F.e.: "family name A, given nameA; family name B, given name B; given name C" ', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'type' => [

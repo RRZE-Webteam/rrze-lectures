@@ -24,8 +24,8 @@ class Functions
         add_action('wp_ajax_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
         add_action('wp_ajax_nopriv_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
         
-        // add_action('wp_ajax_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); // deactivated 2023-02-23 because it's not yet settled by CIO if we can present identifiers 
-        // add_action('wp_ajax_nopriv_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); // deactivated 2023-02-23 because it's not yet settled by CIO if we can present identifiers 
+        add_action('wp_ajax_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); 
+        add_action('wp_ajax_nopriv_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']);
 
         // add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
         // add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
@@ -217,12 +217,11 @@ class Functions
 
     public function adminEnqueueScripts()
     {
-
         wp_enqueue_script(
             'rrze-lectures-ajax',
             plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
             ['jquery'],
-            '1.6.4'
+            RRZE_PLUGIN_VERSION
         );
 
         wp_localize_script('rrze-lectures-ajax', 'lecture_ajax', [
@@ -327,49 +326,49 @@ class Functions
         return $ret;
     }
 
-    // public function ajaxGetLecturerIdentifier()
-    // {
-    //     check_ajax_referer('lecture-ajax-nonce', 'nonce');
-    //     $aInputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+    public function ajaxGetLecturerIdentifier()
+    {
+        check_ajax_referer('lecture-ajax-nonce', 'nonce');
+        $aInputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 
-    //     $aFieldnames = [
-    //         __('Identifier', 'rrze-lectures'),
-    //         __('Name', 'rrze-lectures')
-    //     ];
+        $aFieldnames = [
+            __('Identifier', 'rrze-lectures'),
+            __('Name', 'rrze-lectures')
+        ];
 
-    //     $response = $this->getTableHTML($this->getLecturerIdentifier($aInputs), $aFieldnames);
-    //     wp_send_json($response);
-    // }
+        $response = $this->getTableHTML($this->getLecturerIdentifier($aInputs), $aFieldnames);
+        wp_send_json($response);
+    }
 
 
-    // public function getLecturerIdentifier($aParams = [])
-    // {
-    //     $ret = __('No matching entries found.', 'rrze-lectures');
-    //     $lq = self::makeLQ($aParams);
+    public function getLecturerIdentifier($aParams = [])
+    {
+        $ret = __('No matching entries found.', 'rrze-lectures');
+        $lq = self::makeLQ($aParams);
 
-    //     $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName') . '&lq=' . urlencode($lq);
+        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName') . '&lq=' . urlencode($lq);
 
-    //     $oDIP = new DIPAPI();
-    //     $response = $oDIP->getResponse('persons', $dipParams);
+        $oDIP = new DIPAPI();
+        $response = $oDIP->getResponse('persons', $dipParams);
 
-    //     if (!$response['valid']) {
-    //         return $ret;
-    //     } else {
-    //         $data = $response['content']['data'];
+        if (!$response['valid']) {
+            return $ret;
+        } else {
+            $data = $response['content']['data'];
 
-    //         if (empty($data)) {
-    //             return $ret;
-    //         }
+            if (empty($data)) {
+                return $ret;
+            }
 
-    //         $ret = [];
+            $ret = [];
 
-    //         foreach ($data as $aDetails) {
-    //             $ret[$aDetails['identifier']] = $aDetails['familyName'] . ', ' . $aDetails['givenName'];
-    //         }
-    //     }
+            foreach ($data as $aDetails) {
+                $ret[$aDetails['identifier']] = $aDetails['familyName'] . ', ' . $aDetails['givenName'];
+            }
+        }
 
-    //     return $ret;
-    // }
+        return $ret;
+    }
 
     public static function isMaintenanceMode()
     {
