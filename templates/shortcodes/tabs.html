@@ -39,9 +39,7 @@
     <ul>
 {{/type_start}}
 
-        <p><em>(Nur zum Debuggen: identifier = {{=identifier}})<br><a href="{{=providerValues.courses.url}}" target="rrze-campo" class="rrze-lectures-linklist">Link zu Campo</a></em></p>
         <h2><span itemprop="name">{{=name}}</span></h2>
-
 
         [tabs]
         [tab title="Grunddaten"]
@@ -62,7 +60,7 @@
 
 
         <p>Veranstaltungsart: {{=providerValues.event.eventtype}}</p>
-        <p>Turnus des Angebots: Feld FEHLT (Stand: 2023-02-21)</p>
+        <p>Turnus des Angebots: Feld FEHLT (Stand: 2023-03-10)</p>
 
         {{providerValues.event.comment}}[alert style="warning"]<strong>Kommentar</strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
 
@@ -72,41 +70,45 @@
         [/tab]
         [tab title="Parallelgruppen / Termine"]
 
+
+
+        <br>&nbsp;<br>
+
+        {{@providerValues.courses}}
+
+        <a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist">Link zu Campo</a>
+
+        <p>Semesterwochenstunden: {{=_val.hours_per_week}}</p>
+
+        <p>Lehrsprache: {{=_val.teaching_language_txt}}</p>
+
         Verantwortliche/-r
         <ul>
-            {{@providerValues.event_responsible}}
+            {{@_val.event_responsible}}
             <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">
                 <a href="hier fehlt der Link zu IdM oder DIP liefert ID für rrze-contact oder event_responsible hat unter location einen URL">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{:_val.surname}}! surname (schema: familyName) ist LEER !{{/_val.surname}}</a>
             </li>
-            {{/@providerValues.event_responsible}}
+            {{/@_val.event_responsible}}
         </ul>
 
-        <p>Semesterwochenstunden: {{=providerValues.courses.hours_per_week}}</p>
-
-        <p>Lehrsprache: {{=providerValues.courses.display_language_txt}} (2DO: 1. long txt / 2. translate)</p>
-
-
         <h4>Inhalt</h4>
-        <p itemprop="description">{{providerValues.courses.contents}}{{=providerValues.courses.contents}}{{:providerValues.courses.contents}}providerValues.courses.contents ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.contents}}</p>
+        <p itemprop="description">{{_val.contents}}{{=_val.contents}}{{:_val.contents}}_val.contents ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.contents}}</p>
 
         <h4>Literaturhinweise</h4>
-        <p>{{providerValues.courses.literature}}{{=providerValues.courses.literature}}{{:providerValues.courses.literature}}providerValues.courses.literature ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.literature}}</p>
+        <p>{{_val.literature}}{{=_val.literature}}{{:_val.literature}}_val.literature ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.literature}}</p>
 
         <h4>Empfohlene Voraussetzungen / Organisatorisches</h4>
-        <p>{{providerValues.courses.compulsory_requirement}}{{=providerValues.courses.compulsory_requirement}}{{:providerValues.courses.compulsory_requirement}}providerValues.courses.compulsory_requirement ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.compulsory_requirement}}</p>
+        <p>{{_val.compulsory_requirement}}{{=_val.compulsory_requirement}}{{:_val.compulsory_requirement}}_val.compulsory_requirement ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.compulsory_requirement}}</p>
 
         <h4>Maximale Anzahl Teilnehmer/-innen</h4>
-        <p>{{providerValues.courses.attendee_maximum}}{{=providerValues.courses.attendee_maximum}}{{:providerValues.courses.attendee_maximum}}providerValues.courses.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/providerValues.courses.attendee_maximum}}</p>
+        <p>{{_val.attendee_maximum}}{{=_val.attendee_maximum}}{{:_val.attendee_maximum}}_val.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.attendee_maximum}}</p>
         <h4>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung</h4>
-        <p>{{providerValues.courses.attendee_minimum}}{{=providerValues.courses.attendee_minimum}}{{:providerValues.courses.attendee_minimum}}Feld FEHLT (Stand: 2023-02-21) (Vorschlag: providerValues.courses.attendee_minimum){{/providerValues.courses.attendee_minimum}}</p>
+        <p>{{_val.attendee_minimum}}{{=_val.attendee_minimum}}{{:_val.attendee_minimum}}Feld FEHLT (Stand: 2023-02-21) (Vorschlag: _val.attendee_minimum){{/_val.attendee_minimum}}</p>
 
         {{maximumAttendeeCapacity}}<p>Maximale Anzahl Teilnehmer/-innen: {{=maximumAttendeeCapacity}}</p>{{/maximumAttendeeCapacity}}
         <p>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung: Feld FEHLT (Stand: 2023-02-21) (Vorschlag: minimumAttendeeCapacity)</p>
 
 
-        <br>&nbsp;<br>
-
-        {{providerValues.courses.planned_dates}}
         <table>
             <tr>
                 <td>Rhythmus</td>
@@ -119,10 +121,10 @@
                 <td>Durchführende/-r</td>
                 <td>Raum</td>
             </tr>
-            {{@providerValues.courses.planned_dates}}
+            {{@_val.planned_dates}}
             <tr>
                 <td>{{_val.rhythm}}{{=_val.rhythm}}{{/_val.rhythm}}</td>
-                <td>{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}} (2DO: translate)</td>
+                <td>{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}}</td>
                 <td>{{_val.starttime}}{{=_val.starttime}}{{/_val.starttime}}
                     -
                     {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}
@@ -140,12 +142,12 @@
                 <td>{{_val.famos_request}}{{=_val.famos_request}}{{/_val.famos_request}} (2DO: famos_request URL FEHLT oder kann Link mit dieser Nr auf Map / Details-Page gesetzt werden?)
                 </td>
             </tr>
-            {{/@providerValues.courses.planned_dates}}
+            {{/@_val.planned_dates}}
 
         </table>
-        {{:providerValues.courses.planned_dates}}
+        {{:@providerValues.courses}}
         Es sind noch keine Termine geplant. (2DO: Text von Campo)
-        {{/providerValues.courses.planned_dates}}
+        {{/@providerValues.courses}}
 
         [/tab]
 

@@ -13,6 +13,10 @@ class Sanitizer
 
     public function __construct()
     {
+    }
+
+    public function onLoaded()
+    {
         $this->aMap = getSanitizerMap();
     }
 
@@ -48,42 +52,54 @@ class Sanitizer
         }
     }
 
-    public static function sanitizeLectures(&$data)
+
+    public static function sanitizeLectures(&$data, &$aLanguages)
     {
         array_walk_recursive($data, 'sanitize_text_field');
-        
-        foreach ($data as $nr => $aEntries) {
-            // set display_language_txt
-            if (!empty($data[$nr]['providerValues']['courses']['display_language'])) {
-                $data[$nr]['providerValues']['courses']['display_language_txt'] = implode(' or ', $data[$nr]['providerValues']['courses']['display_language']);
-            }
 
-            // convert dates
-            if (!empty($data[$nr]['providerValues']['courses']['planned_dates'])) {
-                foreach ($data[$nr]['providerValues']['courses']['planned_dates'] as $cNr => $aDetails) {
-                    if (!empty($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'])) {
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['weekday'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'], 'Europe/Berlin', 'N');
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'], 'Europe/Berlin', 'd.m.Y');
-                    }
-                    if (!empty($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'])) {
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['weekday'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'], 'Europe/Berlin', 'N');
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['startdate'], 'Europe/Berlin', 'd.m.Y');
-                    }
-                    if (!empty($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['enddate'])) {
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['enddate'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['enddate'], 'Europe/Berlin', 'd.m.Y');
-                    }
-                    if (!empty($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['starttime'])) {
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['starttime'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['starttime'], 'Europe/Berlin', 'H:i');
-                    }
-                    if (!empty($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['endtime'])) {
-                        $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['endtime'] = Functions::convertDate($data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['endtime'], 'Europe/Berlin', 'H:i');
+        foreach ($data as $iEntry => $aEntries) {
+
+            if (!empty($data[$iEntry]['providerValues']['courses'])) {
+                foreach ($data[$iEntry]['providerValues']['courses'] as $iCourse => $aCourse) {
+                    // set display_language_txt
+                    if (!empty($aCourse['teaching_language'])) {
+                        array_walk($aCourse['teaching_language'], function (&$val, $key) use ($aLanguages) {
+                            if (!empty($aLanguages[$val])) {
+                                $val = $aLanguages[$val];
+                            }
+                        });
+                        $data[$iEntry]['providerValues']['courses'][$iCourse]['teaching_language_txt'] = implode(' ' . __('or', 'rrze-lectures') . ' ', $aCourse['teaching_language']);
                     }
 
-                    // get "Ausfalltermine"
-                    if (!empty($aDetails['individual_dates'])) {
-                        foreach ($aDetails['individual_dates'] as $iNr => $aIndividuals) {
-                            if (!empty($aIndividuals['cancelled']) && !empty($aIndividuals['date']) && $aIndividuals['cancelled'] == 1) {
-                                $data[$nr]['providerValues']['courses']['planned_dates'][$cNr]['misseddates'][] = Functions::convertDate($aIndividuals['date'], 'Europe/Berlin', 'd.m.Y');
+
+                    // convert dates
+                    if (!empty($aCourse['planned_dates'])) {
+                        foreach ($aCourse['planned_dates'] as $iDate => $aDates) {
+                            if (!empty($aDates['startdate'])) {
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['weekday'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'N');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['startdate'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'd.m.Y');
+                            }
+                            if (!empty($aDates['startdate'])) {
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['weekday'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'N');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['startdate'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'd.m.Y');
+                            }
+                            if (!empty($aDates['enddate'])) {
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['enddate'] = Functions::convertDate($aDates['enddate'], 'Europe/Berlin', 'd.m.Y');
+                            }
+                            if (!empty($aDates['starttime'])) {
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['starttime'] = Functions::convertDate($aDates['starttime'], 'Europe/Berlin', 'H:i');
+                            }
+                            if (!empty($aDates['endtime'])) {
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['endtime'] = Functions::convertDate($aDates['endtime'], 'Europe/Berlin', 'H:i');
+                            }
+
+                            // get "Ausfalltermine"
+                            if (!empty($aDates['individual_dates'])) {
+                                foreach ($aDates['individual_dates'] as $iIndividual => $aIndividuals) {
+                                    if (!empty($aIndividuals['cancelled']) && !empty($aIndividuals['date']) && $aIndividuals['cancelled'] == 1) {
+                                        $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['misseddates'][] = Functions::convertDate($aIndividuals['date'], 'Europe/Berlin', 'd.m.Y');
+                                    }
+                                }
                             }
                         }
                     }
@@ -91,5 +107,4 @@ class Sanitizer
             }
         }
     }
-
 }

@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
 // use RRZE\Lectures\Translator;
-use RRZE\Lectures\Template;
+// use RRZE\Lectures\Template;
 
 /**
  * Shortcode
@@ -40,6 +40,7 @@ class Shortcode
         $constants = getConstants();
         $this->aAllowedColors = $constants['colors'];
         $this->aAllowedFormats = $constants['formats'];
+        $this->aLanguages = $constants['langcodes'];
 
         add_action('admin_enqueue_scripts', [$this, 'enqueueGutenberg']);
         add_action('init', [$this, 'initGutenberg']);
@@ -207,6 +208,12 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
+        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw'){
+            echo '<pre>';
+            var_dump($data);
+            echo '</pre>';
+        }
+
         Functions::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
 
         // delete all courses that don't fit to given semester
@@ -234,7 +241,7 @@ class Shortcode
 
 
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
-        Sanitizer::sanitizeLectures($data);
+        Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
         // get the array elements of multilanguage fields from API:
         $translator = new Translator($this->atts['display_language']);
@@ -422,7 +429,13 @@ class Shortcode
         }
         $aDegree[$degree][$type][$title]['last'] = true;
 
-        Functions::console_log('Accordion & first/last values set for template', $tsStart);
+        Functions::console_log('Pre tempate', $tsStart);
+
+        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-pre-template'){
+            echo '<pre>';
+            var_dump($aDegree);
+            echo '</pre>';
+        }
 
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
