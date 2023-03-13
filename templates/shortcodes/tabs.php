@@ -42,13 +42,13 @@
         <h2><span itemprop="name">{{=name}}</span></h2>
 
         [tabs]
-        [tab title="Grunddaten"]
+        [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
 
-        Titel: {{=providerValues.event.title}}
-        Kurztext: {{=providerValues.event.shorttext}}
+        <?php echo __('Title', 'rrze-lectures'); ?>: {{=providerValues.event.title}}
+        <?php echo __('Short text', 'rrze-lectures'); ?>: {{=providerValues.event.shorttext}}
 
         {{providerValues.event_orgunit}}
-        Organisationseinheit:
+        <?php echo __('Organizational unit', 'rrze-lectures'); ?>:
         <ul>
             {{/providerValues.event_orgunit}}
             {{@providerValues.event_orgunit}}
@@ -58,14 +58,16 @@
         </ul>
         {{/providerValues.event_orgunit}}
 
-        <p><? echo __('Type of event', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>
-        <p><? echo __('Frequency of the offer', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-10)</p>
+        <p><?php echo __('Course type', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>
+        <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-10)</p>
+        <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: fehlt dieses Feld? (Stand: 2023-03-13)</p>
+        <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: fehlt dieses Feld? (Stand: 2023-03-13)</p>        
 
-        {{providerValues.event.comment}}[alert style="warning"]<strong>Kommentar</strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
+        {{providerValues.event.comment}}[alert style="warning"]<strong><?php echo __('Comment', 'rrze-lectures'); ?></strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
 
 
         [/tab]
-        [tab title="Parallelgruppen / Termine"]
+        [tab title="<?php echo __('Parallel groups / dates', 'rrze-lectures'); ?>"]
 
 
 
@@ -73,13 +75,13 @@
 
         {{@providerValues.courses}}
 
-        <a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist">Link zu Campo</a>
+        <a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist"><?php echo __('Link to Campo', 'rrze-lectures'); ?></a>
 
-        <p>Semesterwochenstunden: {{=_val.hours_per_week}}</p>
+        <p><?php echo __('Semester hours per week', 'rrze-lectures'); ?>: {{=_val.hours_per_week}}</p>
 
-        <p>Lehrsprache: {{=_val.teaching_language_txt}}</p>
+        <p><?php echo __('Teaching language', 'rrze-lectures'); ?>: {{=_val.teaching_language_txt}}</p>
 
-        Verantwortliche/-r
+        <?php echo __('Responsible', 'rrze-lectures'); ?>
         <ul>
             {{@_val.event_responsible}}
             <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">
@@ -88,35 +90,31 @@
             {{/@_val.event_responsible}}
         </ul>
 
-        <h4>Inhalt</h4>
+        <h4><?php echo __('Content', 'rrze-lectures'); ?></h4>
         <p itemprop="description">{{_val.contents}}{{=_val.contents}}{{:_val.contents}}_val.contents ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.contents}}</p>
 
-        <h4>Literaturhinweise</h4>
+        <h4><?php echo __('Literature references', 'rrze-lectures'); ?></h4>
         <p>{{_val.literature}}{{=_val.literature}}{{:_val.literature}}_val.literature ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.literature}}</p>
 
-        <h4>Empfohlene Voraussetzungen / Organisatorisches</h4>
+        <h4><?php echo __('Recommended requirements / organizational matters', 'rrze-lectures'); ?></h4>
         <p>{{_val.compulsory_requirement}}{{=_val.compulsory_requirement}}{{:_val.compulsory_requirement}}_val.compulsory_requirement ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.compulsory_requirement}}</p>
 
-        <h4>Maximale Anzahl Teilnehmer/-innen</h4>
+        <h4><?php echo __('Maximum number of participants', 'rrze-lectures'); ?></h4>
         <p>{{_val.attendee_maximum}}{{=_val.attendee_maximum}}{{:_val.attendee_maximum}}_val.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.attendee_maximum}}</p>
-        <h4>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung</h4>
+        <h4><?php echo __('Minimum number of participants for the event to take place', 'rrze-lectures'); ?></h4>
         <p>{{_val.attendee_minimum}}{{=_val.attendee_minimum}}{{:_val.attendee_minimum}}Feld FEHLT (Stand: 2023-02-21) (Vorschlag: _val.attendee_minimum){{/_val.attendee_minimum}}</p>
-
-        {{maximumAttendeeCapacity}}<p>Maximale Anzahl Teilnehmer/-innen: {{=maximumAttendeeCapacity}}</p>{{/maximumAttendeeCapacity}}
-        <p>Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung: Feld FEHLT (Stand: 2023-02-21) (Vorschlag: minimumAttendeeCapacity)</p>
-
 
         <table>
             <tr>
-                <td>Rhythmus</td>
-                <td>Wochentag</td>
-                <td>Von - Bis</td>
-                <td>Ausfalltermin (2DO: sort - via API request!</td>
-                <td>Startdatum - Enddatum</td>
-                <td>Erw. Tn.</td>
-                <td>Bemerkung</td>
-                <td>Durchführende/-r</td>
-                <td>Raum</td>
+                <td><?php echo __('Frequency', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Weekday', 'rrze-lectures'); ?></td>
+                <td><?php echo __('From - To', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Cancellation date', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Start date - End date', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Exp. Att.', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Comment', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Lecturer(s)', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Room', 'rrze-lectures'); ?></td>
             </tr>
             {{@_val.planned_dates}}
             <tr>
@@ -139,32 +137,32 @@
                 <td>{{_val.famos_request}}{{=_val.famos_request}}{{/_val.famos_request}} (2DO: famos_request URL FEHLT oder kann Link mit dieser Nr auf Map / Details-Page gesetzt werden?)
                 </td>
             </tr>
+            {{:@_val.planned_dates}}
+                <?php echo __('No planned appointments for this parallel group yet.', 'rrze-lectures'); ?>            
             {{/@_val.planned_dates}}
 
         </table>
-        {{:@providerValues.courses}}
-        Es sind noch keine Termine geplant. (2DO: Text von Campo)
         {{/@providerValues.courses}}
 
         [/tab]
 
         {{providerValues.modules}}
 
-        [tab title="Module / Studiengänge"]
+        [tab title="<?php echo __('Modules and degree programmes', 'rrze-lectures'); ?>"] 
 
         <table>
             <tr>
-                <td>Standardtext</td>
-                <td>Typ</td>
-                <td>Abschluss</td>
-                <td>Fach</td>
-                <td>Vertiefung</td>
-                <td>Schwerpunkt</td>
-                <td>Fachkennzeichen</td>
-                <td>Prüfungsordnungsversion</td>
-                <td>Studienform</td>
-                <td>Studienort</td>
-                <td>Studienart</td>
+                <td><?php echo __('Default text', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Type', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Degree', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Degree&nbsp;', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Major field of study', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Course specialization', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Subject indicator', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Version of examination regulations', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Form of study', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Place of study', 'rrze-lectures'); ?></td>
+                <td><?php echo __('Type of study', 'rrze-lectures'); ?></td>
             </tr>
 
             {{@providerValues.modules}}
@@ -183,6 +181,8 @@
                 <td>FEHLT (Stand: 2023-02-21)</td>
                 <td>FEHLT (Stand: 2023-02-21)</td>                
             </tr>
+            {{:@_val.modules_cos}}
+                <?php echo __('The course has not been assigned to a course of study yet', 'rrze-lectures'); ?>   
             {{/@_val.modules_cos}}
             {{/@providerValues.modules}}
         </table>
@@ -191,8 +191,6 @@
 
         {{/providerValues.modules}}
     [/tabs]
-
-
 
         {{do_type_accordion}}
     {{type_end}}

@@ -370,8 +370,7 @@ class Shortcode
 
         Functions::console_log('Sort completed', $tsStart);
 
-        // $template = 'shortcodes/' . $this->atts['format'] . '.html';
-        $template = 'shortcodes/' . $this->atts['format'] . '.php'; // TEST
+        $template = 'shortcodes/' . $this->atts['format'] . '.php'; // switched from .html to .php for translations using localization __()
 
         $aTmp = [];
 

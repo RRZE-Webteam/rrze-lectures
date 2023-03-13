@@ -188,7 +188,7 @@ function getShortcodeSettings()
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Type f.e. Vorlesung', 'rrze-lectures'),
+                'label' => __('Type f.e. Lecture', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'degree' => [
@@ -207,13 +207,13 @@ function getShortcodeSettings()
             'teaching_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Teaching language (f.e. "en" or "de" or "en,de,fr"', 'rrze-lectures'),
+                'label' => __('Teaching language (f.e. "en" or "de" or "en, de, fr"', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Teaching language (f.e. "en" or "de" or "en:de" <= fallback is set to "de"', 'rrze-lectures'),
+                'label' => __('Display language (f.e. "en" or "de" or "en:de" <= fallback is set to "de")', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'guest' => [
