@@ -154,7 +154,7 @@
                                 // ICS
                                 if (!in_array('ics', $this->hide)) {
                                     $aIcsLink = Functions::makeLinkToICS($type, $lecture, $term, $t);
-                                    $t['ics'] = '<span class="lecture-info-ics" itemprop="ics"><a href="' . $aIcsLink['link'] . '" aria-label="' . $aIcsLink['linkTxt'] . '">' . __('ICS', 'rrze-univis') . '</a></span>';
+                                    $t['ics'] = '<span class="lecture-info-ics" itemprop="ics"><a href="' . $aIcsLink['link'] . '" aria-label="' . $aIcsLink['linkTxt'] . '">' . __('ICS', 'rrze-lectures') . '</a></span>';
                                 }
                                 $t['time'] .= ',';
                                 $term_formatted = implode(' ', $t);

@@ -58,13 +58,10 @@
         </ul>
         {{/providerValues.event_orgunit}}
 
-
-        <p>Veranstaltungsart: {{=providerValues.event.eventtype}}</p>
-        <p>Turnus des Angebots: Feld FEHLT (Stand: 2023-03-10)</p>
+        <p><? echo __('Type of event', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>
+        <p><? echo __('Frequency of the offer', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-10)</p>
 
         {{providerValues.event.comment}}[alert style="warning"]<strong>Kommentar</strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
-
-        
 
 
         [/tab]

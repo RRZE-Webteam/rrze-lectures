@@ -213,7 +213,7 @@ function getShortcodeSettings()
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Teaching language (f.e. "en" or "de". "en:de" <= fallback is set to "de"', 'rrze-lectures'),
+                'label' => __('Teaching language (f.e. "en" or "de" or "en:de" <= fallback is set to "de"', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'guest' => [

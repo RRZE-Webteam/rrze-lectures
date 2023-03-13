@@ -237,13 +237,11 @@ class Shortcode
 
 
         // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
-    
-
 
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
-        // get the array elements of multilanguage fields from API:
+        // translate by display_language (f.e. "fr" => if no translation in FR is given by API output is NULL / "fr:en" => if no translation in FR is given, Translator checks if translation in EN is given by API and returns it or NULL (en = fallback) / if this attribut is not given => website's language is used)        
         $translator = new Translator($this->atts['display_language']);
         $translator->setTranslations($data);
 
@@ -372,7 +370,8 @@ class Shortcode
 
         Functions::console_log('Sort completed', $tsStart);
 
-        $template = 'shortcodes/' . $this->atts['format'] . '.html';
+        // $template = 'shortcodes/' . $this->atts['format'] . '.html';
+        $template = 'shortcodes/' . $this->atts['format'] . '.php'; // TEST
 
         $aTmp = [];
 
