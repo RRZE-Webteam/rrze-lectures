@@ -204,6 +204,12 @@ function getShortcodeSettings()
                 'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
                 'type' => 'string',
             ],
+            'teaching_language' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Teaching language (f.e. "en" or "de" or "en,de,fr"', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',

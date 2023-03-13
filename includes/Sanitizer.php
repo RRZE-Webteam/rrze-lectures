@@ -61,7 +61,7 @@ class Sanitizer
 
             if (!empty($data[$iEntry]['providerValues']['courses'])) {
                 foreach ($data[$iEntry]['providerValues']['courses'] as $iCourse => $aCourse) {
-                    // set display_language_txt
+                    // set teaching_language_txt
                     if (!empty($aCourse['teaching_language'])) {
                         array_walk($aCourse['teaching_language'], function (&$val, $key) use ($aLanguages) {
                             if (!empty($aLanguages[$val])) {
