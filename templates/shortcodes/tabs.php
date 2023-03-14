@@ -41,10 +41,13 @@
 
         <h2><span itemprop="name">{{=name}}</span></h2>
 
+        <!-- name ist 'de' => Ausgabe? -->
+        <!-- Test mit Begleitseminar zu Bachelor- und Masterarbeiten -->
+
         [tabs]
         [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
 
-        <?php echo __('Title', 'rrze-lectures'); ?>: {{=providerValues.event.title}}
+        {{providerValues.event.title}}<?php echo __('Title', 'rrze-lectures'); ?>: {{=providerValues.event.title}}{{/providerValues.event.title}}
         <?php echo __('Short text', 'rrze-lectures'); ?>: {{=providerValues.event.shorttext}}
 
         {{providerValues.event_orgunit}}
@@ -200,13 +203,17 @@
                 [/accordion]
             {{/degree_end}}
         {{:do_degree_accordion}}
+
+        HIER TEST 1
             [/collapse]
         {{/do_degree_accordion}}        
     {{/type_end}}
 {{/do_type_accordion}}
 {{do_degree_accordion}}
     {{degree_end}}
-        [/collapse]
+    HIER TEST 2
+
+    [/collapse]
     {{/degree_end}}
 {{/do_degree_accordion}}
 {{last}}

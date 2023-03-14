@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: RRZE Lectures\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 13:53+0000\n"
-"PO-Revision-Date: 2023-03-13 18:05+0000\n"
+"PO-Revision-Date: 2023-03-14 16:42+0000\n"
 "Last-Translator: \n"
 "Language-Team: Deutsch\n"
 "Language: de_DE\n"
@@ -15,23 +15,23 @@ msgstr ""
 "X-Loco-Version: 2.6.3; wp-6.1.1\n"
 "X-Domain: rrze-lectures"
 
-#: includes/Functions.php:391 includes/Shortcode.php:581
+#: includes/Functions.php:391 includes/Shortcode.php:600
 msgid "-- All --"
-msgstr ""
+msgstr "-- Alle --"
 
-#: includes/Shortcode.php:659
+#: includes/Shortcode.php:678
 msgid "-- Current semester --"
-msgstr ""
+msgstr "-- Aktuelles Semester --"
 
 #: templates/lectures-single.php:167
 msgid "Additional information"
-msgstr ""
+msgstr "Weitere Informationen"
 
 #. Description of the plugin
 msgid "Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:45
+#: templates/shortcodes/tabs.php:48
 msgid "Basic data"
 msgstr "Grunddaten"
 
@@ -40,58 +40,62 @@ msgstr "Grunddaten"
 msgid "Call to undefined method %1$s::%2$s"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:112
+#: templates/shortcodes/tabs.php:115
 msgid "Cancellation date"
 msgstr "Ausfalltermin"
 
 #: config/config.php:48
 msgid "Chinese"
-msgstr ""
+msgstr "Chinesisch"
 
 #: config/config.php:270
 msgid "Color of accordions"
-msgstr ""
+msgstr "Farbe der Akkordeons"
 
-#: templates/shortcodes/tabs.php:66 templates/shortcodes/tabs.php:115
+#: templates/shortcodes/tabs.php:69 templates/shortcodes/tabs.php:118
 msgid "Comment"
 msgstr "Bemerkung"
 
 #: templates/lectures-single.php:140 templates/lectures-single.php:158
-#: templates/shortcodes/tabs.php:93
+#: templates/shortcodes/tabs.php:96
 msgid "Content"
 msgstr "Inhalt"
 
 #: templates/lectures-all.php:172 templates/lectures-single.php:96
 msgid "Course"
-msgstr ""
+msgstr "Kurse"
 
-#: templates/shortcodes/tabs.php:160
+#: templates/shortcodes/tabs.php:163
 msgid "Course specialization"
 msgstr "Schwerpunkt"
 
-#: templates/shortcodes/tabs.php:61
+#: templates/shortcodes/tabs.php:64
 msgid "Course type"
 msgstr "Veranstaltungsart"
 
 #: templates/lectures-single.php:154
 msgid "Credits"
-msgstr ""
+msgstr "Punkte"
 
 #: includes/Functions.php:534 templates/lectures-all.php:129
 #: templates/lectures-all.php:129 templates/lectures-all.php:131
 #: templates/lectures-all.php:131 templates/lectures-all.php:134
 msgid "Date"
+msgstr "Datum"
+
+#: config/config.php:275
+msgid "Default"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:155
+#: templates/shortcodes/tabs.php:158
 msgid "Default text"
 msgstr "Standardtext"
 
-#: config/config.php:197 templates/shortcodes/tabs.php:157
+#: config/config.php:197 templates/shortcodes/tabs.php:160
 msgid "Degree"
 msgstr "Abschluss"
 
-#: templates/shortcodes/tabs.php:158
+#: templates/shortcodes/tabs.php:161
 msgid "Degree&nbsp;"
 msgstr "Fach"
 
@@ -105,23 +109,24 @@ msgstr ""
 
 #: config/config.php:216
 msgid ""
-"Display language (f.e. \"en\" or \"de\" or \"en:de\" <= fallback is set to "
-"\"de\")"
+"Display language (f.e. \"en\" or \"de\" or \"fr\". If this attribute is not "
+"given, website's language is used. In every case fallback is \"de\".)"
 msgstr ""
-"Anzeigesprache (z.B. \"en\" oder \"de\" oder \"en:de\" <= Fallback wurde auf "
-"\"de\" gesetzt)"
+"Anzeigesprache (z. B. \"en\" oder \"de\" oder \"fr\". Wenn dieses Attribut "
+"nicht angegeben wird, wird die Sprache der Website verwendet. Fallback ist "
+"in jedem Fall \"de\".)"
 
 #: config/config.php:227
 msgid "don't filter"
-msgstr ""
+msgstr "nicht filtern"
 
-#: templates/shortcodes/tabs.php:63
+#: templates/shortcodes/tabs.php:66
 msgid "ECTS credits"
 msgstr "ECTS-Punkte"
 
 #: templates/lectures-single.php:148
 msgid "ECTS information"
-msgstr ""
+msgstr "ECTS Information"
 
 #: config/config.php:44
 msgid "English"
@@ -129,34 +134,37 @@ msgstr "Englisch"
 
 #: templates/lectures-all.php:169 templates/lectures-single.php:93
 msgid "exclude"
-msgstr ""
+msgstr "ausschließen"
 
-#: templates/shortcodes/tabs.php:114
+#: templates/shortcodes/tabs.php:117
 msgid "Exp. Att."
 msgstr "Erw. Tn."
 
 #: templates/lectures-all.php:84 templates/lectures-single.php:172
 msgid "Expected participants"
-msgstr ""
+msgstr "Erwartete Teilnehmer"
 
 #: includes/Settings.php:895
 msgid "Family name"
-msgstr ""
+msgstr "Nachname"
 
 #: config/config.php:167
 msgid "FAU Org Nr"
 msgstr ""
 
-#: includes/Shortcode.php:115
+#: includes/Shortcode.php:117
 msgid ""
 "FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or "
 "use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or "
 "lecturer_identifier"
 msgstr ""
+"FAU Org Nr fehlt. Tragen Sie diese entweder in den Einstellungen von rrze-"
+"lectures ein oder nutzen Sie eines der folgenden Shortcode Attribute: "
+"fauorgnr, lecture_name, lecturer_idm oder lecturer_identifier"
 
 #: config/config.php:117 includes/Functions.php:291
 msgid "FAU Org Number"
-msgstr ""
+msgstr "FAU Org Nummer"
 
 #: config/config.php:279
 msgid "FAU: Dunkelblau"
@@ -164,15 +172,17 @@ msgstr ""
 
 #: templates/lectures-single.php:116
 msgid "Fields of study"
-msgstr ""
+msgstr "Studienbereiche"
 
 #: includes/Settings.php:888
 msgid ""
 "Fill in one or more of the following fields. A search by given name only is "
 "not possible."
 msgstr ""
+"Füllen Sie eines oder mehrere der folgenden Felder aus. Eine Suche nur nach "
+"Vornamen ist nicht möglich."
 
-#: templates/shortcodes/tabs.php:163
+#: templates/shortcodes/tabs.php:166
 msgid "Form of study"
 msgstr "Studienform"
 
@@ -182,23 +192,23 @@ msgstr ""
 
 #: config/config.php:46
 msgid "French"
-msgstr ""
+msgstr "Französisch"
 
-#: templates/shortcodes/tabs.php:109
+#: templates/shortcodes/tabs.php:112
 msgid "Frequency"
 msgstr "Rhythmus"
 
 #: includes/Functions.php:205
 msgid "Fri"
-msgstr ""
+msgstr "Fr"
 
-#: templates/shortcodes/tabs.php:111
+#: templates/shortcodes/tabs.php:114
 msgid "From - To"
 msgstr "Von - Bis"
 
 #: templates/lectures-single.php:127
 msgid "from SEM"
-msgstr ""
+msgstr "ab SEM"
 
 #: config/config.php:43
 msgid "German"
@@ -206,15 +216,15 @@ msgstr "Deutsch"
 
 #: includes/Settings.php:901
 msgid "Given name"
-msgstr ""
+msgstr "Vorname"
 
 #: config/config.php:248
 msgid "Headline's size"
-msgstr ""
+msgstr "Größe der Überschrift"
 
 #: config/config.php:242
 msgid "Hide"
-msgstr ""
+msgstr "Ausblenden"
 
 #. Author URI of the plugin
 msgid "https://blogs.fau.de/webworking/"
@@ -233,25 +243,26 @@ msgstr ""
 msgid "Identifier"
 msgstr ""
 
-#: includes/Functions.php:534
-msgid "import to calendar"
+#: config/config.php:109
+msgid ""
+"If you use the CMS offer by RRZE, you do not need to enter the DIP API key."
 msgstr ""
 
-#: config/config.php:275
-msgid "Kein"
-msgstr ""
+#: includes/Functions.php:534
+msgid "import to calendar"
+msgstr "Kalender importieren"
 
 #: templates/lectures-single.php:169
 msgid "Keywords"
-msgstr ""
+msgstr "Schlagwörter"
 
-#: includes/Shortcode.php:655
+#: includes/Shortcode.php:674
 msgid "Language"
-msgstr ""
+msgstr "Sprache"
 
-#: includes/Shortcode.php:649
+#: includes/Shortcode.php:668
 msgid "Lecture"
-msgstr ""
+msgstr "Lehrveranstaltung"
 
 #: templates/lectures-all.php:114
 msgid "Lecture's language German"
@@ -269,7 +280,7 @@ msgstr ""
 msgid "Lecturer IdM"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:116
+#: templates/shortcodes/tabs.php:119
 msgid "Lecturer(s)"
 msgstr "Durchführende/-r"
 
@@ -281,27 +292,27 @@ msgstr ""
 msgid "Lectures Settings"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:78
+#: templates/shortcodes/tabs.php:81
 msgid "Link to Campo"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:64
+#: templates/shortcodes/tabs.php:67
 msgid "Link to StudOn course (login)"
 msgstr "Link zur Lehrveranstaltung auf StudOn (Anmeldemöglichkeit)"
 
 #: templates/lectures-single.php:162
 msgid "Literature"
-msgstr ""
+msgstr "Literatur"
 
-#: templates/shortcodes/tabs.php:96
+#: templates/shortcodes/tabs.php:99
 msgid "Literature references"
 msgstr "LIteraturhinweise"
 
-#: templates/shortcodes/tabs.php:159
+#: templates/shortcodes/tabs.php:162
 msgid "Major field of study"
 msgstr "Vertiefung"
 
-#: templates/shortcodes/tabs.php:102
+#: templates/shortcodes/tabs.php:105
 msgid "Maximum number of participants"
 msgstr "Maximale Anzahl Teilnehmer/-innen"
 
@@ -309,21 +320,21 @@ msgstr "Maximale Anzahl Teilnehmer/-innen"
 msgid "Med: Blau"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:104
+#: templates/shortcodes/tabs.php:107
 msgid "Minimum number of participants for the event to take place"
 msgstr "Minimum der Teilnehmer/-innen für das Stattfinden der Veranstaltung"
 
-#: templates/shortcodes/tabs.php:62
+#: templates/shortcodes/tabs.php:65
 msgid "Module frequency"
 msgstr "Turnus des Angebots"
 
-#: templates/shortcodes/tabs.php:151
+#: templates/shortcodes/tabs.php:154
 msgid "Modules and degree programmes"
 msgstr "Module / Studiengänge"
 
 #: includes/Functions.php:193
 msgid "Mon"
-msgstr ""
+msgstr "Mo"
 
 #: includes/Functions.php:336
 msgid "Name"
@@ -331,7 +342,7 @@ msgstr ""
 
 #: includes/Functions.php:292 includes/Settings.php:865
 msgid "Name of organization"
-msgstr ""
+msgstr "Name der Organisation"
 
 #: config/config.php:287
 msgid "Nat: Meeresgrün"
@@ -339,15 +350,17 @@ msgstr ""
 
 #: config/config.php:133
 msgid "No data"
-msgstr ""
+msgstr "Keine Daten"
 
 #: templates/single-lecture.php:20
 msgid "No information can be retrieved for the specified lecture."
 msgstr ""
+"Zur angegebenen Lehrveranstaltung können keine Informationen abgerufen "
+"werden."
 
 #: config/config.php:137 includes/Functions.php:301 includes/Functions.php:346
 msgid "No matching entries found."
-msgstr ""
+msgstr "Keine passenden Einträge gefunden."
 
 #: templates/shortcodes/tabs.php:144
 msgid "No planned appointments for this parallel group yet."
@@ -355,21 +368,21 @@ msgstr "Es wurden noch keine Termine für die Parallelgruppe geplant."
 
 #: config/config.php:235
 msgid "Not suitable for visiting students"
-msgstr ""
+msgstr "Für Gaststudierende nicht geeignet"
 
 #: includes/Sanitizer.php:71
 msgid "or"
-msgstr ""
+msgstr "oder"
 
-#: templates/shortcodes/tabs.php:51
+#: templates/shortcodes/tabs.php:54
 msgid "Organizational unit"
 msgstr "Organisationseinheit"
 
-#: templates/shortcodes/tabs.php:70
+#: templates/shortcodes/tabs.php:73
 msgid "Parallel groups / dates"
 msgstr "Parallelgruppen / Termine"
 
-#: includes/Shortcode.php:626
+#: includes/Shortcode.php:645
 msgid "Person"
 msgstr ""
 
@@ -377,7 +390,7 @@ msgstr ""
 msgid "Phil: Ocker"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:164
+#: templates/shortcodes/tabs.php:167
 msgid "Place of study"
 msgstr "Studienort"
 
@@ -395,16 +408,16 @@ msgstr ""
 msgid "Recommended Literature"
 msgstr "Empfohlene Literatur"
 
-#: templates/shortcodes/tabs.php:99
+#: templates/shortcodes/tabs.php:102
 msgid "Recommended requirements / organizational matters"
 msgstr "Empfohlene Voraussetzungen / Organisatorisches"
 
-#: templates/shortcodes/tabs.php:84
+#: templates/shortcodes/tabs.php:87
 msgid "Responsible"
 msgstr "Verantwortliche/-r"
 
 #: templates/lectures-all.php:166 templates/lectures-single.php:90
-#: templates/shortcodes/tabs.php:117
+#: templates/shortcodes/tabs.php:120
 msgid "Room"
 msgstr "Raum"
 
@@ -423,7 +436,7 @@ msgstr ""
 
 #: config/config.php:47
 msgid "Russian"
-msgstr ""
+msgstr "Russisch"
 
 #: config/config.php:295
 msgid "RW: Bordeaurot"
@@ -431,65 +444,65 @@ msgstr ""
 
 #: includes/Functions.php:208
 msgid "Sat"
-msgstr ""
+msgstr "Sa"
 
 #: includes/Settings.php:871 includes/Settings.php:907
 msgid "Search"
-msgstr ""
+msgstr "Suche"
 
 #: includes/Settings.php:858
 msgid "Search for FAU Org Number"
-msgstr ""
+msgstr "Suche nach FAU Org Nummer"
 
 #: includes/Settings.php:885
 msgid "Search for identifier"
-msgstr ""
+msgstr "Suche nach Identifier"
 
-#: includes/Shortcode.php:659
+#: includes/Shortcode.php:678
 msgid "Semester"
 msgstr ""
 
 #: config/config.php:204
 msgid "Semester f.e. SoSe2023 or WiSe2024"
-msgstr ""
+msgstr "Semester z.B. SoSe2023 oder WiSe2024"
 
-#: templates/shortcodes/tabs.php:80
+#: templates/shortcodes/tabs.php:83
 msgid "Semester hours per week"
 msgstr "Semesterwochenstunden"
 
-#: templates/shortcodes/tabs.php:48
+#: templates/shortcodes/tabs.php:51
 msgid "Short text"
 msgstr "Kurztext"
 
 #: config/config.php:313
 msgid "Show"
-msgstr ""
+msgstr "Anzeigen"
 
 #: config/config.php:45
 msgid "Spanish"
-msgstr ""
+msgstr "Spanisch"
 
-#: includes/Shortcode.php:669
+#: includes/Shortcode.php:688
 msgid "SS"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:113
+#: templates/shortcodes/tabs.php:116
 msgid "Start date - End date"
 msgstr "Startdatum - Enddatum"
 
-#: templates/shortcodes/tabs.php:161
+#: templates/shortcodes/tabs.php:164
 msgid "Subject indicator"
 msgstr "Fachkennzeichen"
 
 #: config/config.php:231
 msgid "Suitable for visiting students"
-msgstr ""
+msgstr "Für Gaststudierende geeignet"
 
 #: includes/Functions.php:211
 msgid "Sun"
-msgstr ""
+msgstr "So"
 
-#: templates/shortcodes/tabs.php:82
+#: templates/shortcodes/tabs.php:85
 msgid "Teaching language"
 msgstr "Lehrsprache"
 
@@ -502,7 +515,7 @@ msgstr "Lehrsprache (z.B. \"en\" oder \"de\" oder \"en, de, fr\")"
 msgid "TF: Silbern"
 msgstr ""
 
-#: templates/shortcodes/tabs.php:185
+#: templates/shortcodes/tabs.php:188
 msgid "The course has not been assigned to a course of study yet"
 msgstr "Die Veranstaltung wurde noch keinem Studiengang zugeordnet"
 
@@ -522,28 +535,32 @@ msgstr ""
 
 #: config/config.php:134
 msgid ""
-"This sentence will be returned by default if shortcode couln't find any data."
-" You can use different messages in each shortcode by using the attribut "
-"nodata. F.e. [lectures nodata=\"No lectures found.\"]"
+"This sentence will be returned by default if shortcode couldn't find any "
+"data. You can use different messages in each shortcode by using the "
+"attribute nodata. F.e. [lectures nodata=\"No lectures found.\"]"
 msgstr ""
+"Dieser Satz wird standardmäßig zurückgegeben, wenn der Shortcode keine Daten "
+"finden konnte. Sie können in jedem Shortcode unterschiedliche Mitteilungen "
+"verwenden, indem Sie das Attribut nodata verwenden. z.B. [lectures "
+"nodata=\"Keine Vorlesungen gefunden.\"]"
 
 #: includes/Functions.php:202
 msgid "Thu"
-msgstr ""
+msgstr "Do"
 
 #: templates/lectures-single.php:58
 msgid "Time and place"
-msgstr ""
+msgstr "Zeit und Ort"
 
 #: templates/lectures-all.php:194 templates/lectures-single.php:111
 msgid "Time and place on appointment"
-msgstr ""
+msgstr "Zeit und Ort nach Vereinbarung"
 
 #: templates/lectures-all.php:163 templates/lectures-single.php:87
 msgid "Time on appointment"
-msgstr ""
+msgstr "Zeit nach Vereinbarung"
 
-#: templates/lectures-single.php:150 templates/shortcodes/tabs.php:47
+#: templates/lectures-single.php:150 templates/shortcodes/tabs.php:50
 msgid "Title"
 msgstr "Titel"
 
@@ -558,9 +575,9 @@ msgstr ""
 
 #: includes/Functions.php:196
 msgid "Tue"
-msgstr ""
+msgstr "Di"
 
-#: includes/Shortcode.php:652 templates/shortcodes/tabs.php:156
+#: includes/Shortcode.php:671 templates/shortcodes/tabs.php:159
 msgid "Type"
 msgstr "Typ"
 
@@ -568,26 +585,26 @@ msgstr "Typ"
 msgid "Type f.e. Lecture"
 msgstr "Lehrveranstaltungstyp z.B. Vorlesung"
 
-#: templates/shortcodes/tabs.php:165
+#: templates/shortcodes/tabs.php:168
 msgid "Type of study"
 msgstr "Studienart"
 
-#: templates/shortcodes/tabs.php:162
+#: templates/shortcodes/tabs.php:165
 msgid "Version of examination regulations"
 msgstr "Prüfungsordnungsversion"
 
 #: config/config.php:222
 msgid "Visiting students"
-msgstr ""
+msgstr "Gaststudierende"
 
 #: includes/Functions.php:199
 msgid "Wed"
-msgstr ""
+msgstr "Mi"
 
-#: templates/shortcodes/tabs.php:110
+#: templates/shortcodes/tabs.php:113
 msgid "Weekday"
 msgstr "Wochentag"
 
-#: includes/Shortcode.php:670
+#: includes/Shortcode.php:689
 msgid "WS"
 msgstr ""

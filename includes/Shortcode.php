@@ -24,6 +24,8 @@ class Shortcode
     private $settings = '';
     private $aAllowedColors = [];
     private $aAllowedFormats = [];
+
+    private $aLanguages = [];
     protected $noCache = false;
 
 
@@ -170,7 +172,7 @@ class Shortcode
             $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
         }
 
-        // teaching_language (display_language works differently - it is not an attribute for the DIP-Campo-API)
+        // teaching_language (display_language works differently and is not an attribute for the DIP-Campo-API)
         if (!empty($this->atts['teaching_language'])) {
             $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
         }
@@ -241,9 +243,18 @@ class Shortcode
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
-        // translate by display_language (f.e. "fr" => if no translation in FR is given by API output is NULL / "fr:en" => if no translation in FR is given, Translator checks if translation in EN is given by API and returns it or NULL (en = fallback) / if this attribut is not given => website's language is used)        
+        // translate by display_language (f.e. "fr" => if no translation in FR is given by API output is NULL / "fr:en" => if no translation in FR is given, Translator checks if translation in EN is given by API and returns it or NULL (en = fallback) / if this attribute is not given => website's language is used)        
+
+        // echo 'VORHER: <pre>';
+        // var_dump($data);
+        // exit;
+
         $translator = new Translator($this->atts['display_language']);
         $translator->setTranslations($data);
+
+        // echo 'NACHHER: <pre>';
+        // var_dump($data);
+        // exit;
 
         Functions::console_log('after Translator ' . json_encode($data), $tsStart);
 
@@ -406,6 +417,8 @@ class Shortcode
         $iCnt = 0;
         $first = true;
 
+        // Fehlerursache: $type ist leer, weil keine Translation exisitiert in Campo
+
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 $i = 1;
@@ -476,7 +489,7 @@ class Shortcode
         if (empty($atts['display_language'])) {
             $atts['display_language'] = $siteLang;
         }else{
-            $atts['display_language'] = strtolower($atts['display_language']);
+            $atts['display_language'] = strtolower(substr($atts['display_language'], 0, 2));
         }
 
         // dynamically generate hide vars
@@ -532,8 +545,14 @@ class Shortcode
         }
 
         // no data
-        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $siteLang])) {
-            // we allow nodata to be empty in case users don't want any output 
+        // 1. we allow nodata to be empty in case users don't want any output 
+        // (in this case user has to delete nodata entries in settings assigned to website's language and -if attribute is used in shortcode- assigned to display_language)
+        // 2. if shortcode attribute "nodata" is given => use it
+        // 3. else => nodata is set to config's nodata assigned to shortcode attribute "display_language"
+        // 4. if 3 is undefined =>  nodata is set to nodata assigned to website's language
+        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $atts['display_language']])) {
+            $atts['nodata'] = $this->options['basic_nodata_' . $atts['display_language']];
+        }elseif (!empty($this->options['basic_nodata_' . $siteLang])) {
             $atts['nodata'] = $this->options['basic_nodata_' . $siteLang];
         }
 

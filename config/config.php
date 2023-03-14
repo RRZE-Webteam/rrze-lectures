@@ -106,7 +106,7 @@ function getFields()
             [
                 'name' => 'ApiKey',
                 'label' => __('DIP API-Key', 'rrze-lectures'),
-                'desc' => '',
+                'desc' => __('If you use the CMS offer by RRZE, you do not need to enter the DIP API key.', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
                 'default' => '',
@@ -130,8 +130,8 @@ function getFields()
     foreach (getAvailableLanguages() as $local => $lang) {
         $aNodata[] = [
             'name' => 'nodata_' . substr($local, 0, 2),
-            'label' => __('No data', 'rrze-lectures') . ' - ' . preg_replace('/\((.+?)\)/', '', $lang),
-            'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
+            'label' => __('No data', 'rrze-lectures') . ' (' . trim(preg_replace('/\((.+?)\)/', '', $lang)) . ')',
+            'desc' => __('This sentence will be returned by default if shortcode couldn\'t find any data. You can use different messages in each shortcode by using the attribute nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
             'placeholder' => '',
             'type' => 'text',
             'default' => __('No matching entries found.', 'rrze-lectures'),
@@ -213,7 +213,7 @@ function getShortcodeSettings()
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Display language (f.e. "en" or "de" or "en:de" <= fallback is set to "de")', 'rrze-lectures'),
+                'label' => __('Display language (f.e. "en" or "de" or "fr". If this attribute is not given, website\'s language is used. In every case fallback is "de".)', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'guest' => [
@@ -272,7 +272,7 @@ function getShortcodeSettings()
                 'values' => [
                     [
                         'id' => '',
-                        'val' => __('Kein', 'rrze-lectures'),
+                        'val' => __('Default', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'fau',
