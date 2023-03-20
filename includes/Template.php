@@ -32,7 +32,7 @@ class Template
         return in_array($active_theme->get('Name'), getConstants('fauthemes'));
     }
     
-    public function include_single_template($template_path)
+    public function include_single_template(string $template_path): string 
     {
         global $post;
 
@@ -49,7 +49,7 @@ class Template
         return dirname($this->pluginFile) . $template_path;
     }
 
-    public function include_archive_template($template_path)
+    public function include_archive_template(string $template_path): string
     {
         global $post;
 
@@ -106,7 +106,7 @@ class Template
         return $content;
     }
 
-    public static function makeCollapseTitle(&$data, &$group)
+    public static function makeCollapseTitle(array &$data, string &$group): string
     {
         $name = htmlentities($data['name']);
 
@@ -122,7 +122,7 @@ class Template
         return $ret;
     }
 
-    public static function makeAccordion(&$data, &$i, &$max, &$tite, &$group)
+    public static function makeAccordion(array &$data, int &$i, int &$max, string &$tite, string &$group): array
     {
         $data['accordion'] = true;
         $data['collapsibles_start'] = ($i == 1 ? true : false);

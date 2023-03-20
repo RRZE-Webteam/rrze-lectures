@@ -17,7 +17,7 @@ class Translator
     // protected $varFunc;
 
 
-    public function __construct($display_language)
+    public function __construct(string $display_language)
     {
         $this->display_language = $display_language;
 
@@ -32,7 +32,7 @@ class Translator
     }
 
     /* returns translations by language (given attribute and/or settings value) or '' */
-    private function getTranslation(&$aIn)
+    private function getTranslation(array &$aIn): string|array
     {
         if (!is_array($aIn)) {
             // DIP-Field is not a mulitlang-field (== string (and not array with language codes) (["en" => "english text", "de" => "deutscher Text"])
@@ -49,7 +49,7 @@ class Translator
     }
 
 
-    public function setTranslations(&$aData)
+    public function setTranslations(array &$aData)
     {
         foreach ($aData as $nr => $aLecture) {
             foreach ($aLecture as $fieldName => $field) {

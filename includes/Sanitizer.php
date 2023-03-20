@@ -20,7 +20,7 @@ class Sanitizer
         $this->aMap = getSanitizerMap();
     }
 
-    public static function wp_kses_custom($str)
+    public static function wp_kses_custom(string $str): string
     {
         $allowed_html = [
             'a' => [
@@ -41,7 +41,7 @@ class Sanitizer
         return wp_kses($str, $allowed_html, $allowed_protocols);
     }
 
-    public function sanitizeArray($aIn)
+    public function sanitizeArray(array $aIn): array
     {
         foreach ($aIn as $field => $value) {
             if (is_array($value)) {
@@ -58,7 +58,7 @@ class Sanitizer
         return $aIn;
     }
 
-    public function sanitizeField($value, $type = 'string')
+    public function sanitizeField(string $value, string $type = 'string'): string
     {
         switch ($type) {
             case 'date':
@@ -74,7 +74,7 @@ class Sanitizer
     }
 
 
-    public static function sanitizeLectures(&$data, &$aLanguages)
+    public static function sanitizeLectures(array &$data, array &$aLanguages)
     {
         array_walk_recursive($data, 'sanitize_text_field');
 

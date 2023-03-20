@@ -50,7 +50,7 @@ class Functions
     }
 
  
-    public static function console_log($msg = '', $tsStart = 0)
+    public static function console_log(string $msg = '', int $tsStart = 0)
     {
         if (isset($_GET['debug'])) {
             $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';
@@ -58,7 +58,7 @@ class Functions
         }
     }
 
-    public static function getSemester($iSem = 0)
+    public static function getSemester(int $iSem = 0): string
     {
         // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
         // Das Wintersemester entsprechend vom 01.10. des Jahres bis zum 31.03. des folgenden Jahres
@@ -68,7 +68,6 @@ class Functions
         $year = date('Y');
         $sem = 'SoSe';
         $ret = '';
-        $iSem = (int) $iSem;
 
         $soseStart = date('Y-m-d', strtotime($year . '-04-01'));
         $soseEnd = date('Y-m-d', strtotime($year . '-09-30'));
@@ -152,12 +151,12 @@ class Functions
         return $ret;
     }
 
-    public static function isLastElement(array $aArr)
+    public static function isLastElement(array $aArr): bool
     {
         return next($aArr) !== false ?: key($aArr) !== null;
     }
 
-    public static function makeLQ($aIn)
+    public static function makeLQ(array $aIn): string
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
@@ -199,7 +198,7 @@ class Functions
         return implode('&', $aLQ);
     }
 
-    public static function convertDate($tz, $timezone, $format)
+    public static function convertDate(string $tz, string $timezone, string $format): string
     {
         $dt = new \DateTime($tz, new \DateTimeZone($timezone));
         $dt->setTimezone(new \DateTimeZone('Europe/Berlin'));
@@ -232,7 +231,7 @@ class Functions
         return $ret;
     }
 
-    public static function setDataToCache($data, $aAtts = [])
+    public static function setDataToCache(string $data, array $aAtts = []): bool
     {
         $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
 
@@ -250,7 +249,7 @@ class Functions
         // }
     }
 
-    public static function getDataFromCache($aAtts = [])
+    public static function getDataFromCache(array $aAtts = []): mixed
     {
         return get_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)));
     }
@@ -265,7 +264,7 @@ class Functions
         update_option(self::TRANSIENT_OPTION, '');
     }
 
-    public function getTableHTML($aIn, $aFieldnames)
+    public function getTableHTML(array $aIn, array $aFieldnames): array|string
     {
         if (!is_array($aIn)) {
             return $aIn;
@@ -307,7 +306,7 @@ class Functions
         wp_send_json($response);
     }
 
-    public function getFAUOrgNr($keyword = null)
+    public function getFAUOrgNr(string $keyword = null): array|string
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
 
@@ -354,7 +353,7 @@ class Functions
     }
 
 
-    public function getLecturerIdentifier($aParams = [])
+    public function getLecturerIdentifier(array $aParams = []): array|string
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
         $lq = self::makeLQ($aParams);
@@ -387,7 +386,7 @@ class Functions
         return $ret;
     }
 
-    public static function isMaintenanceMode()
+    public static function isMaintenanceMode(): bool
     {
         if (is_multisite()) {
             $settingsOptions = get_site_option('rrze_settings');
@@ -400,7 +399,7 @@ class Functions
 
 
 
-    public function getSelectHTML($aIn)
+    public function getSelectHTML(array $aIn): string
     {
         if (!is_array($aIn)) {
             return "<option value=''>$aIn</option>";
@@ -422,7 +421,7 @@ class Functions
         wp_send_json($response);
     }
 
-    public static function makeLinkToICS($type, $lecture, $term, $t)
+    public static function makeLinkToICS(string $type, array $lecture, array $term, array $t): array
     {
         $aProps = [
             'SUMMARY' => $lecture['title'],

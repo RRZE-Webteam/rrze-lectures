@@ -73,7 +73,7 @@ class Shortcode
      * @param  array   $atts Shortcode-Attribute
      * @return string Gib den Inhalt zurück
      */
-    public function shortcodeLectures($atts, $content = NULL)
+    public function shortcodeLectures(array $atts, string $content = NULL): string
     {
 
         if (Functions::isMaintenanceMode()){
@@ -475,7 +475,7 @@ class Shortcode
         return $content;
     }
 
-    private function normalize($atts)
+    private function normalize(array $atts): array
     {
         // website's language
         $siteLang = substr(get_locale(), 0, 2);
@@ -579,7 +579,7 @@ class Shortcode
     }
 
 
-    public function isGutenberg()
+    public function isGutenberg(): bool
     {
         $postID = get_the_ID();
         if ($postID && !use_block_editor_for_post($postID)) {
@@ -588,7 +588,7 @@ class Shortcode
         return true;
     }
 
-    private function makeDropdown($id, $label, $aData, $all = null)
+    private function makeDropdown(string $id, string $label, array $aData, string $all = null): array
     {
         $ret = [
             'id' => $id,
@@ -610,7 +610,7 @@ class Shortcode
         return $ret;
     }
 
-    private function makeToggle($label)
+    private function makeToggle(string $label): array
     {
         return [
             'label' => $label,
@@ -621,7 +621,7 @@ class Shortcode
         ];
     }
 
-    public function fillGutenbergOptions($aSettings)
+    public function fillGutenbergOptions(array $aSettings): array
     {
         $this->dip = new DIPAPI($this->DIPURL, $this->DIPOrgNr, null);
 
@@ -777,7 +777,7 @@ class Shortcode
     }
 
 
-    public function addMCEButtons($pluginArray)
+    public function addMCEButtons(array $pluginArray): array
     {
         if (current_user_can('edit_posts') && current_user_can('edit_pages')) {
             $pluginArray['rrze_lecture_shortcode'] = plugins_url('../js/tinymce-shortcodes.js', plugin_basename(__FILE__));
