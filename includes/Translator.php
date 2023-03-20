@@ -32,7 +32,7 @@ class Translator
     }
 
     /* returns translations by language (given attribute and/or settings value) or '' */
-    private function getTranslation(array &$aIn): string|array
+    private function getTranslation(string|array|null &$aIn): string|array|null
     {
         if (!is_array($aIn)) {
             // DIP-Field is not a mulitlang-field (== string (and not array with language codes) (["en" => "english text", "de" => "deutscher Text"])
