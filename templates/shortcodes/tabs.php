@@ -48,7 +48,7 @@
         [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
 
         {{providerValues.event.title}}<?php echo __('Title', 'rrze-lectures'); ?>: {{=providerValues.event.title}}{{/providerValues.event.title}}
-        <?php echo __('Short text', 'rrze-lectures'); ?>: {{=providerValues.event.shorttext}}
+        {{providerValues.event.shorttext}}<?php echo __('Short text', 'rrze-lectures'); ?>: {{=providerValues.event.shorttext}}{{/providerValues.event.shorttext}}
 
         {{providerValues.event_orgunit}}
         <?php echo __('Organizational unit', 'rrze-lectures'); ?>:
@@ -62,9 +62,9 @@
         {{/providerValues.event_orgunit}}
 
         <p><?php echo __('Course type', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>
-        <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-10)</p>
-        <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: fehlt dieses Feld? (Stand: 2023-03-13)</p>
-        <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: fehlt dieses Feld? (Stand: 2023-03-13)</p>        
+        <!-- <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-20)</p> -->
+        <!-- <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-20)</p> -->
+        <!-- <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-20)</p>         -->
 
         {{providerValues.event.comment}}[alert style="warning"]<strong><?php echo __('Comment', 'rrze-lectures'); ?></strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
 
@@ -86,26 +86,33 @@
 
         <?php echo __('Responsible', 'rrze-lectures'); ?>
         <ul>
-            {{@_val.event_responsible}}
+            {{@_val.course_responsible}}
             <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">
                 <a href="hier fehlt der Link zu IdM oder DIP liefert ID für rrze-contact oder event_responsible hat unter location einen URL">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{:_val.surname}}! surname (schema: familyName) ist LEER !{{/_val.surname}}</a>
             </li>
-            {{/@_val.event_responsible}}
+            {{/@_val.course_responsible}}
         </ul>
 
-        <h4><?php echo __('Content', 'rrze-lectures'); ?></h4>
-        <p itemprop="description">{{_val.contents}}{{=_val.contents}}{{:_val.contents}}_val.contents ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.contents}}</p>
+        {{_val.contents}}
+        <strong><?php echo __('Content', 'rrze-lectures'); ?></strong>
+        <p itemprop="description">{{=_val.contents}}</p>
+        {{/_val.contents}}
 
-        <h4><?php echo __('Literature references', 'rrze-lectures'); ?></h4>
-        <p>{{_val.literature}}{{=_val.literature}}{{:_val.literature}}_val.literature ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.literature}}</p>
+        {{_val.literature}}
+        <p><?php echo __('Literature references', 'rrze-lectures'); ?>: {{=_val.literature}}</p>
+        {{/_val.literature}}
 
-        <h4><?php echo __('Recommended requirements / organizational matters', 'rrze-lectures'); ?></h4>
-        <p>{{_val.compulsory_requirement}}{{=_val.compulsory_requirement}}{{:_val.compulsory_requirement}}_val.compulsory_requirement ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.compulsory_requirement}}</p>
+        {{_val.compulsory_requirement}}
+        <p><?php echo __('Recommended requirements / organizational matters', 'rrze-lectures'); ?>: {{=_val.compulsory_requirement}}</p>
+        {{/_val.compulsory_requirement}}
 
-        <h4><?php echo __('Maximum number of participants', 'rrze-lectures'); ?></h4>
-        <p>{{_val.attendee_maximum}}{{=_val.attendee_maximum}}{{:_val.attendee_maximum}}_val.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21){{/_val.attendee_maximum}}</p>
-        <h4><?php echo __('Minimum number of participants for the event to take place', 'rrze-lectures'); ?></h4>
-        <p>{{_val.attendee_minimum}}{{=_val.attendee_minimum}}{{:_val.attendee_minimum}}Feld FEHLT (Stand: 2023-02-21) (Vorschlag: _val.attendee_minimum){{/_val.attendee_minimum}}</p>
+        {{_val.attendee_maximum}}
+        <p><?php echo __('Maximum number of participants', 'rrze-lectures'); ?>: {{=_val.attendee_maximum}}{{:_val.attendee_maximum}}_val.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21)</p>
+        {{/_val.attendee_maximum}}
+
+        {{_val.attendee_minimum}}
+        <p><?php echo __('Minimum number of participants for the event to take place', 'rrze-lectures'); ?>: {{=_val.attendee_minimum}}</p>
+        {{/_val.attendee_minimum}}
 
         <table>
             <tr>
@@ -136,8 +143,12 @@
                 </td>
                 <td>{{_val.comment}}{{=_val.comment}}{{/_val.comment}}
                 </td>
-                <td>individual_instructor => falls Array gefüllt ist (2DO: LV finden mit !empty(roviderValues.courses.planned_dates.instructor)</td>
-                <td>{{_val.famos_request}}{{=_val.famos_request}}{{/_val.famos_request}} (2DO: famos_request URL FEHLT oder kann Link mit dieser Nr auf Map / Details-Page gesetzt werden?)
+                <td>
+                {{@_val.instructor}}
+                    {{_val.prefixTitle}}{{=_val.prefixTitle}} {{/_val.prefixTitle}}{{_val.firstname}}{{=_val.firstname}} {{/_val.firstname}}{{_val.surname}}{{=_val.surname}} {{/_val.surname}}
+                {{/@_val.instructor}}    
+                </td>
+                <td>{{_val.famos_code}}{{=_val.famos_code}}{{/_val.famos_code}}
                 </td>
             </tr>
             {{:@_val.planned_dates}}
@@ -203,16 +214,12 @@
                 [/accordion]
             {{/degree_end}}
         {{:do_degree_accordion}}
-
-        HIER TEST 1
             [/collapse]
         {{/do_degree_accordion}}        
     {{/type_end}}
 {{/do_type_accordion}}
 {{do_degree_accordion}}
     {{degree_end}}
-    HIER TEST 2
-
     [/collapse]
     {{/degree_end}}
 {{/do_degree_accordion}}

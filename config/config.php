@@ -64,6 +64,7 @@ function getConstants()
     return $options;
 }
 
+
 /**
  * Gibt die Einstellungen des Menus zurück.
  * @return array [description]

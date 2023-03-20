@@ -20,6 +20,27 @@ class Sanitizer
         $this->aMap = getSanitizerMap();
     }
 
+    public static function wp_kses_custom($str)
+    {
+        $allowed_html = [
+            'a' => [
+                'href' => true,
+            ],
+            'ul' => [],
+            'ol' => [],
+            'li' => [],
+        ];
+
+
+        $allowed_protocols = [
+            'http',
+            'https',
+            'mailto',
+        ];
+
+        return wp_kses($str, $allowed_html, $allowed_protocols);
+    }
+
     public function sanitizeArray($aIn)
     {
         foreach ($aIn as $field => $value) {
@@ -58,6 +79,12 @@ class Sanitizer
         array_walk_recursive($data, 'sanitize_text_field');
 
         foreach ($data as $iEntry => $aEntries) {
+
+            if (!empty($data[$iEntry]['providerValues']['event']['comment'])){
+                foreach($data[$iEntry]['providerValues']['event']['comment'] as $lang => $val){
+                    $data[$iEntry]['providerValues']['event']['comment'][$lang] = self::wp_kses_custom($data[$iEntry]['providerValues']['event']['comment'][$lang]);
+                }
+            }
 
             if (!empty($data[$iEntry]['providerValues']['courses'])) {
                 foreach ($data[$iEntry]['providerValues']['courses'] as $iCourse => $aCourse) {

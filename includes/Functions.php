@@ -33,6 +33,23 @@ class Functions
         // add_action('wp_ajax_nopriv_GenerateICS', [$this, 'ajaxGenerateICS']);
     }
 
+
+    public function adminEnqueueScripts()
+    {
+        wp_enqueue_script(
+            'rrze-lectures-ajax',
+            plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
+            ['jquery'],
+            RRZE_PLUGIN_VERSION
+        );
+
+        wp_localize_script('rrze-lectures-ajax', 'lecture_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('lecture-ajax-nonce'),
+        ]);
+    }
+
+ 
     public static function console_log($msg = '', $tsStart = 0)
     {
         if (isset($_GET['debug'])) {
@@ -215,21 +232,6 @@ class Functions
         return $ret;
     }
 
-    public function adminEnqueueScripts()
-    {
-        wp_enqueue_script(
-            'rrze-lectures-ajax',
-            plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
-            ['jquery'],
-            RRZE_PLUGIN_VERSION
-        );
-
-        wp_localize_script('rrze-lectures-ajax', 'lecture_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('lecture-ajax-nonce'),
-        ]);
-    }
-
     public static function setDataToCache($data, $aAtts = [])
     {
         $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
@@ -269,10 +271,19 @@ class Functions
             return $aIn;
         }
 
-        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . $aFieldnames[0] . '</strong></td></td><td><strong>' . $aFieldnames[1] . '</strong></td></tr></thead>';
+        $ret = '<table class="wp-list-table widefat striped"><thead><tr>';
 
-        foreach ($aIn as $ID => $val) {
-            $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
+        foreach($aFieldnames as $fieldname){
+            $ret .= '<td><strong>' . $fieldname . '</strong></td>';
+        }
+        $ret .= '</tr></thead>';
+        
+        foreach ($aIn as $aVal) {
+            $ret .= '<tr>';
+            foreach($aVal as $val){
+                $ret .= '<td style="word-wrap: break-word;">' . $val . '</td>';
+            }
+            $ret .= '</tr>';
         }
         $ret .= '</table>';
 
@@ -317,10 +328,11 @@ class Functions
             $ret = [];
 
             foreach ($data as $aDetails) {
-                $ret[$aDetails['disambiguatingDescription']] = $aDetails['name'];
+                $ret[] = [
+                    $aDetails['disambiguatingDescription'],
+                    $aDetails['name'],
+                ];
             }
-
-
         }
 
         return $ret;
@@ -333,7 +345,8 @@ class Functions
 
         $aFieldnames = [
             __('Identifier', 'rrze-lectures'),
-            __('Name', 'rrze-lectures')
+            __('Name', 'rrze-lectures'),
+            __('Name of organization', 'rrze-lectures')
         ];
 
         $response = $this->getTableHTML($this->getLecturerIdentifier($aInputs), $aFieldnames);
@@ -346,7 +359,7 @@ class Functions
         $ret = __('No matching entries found.', 'rrze-lectures');
         $lq = self::makeLQ($aParams);
 
-        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName') . '&lq=' . urlencode($lq);
+        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName;memberOf.memberOf.name') . '&lq=' . urlencode($lq);
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('persons', $dipParams);
@@ -363,7 +376,11 @@ class Functions
             $ret = [];
 
             foreach ($data as $aDetails) {
-                $ret[$aDetails['identifier']] = $aDetails['familyName'] . ', ' . $aDetails['givenName'];
+                $ret[] = [
+                    $aDetails['identifier'],
+                    $aDetails['familyName'] . ', ' . $aDetails['givenName'],
+                    $aDetails['memberOf'][0]['memberOf']['name']
+                ];
             }
         }
 
