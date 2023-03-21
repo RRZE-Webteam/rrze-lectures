@@ -107,7 +107,7 @@
         {{/_val.compulsory_requirement}}
 
         {{_val.attendee_maximum}}
-        <p><?php echo __('Maximum number of participants', 'rrze-lectures'); ?>: {{=_val.attendee_maximum}}{{:_val.attendee_maximum}}_val.attendee_maximum ist NULL, sollte aber Inhalt haben (Stand: 2023-02-21)</p>
+        <p><?php echo __('Maximum number of participants', 'rrze-lectures'); ?>: {{=_val.attendee_maximum}}</p>
         {{/_val.attendee_maximum}}
 
         {{_val.attendee_minimum}}
@@ -151,10 +151,10 @@
                 <td>{{_val.famos_code}}{{=_val.famos_code}}{{/_val.famos_code}}
                 </td>
             </tr>
-            {{:@_val.planned_dates}}
-                <?php echo __('No planned appointments for this parallel group yet.', 'rrze-lectures'); ?>            
             {{/@_val.planned_dates}}
-
+            {{!_val.planned_dates}}
+                <?php echo __('No planned appointments for this parallel group yet.', 'rrze-lectures'); ?>
+            {{/!_val.planned_dates}}
         </table>
         {{/@providerValues.courses}}
 
@@ -180,24 +180,24 @@
             </tr>
 
             {{@providerValues.modules}}
-            {{@_val.modules_cos}}
+                {{@_val.modules_cos}}
 
-            <tr>
-                <td>FEHLT (Stand: 2023-02-21)</td>
-                <td>FEHLT (Stand: 2023-02-21)</td>
-                <td>{{=_val.degree}}</td>
-                <td>{{=_val.subject}}</td>
-                <td>{{=_val.major}}</td>
-                <td>FEHLT (Stand: 2023-02-21)</td>
-                <td>{{=_val.subject_indicator}}</td>
-                <td>{{=_val.version}}</td>
-                <td>FEHLT (Stand: 2023-02-21)</td>                
-                <td>FEHLT (Stand: 2023-02-21)</td>
-                <td>FEHLT (Stand: 2023-02-21)</td>                
-            </tr>
-            {{:@_val.modules_cos}}
-                <?php echo __('The course has not been assigned to a course of study yet', 'rrze-lectures'); ?>   
-            {{/@_val.modules_cos}}
+                <tr>
+                    <td>FEHLT (Stand: 2023-02-21)</td>
+                    <td>FEHLT (Stand: 2023-02-21)</td>
+                    <td>{{=_val.degree}}</td>
+                    <td>{{=_val.subject}}</td>
+                    <td>{{=_val.major}}</td>
+                    <td>FEHLT (Stand: 2023-02-21)</td>
+                    <td>{{=_val.subject_indicator}}</td>
+                    <td>{{=_val.version}}</td>
+                    <td>FEHLT (Stand: 2023-02-21)</td>                
+                    <td>FEHLT (Stand: 2023-02-21)</td>
+                    <td>FEHLT (Stand: 2023-02-21)</td>                
+                </tr>
+                {{:@_val.modules_cos}}
+                    <?php echo __('The course has not been assigned to a course of study yet', 'rrze-lectures'); ?>   
+                {{/@_val.modules_cos}}
             {{/@providerValues.modules}}
         </table>
 

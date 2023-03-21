@@ -82,7 +82,9 @@ class Sanitizer
 
             if (!empty($data[$iEntry]['providerValues']['event']['comment'])){
                 foreach($data[$iEntry]['providerValues']['event']['comment'] as $lang => $val){
-                    $data[$iEntry]['providerValues']['event']['comment'][$lang] = self::wp_kses_custom($data[$iEntry]['providerValues']['event']['comment'][$lang]);
+                    if (!empty($data[$iEntry]['providerValues']['event']['comment'][$lang])){
+                        $data[$iEntry]['providerValues']['event']['comment'][$lang] = self::wp_kses_custom($data[$iEntry]['providerValues']['event']['comment'][$lang]);
+                    }
                 }
             }
 
