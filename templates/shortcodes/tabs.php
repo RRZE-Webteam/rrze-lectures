@@ -62,12 +62,11 @@
         {{/providerValues.event_orgunit}}
 
         <p><?php echo __('Course type', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>
-        <!-- <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-20)</p> -->
-        <!-- <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-20)</p> -->
-        <!-- <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-20)</p>         -->
+        <!-- <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-22)</p> -->
+        <!-- <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-22)</p> -->
+        <!-- <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-22)</p> -->
 
         {{providerValues.event.comment}}[alert style="warning"]<strong><?php echo __('Comment', 'rrze-lectures'); ?></strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
-
 
         [/tab]
         [tab title="<?php echo __('Parallel groups / dates', 'rrze-lectures'); ?>"]
@@ -84,15 +83,17 @@
 
         <p><?php echo __('Teaching language', 'rrze-lectures'); ?>: {{=_val.teaching_language_txt}}</p>
 
-        <?php echo __('Responsible', 'rrze-lectures'); ?>
+        {{_val.course_responsible}}
+        <?php echo __('Responsible', 'rrze-lectures'); ?>:
         <ul>
             {{@_val.course_responsible}}
             <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">
-                <a href="hier fehlt der Link zu IdM oder DIP liefert ID für rrze-contact oder event_responsible hat unter location einen URL">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{:_val.surname}}! surname (schema: familyName) ist LEER !{{/_val.surname}}</a>
+                {{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{/_val.surname}}
             </li>
             {{/@_val.course_responsible}}
         </ul>
-
+        {{/_val.course_responsible}}
+        </br>
         {{_val.contents}}
         <strong><?php echo __('Content', 'rrze-lectures'); ?></strong>
         <p itemprop="description">{{=_val.contents}}</p>
@@ -130,23 +131,21 @@
             <tr>
                 <td>{{_val.rhythm}}{{=_val.rhythm}}{{/_val.rhythm}}</td>
                 <td>{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}}</td>
-                <td>{{_val.starttime}}{{=_val.starttime}}{{/_val.starttime}}
-                    -
-                    {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}
-                </td>
+                <td>{{_val.starttime}}{{=_val.starttime}}{{/_val.starttime}} - {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}</td>
                 <td>{{@_val.misseddates}}{{=_val}}<br>{{/@_val.misseddates}}</td>
-                <td>{{_val.startdate}}{{=_val.startdate}}{{/_val.startdate}}
-                    -
-                    {{_val.enddate}}{{=_val.enddate}}{{/_val.enddate}}
-                </td>
+                <td>{{_val.startdate}}{{=_val.startdate}}{{/_val.startdate}} - {{_val.enddate}}{{=_val.enddate}}{{/_val.enddate}}</td>
                 <td>{{_val.expected_attendees_count}}{{=_val.expected_attendees_count}}{{/_val.expected_attendees_count}}
                 </td>
                 <td>{{_val.comment}}{{=_val.comment}}{{/_val.comment}}
                 </td>
                 <td>
+                {{_val.instructor}}
+                <ul>
                 {{@_val.instructor}}
-                    {{_val.prefixTitle}}{{=_val.prefixTitle}} {{/_val.prefixTitle}}{{_val.firstname}}{{=_val.firstname}} {{/_val.firstname}}{{_val.surname}}{{=_val.surname}} {{/_val.surname}}
+                    <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{/_val.surname}}</li>
                 {{/@_val.instructor}}    
+                </ul>
+                {{/_val.instructor}}
                 </td>
                 <td>{{_val.famos_code}}{{=_val.famos_code}}{{/_val.famos_code}}
                 </td>
@@ -166,38 +165,39 @@
 
         <table>
             <tr>
-                <td><?php echo __('Default text', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Type', 'rrze-lectures'); ?></td>
+                <!-- <td><?php echo __('Default text', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22) -->
+                <!-- <td><?php echo __('Type', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22) -->
                 <td><?php echo __('Degree', 'rrze-lectures'); ?></td>
                 <td><?php echo __('Degree&nbsp;', 'rrze-lectures'); ?></td>
                 <td><?php echo __('Major field of study', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Course specialization', 'rrze-lectures'); ?></td>
+                <!-- <td><?php echo __('Course specialization', 'rrze-lectures'); ?></td> -->
                 <td><?php echo __('Subject indicator', 'rrze-lectures'); ?></td>
                 <td><?php echo __('Version of examination regulations', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Form of study', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Place of study', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Type of study', 'rrze-lectures'); ?></td>
+                <!-- <td><?php echo __('Form of study', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22)  -->
+                <!-- <td><?php echo __('Place of study', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22)  -->
+                <!-- <td><?php echo __('Type of study', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22)  -->
             </tr>
 
             {{@providerValues.modules}}
-                {{@_val.modules_cos}}
-
-                <tr>
-                    <td>FEHLT (Stand: 2023-02-21)</td>
-                    <td>FEHLT (Stand: 2023-02-21)</td>
-                    <td>{{=_val.degree}}</td>
-                    <td>{{=_val.subject}}</td>
-                    <td>{{=_val.major}}</td>
-                    <td>FEHLT (Stand: 2023-02-21)</td>
-                    <td>{{=_val.subject_indicator}}</td>
-                    <td>{{=_val.version}}</td>
-                    <td>FEHLT (Stand: 2023-02-21)</td>                
-                    <td>FEHLT (Stand: 2023-02-21)</td>
-                    <td>FEHLT (Stand: 2023-02-21)</td>                
-                </tr>
-                {{:@_val.modules_cos}}
+                {{_val.module_cos}}
+                    {{@_val.module_cos}}
+                        <tr>
+                            <!-- <td></td> -->
+                            <!-- <td></td> -->
+                            <td>{{=_val.degree}}</td>
+                            <td>{{=_val.subject}}</td>
+                            <td>{{=_val.major}}</td>
+                            <!-- <td></td> -->
+                            <td>{{=_val.subject_indicator}}</td>
+                            <td>{{=_val.version}}</td>
+                            <!-- <td></td> -->
+                            <!-- <td></td> -->
+                            <!-- <td></td> -->
+                            </tr>
+                    {{/@_val.module_cos}}
+                {{:_val.module_cos}}
                     <?php echo __('The course has not been assigned to a course of study yet', 'rrze-lectures'); ?>   
-                {{/@_val.modules_cos}}
+                {{/_val.module_cos}}
             {{/@providerValues.modules}}
         </table>
 

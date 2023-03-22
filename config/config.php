@@ -17,10 +17,10 @@ function getOptionName()
 
 function getAvailableLanguages()
 {
-    if (class_exists('\RRZE\Multilang\Locale')){
+    if (class_exists('\RRZE\Multilang\Locale')) {
         // rrze-multilang is used
         return \RRZE\Multilang\Locale::getAvailableLanguages();
-    }else{
+    } else {
         if (!function_exists('wp_get_available_translations')) {
             require_once ABSPATH . 'wp-admin/includes/translation-install.php';
         }

@@ -5,6 +5,7 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
+
 // use RRZE\Lectures\Translator;
 // use RRZE\Lectures\Template;
 
@@ -17,6 +18,10 @@ class Shortcode
      * Der vollständige Pfad- und Dateiname der Plugin-Datei.
      * @var string
      */
+
+    protected $websiteLocale;
+    protected $websiteLanguage;
+    protected $bLanguageSwitched = false;
     protected $pluginFile;
     protected $options;
     protected $atts;
@@ -35,6 +40,8 @@ class Shortcode
      */
     public function __construct($pluginFile, $settings)
     {
+        $this->websiteLocale = get_locale();
+        $this->websiteLanguage = substr($this->websiteLocale, 0, 2);
         $this->pluginFile = $pluginFile;
         $this->settings = getShortcodeSettings();
         $this->settings = $this->settings['lectures'];
@@ -76,10 +83,10 @@ class Shortcode
     public function shortcodeLectures(array $atts, string $content = NULL): string
     {
 
-        if (Functions::isMaintenanceMode()){
+        if (Functions::isMaintenanceMode()) {
             return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
         }
-        
+
         $tsStart = microtime(true);
         // show link to DIP only
         // if (in_array('link', $this->show)) {
@@ -131,7 +138,7 @@ class Shortcode
                 }
                 break;
             case 'tabs':
-                default:
+            default:
                 // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.modules';
                 $attrs = ''; // TEST
         }
@@ -144,9 +151,9 @@ class Shortcode
         // uses fauorgnr only if not looking for explicite lectures or lecturers
         if (!empty($this->atts['lecturer_identifier'])) {
             $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
-        }elseif (!empty($this->atts['lecturer_idm'])) {
+        } elseif (!empty($this->atts['lecturer_idm'])) {
             $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        }elseif (!empty($this->atts['lecture_name'])) {
+        } elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['names'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
@@ -210,7 +217,7 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
-        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw'){
+        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw') {
             echo '<pre>';
             var_dump($data);
             echo '</pre>';
@@ -222,7 +229,7 @@ class Shortcode
         foreach ($data as $nr => $aVal) {
             foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
                 if ($aDetails['semester'] == $this->atts['sem']) {
-                    if (empty($data[$nr]['providerValues']['courses_cleaned'])){
+                    if (empty($data[$nr]['providerValues']['courses_cleaned'])) {
                         $data[$nr]['providerValues']['courses_cleaned'] = [];
                     }
                     $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
@@ -230,7 +237,7 @@ class Shortcode
                 unset($data[$nr]['providerValues']['courses'][$cNr]);
             }
             // clean up so we have exactly the same schema in $data again as given by DIP
-            if (!empty($data[$nr]['providerValues']['courses_cleaned'])){
+            if (!empty($data[$nr]['providerValues']['courses_cleaned'])) {
                 $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
                 unset($data[$nr]['providerValues']['courses_cleaned']);
             }
@@ -243,18 +250,8 @@ class Shortcode
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
-        // translate by display_language (f.e. "fr" => if no translation in FR is given by API output is NULL / "fr:en" => if no translation in FR is given, Translator checks if translation in EN is given by API and returns it or NULL (en = fallback) / if this attribute is not given => website's language is used)        
-
-        // echo 'VORHER: <pre>';
-        // var_dump($data);
-        // exit;
-
         $translator = new Translator($this->atts['display_language']);
         $translator->setTranslations($data);
-
-        // echo 'NACHHER: <pre>';
-        // var_dump($data);
-        // exit;
 
         Functions::console_log('after Translator ' . json_encode($data), $tsStart);
 
@@ -442,7 +439,7 @@ class Shortcode
 
         Functions::console_log('Pre tempate', $tsStart);
 
-        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-pre-template'){
+        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-pre-template') {
             echo '<pre>';
             var_dump($aDegree);
             echo '</pre>';
@@ -472,14 +469,15 @@ class Shortcode
         Functions::console_log('Cache set', $tsStart);
         Functions::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
+        if ($this->bLanguageSwitched){
+            switch_to_locale($this->websiteLocale);
+        }
+
         return $content;
     }
 
     private function normalize(array $atts): array
     {
-        // website's language
-        $siteLang = substr(get_locale(), 0, 2);
-
         // sanatize all fields
         foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
@@ -487,9 +485,19 @@ class Shortcode
 
         // set display_language / default: website's language
         if (empty($atts['display_language'])) {
-            $atts['display_language'] = $siteLang;
-        }else{
+            $atts['display_language'] = $this->websiteLanguage;
+        } else {
             $atts['display_language'] = strtolower(substr($atts['display_language'], 0, 2));
+
+            // this plugin supports GERMAN and ENGLISH (see .mo/.po)
+            switch ($atts['display_language']) {
+                case 'de':
+                    switch_to_locale('de_DE');
+                    break;
+                default:
+                    switch_to_locale('en_US');
+            }
+            $this->bLanguageSwitched = true;
         }
 
         // dynamically generate hide vars
@@ -552,8 +560,8 @@ class Shortcode
         // 4. if 3 is undefined =>  nodata is set to nodata assigned to website's language
         if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $atts['display_language']])) {
             $atts['nodata'] = $this->options['basic_nodata_' . $atts['display_language']];
-        }elseif (!empty($this->options['basic_nodata_' . $siteLang])) {
-            $atts['nodata'] = $this->options['basic_nodata_' . $siteLang];
+        } elseif (!empty($this->options['basic_nodata_' . $this->websiteLanguage])) {
+            $atts['nodata'] = $this->options['basic_nodata_' . $this->websiteLanguage];
         }
 
         // hstart
