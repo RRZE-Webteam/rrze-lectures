@@ -17,7 +17,20 @@ function getOptionName()
 
 function getAvailableLanguages()
 {
-    return class_exists('\RRZE\Multilang\Locale') ? \RRZE\Multilang\Locale::getAvailableLanguages() : [];
+    if (class_exists('\RRZE\Multilang\Locale')){
+        // rrze-multilang is used
+        return \RRZE\Multilang\Locale::getAvailableLanguages();
+    }else{
+        if (!function_exists('wp_get_available_translations')) {
+            require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+        }
+        $locale = get_locale();
+        $translations = wp_get_available_translations();
+
+        return [
+            $locale => $translations[$locale]['native_name'],
+        ];
+    }
 }
 
 
