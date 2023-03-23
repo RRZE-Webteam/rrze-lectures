@@ -80,18 +80,13 @@ class Shortcode
      * @param  array   $atts Shortcode-Attribute
      * @return string Gib den Inhalt zurück
      */
-    public function shortcodeLectures(array $atts, string $content = NULL): string
+    public function shortcodeLectures(array|string $atts, string $content = NULL): string
     {
-
         if (Functions::isMaintenanceMode()) {
             return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
         }
 
         $tsStart = microtime(true);
-        // show link to DIP only
-        // if (in_array('link', $this->show)) {
-        //     return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
-        // }
 
         Functions::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
 
@@ -138,13 +133,10 @@ class Shortcode
                 }
                 break;
             case 'tabs':
+                $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.modules.module_cos.degree;providerValues.modules.module_cos.subject;providerValues.modules.module_cos.major;providerValues.modules.module_cos.subject_indicator;providerValues.modules.module_cos.version';
             default:
-                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.modules';
                 $attrs = ''; // TEST
         }
-
-        // $attrs = ''; // TEST
-
 
         $aLQ = [];
 
@@ -244,6 +236,7 @@ class Shortcode
 
         }
 
+        // DEBUG: timeout bereits hier!
 
         // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
 
@@ -457,9 +450,9 @@ class Shortcode
 
         Functions::console_log('Template parsed', $tsStart);
 
-        if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
+        // if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
             $content = do_shortcode($content);
-        }
+        // }
 
         Functions::console_log('do_shortcode() executed', $tsStart);
 

@@ -61,7 +61,7 @@
         </ul>
         {{/providerValues.event_orgunit}}
 
-        <p><?php echo __('Course type', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>
+        {{providerValues.event.eventtype}}<p><?php echo __('Course type', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>{{/providerValues.event.eventtype}}
         <!-- <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-22)</p> -->
         <!-- <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-22)</p> -->
         <!-- <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-22)</p> -->
@@ -77,11 +77,11 @@
 
         {{@providerValues.courses}}
 
-        <a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist"><?php echo __('Link to Campo', 'rrze-lectures'); ?></a>
+        {{_val.url}}<a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist"><?php echo __('Link to Campo', 'rrze-lectures'); ?></a>{{/_val.url}}
 
-        <p><?php echo __('Semester hours per week', 'rrze-lectures'); ?>: {{=_val.hours_per_week}}</p>
+        {{_val.hours_per_week}}<p><?php echo __('Semester hours per week', 'rrze-lectures'); ?>: {{=_val.hours_per_week}}</p>{{/_val.hours_per_week}}
 
-        <p><?php echo __('Teaching language', 'rrze-lectures'); ?>: {{=_val.teaching_language_txt}}</p>
+        {{_val.teaching_language_txt}}<p><?php echo __('Teaching language', 'rrze-lectures'); ?>: {{=_val.teaching_language_txt}}</p>{{/_val.teaching_language_txt}}
 
         {{_val.course_responsible}}
         <?php echo __('Responsible', 'rrze-lectures'); ?>:
