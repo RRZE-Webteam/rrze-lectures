@@ -115,17 +115,18 @@
         <p><?php echo __('Minimum number of participants for the event to take place', 'rrze-lectures'); ?>: {{=_val.attendee_minimum}}</p>
         {{/_val.attendee_minimum}}
 
+        {{_val.planned_dates}}
         <table>
             <tr>
-                <td><?php echo __('Frequency', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Weekday', 'rrze-lectures'); ?></td>
-                <td><?php echo __('From - To', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Cancellation date', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Start date - End date', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Exp. Att.', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Comment', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Lecturer(s)', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Room', 'rrze-lectures'); ?></td>
+                <th><?php echo __('Frequency', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Weekday', 'rrze-lectures'); ?></th>
+                <th><?php echo __('From - To', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Cancellation date', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Start date - End date', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Exp. Att.', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Comment', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Lecturer(s)', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Room', 'rrze-lectures'); ?></th>
             </tr>
             {{@_val.planned_dates}}
             <tr>
@@ -151,31 +152,32 @@
                 </td>
             </tr>
             {{/@_val.planned_dates}}
-            {{!_val.planned_dates}}
-                <?php echo __('No planned appointments for this parallel group yet.', 'rrze-lectures'); ?>
-            {{/!_val.planned_dates}}
         </table>
+        {{:_val.planned_dates}}
+            <?php echo __('No planned appointments for this parallel group yet.', 'rrze-lectures'); ?>
+            <hr>
+        {{/_val.planned_dates}}
+
         {{/@providerValues.courses}}
 
         [/tab]
 
         {{providerValues.modules}}
 
-        [tab title="<?php echo __('Modules and degree programmes', 'rrze-lectures'); ?>"] 
-
+        [tab title="<?php echo __('Modules and degree programmes', 'rrze-lectures'); ?>"]
         <table>
             <tr>
-                <!-- <td><?php echo __('Default text', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22) -->
-                <!-- <td><?php echo __('Type', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22) -->
-                <td><?php echo __('Degree', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Degree&nbsp;', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Major field of study', 'rrze-lectures'); ?></td>
-                <!-- <td><?php echo __('Course specialization', 'rrze-lectures'); ?></td> -->
-                <td><?php echo __('Subject indicator', 'rrze-lectures'); ?></td>
-                <td><?php echo __('Version of examination regulations', 'rrze-lectures'); ?></td>
-                <!-- <td><?php echo __('Form of study', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22)  -->
-                <!-- <td><?php echo __('Place of study', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22)  -->
-                <!-- <td><?php echo __('Type of study', 'rrze-lectures'); ?></td>: Feld FEHLT (Stand: 2023-03-22)  -->
+                <!-- <th><?php echo __('Default text', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22) -->
+                <!-- <th><?php echo __('Type', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22) -->
+                <th><?php echo __('Degree', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Degree&nbsp;', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Major field of study', 'rrze-lectures'); ?></th>
+                <!-- <th><?php echo __('Course specialization', 'rrze-lectures'); ?></th> -->
+                <th><?php echo __('Subject indicator', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Version of examination regulations', 'rrze-lectures'); ?></th>
+                <!-- <th><?php echo __('Form of study', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22)  -->
+                <!-- <th><?php echo __('Place of study', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22)  -->
+                <!-- <th><?php echo __('Type of study', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22)  -->
             </tr>
 
             {{@providerValues.modules}}
