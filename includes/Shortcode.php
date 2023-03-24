@@ -246,8 +246,6 @@ class Shortcode
             echo '</pre>';
         }
 
-        // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
-
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
@@ -268,7 +266,8 @@ class Shortcode
         foreach ($data as $nr => $aEntries) {
             $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
         }
-        unset($data); // free memory
+        // unset($data); // free memory 
+        $data = null; // free memory see: https://stackoverflow.com/questions/584960/whats-better-at-freeing-memory-with-php-unset-or-var-null
 
         Functions::console_log('Group by eventtype completed', $tsStart);
 
@@ -276,9 +275,9 @@ class Shortcode
         $coll = collator_create('de_DE');
 
         // sort group
+        $aTmp = [];
         if (!empty($this->atts['type'])) {
             // sort in order of $this->atts['type']
-            $aTmp = [];
             $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
 
             foreach ($aGivenTypes as $givenType) {
@@ -287,29 +286,31 @@ class Shortcode
                 }
             }
             $aData = $aTmp;
-            unset($aTmp); // free memory
         } else {
             // sort alphabetically by group
             $arrayKeys = array_keys($aData);
             collator_sort($coll, $arrayKeys);
-            $aTmp = [];
+
             foreach ($arrayKeys as $key) {
                 $aTmp[$key] = $aData[$key];
             }
             $aData = $aTmp;
-            unset($aTmp); // free memory
         }
+
+        // unset($aTmp); // free memory
+        $aTmp = [];
 
         if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
             // combine all entries and sort them
-            $aTmp = [];
+            // $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 foreach ($aDetails as $aEntries) {
                     // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
                     $aTmp[$aEntries['name']] = $aEntries;
                 }
             }
-            unset($aData); // free memory
+            // unset($aData); // free memory
+            $aData = null; // free memory
 
             $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
@@ -317,15 +318,17 @@ class Shortcode
             foreach ($arrayKeys as $key) {
                 $aTmp2[$key] = $aTmp[$key];
             }
-            unset($aTmp); // free memory
+            // unset($aTmp); // free memory
+            $aTmp = null;
             $aData = [];
             $aData[] = $aTmp2;
             $iAllEntries = count($aTmp2);
-            unset($aTmp2); // free memory
+            // unset($aTmp2); // free memory
+            $aTmp2 = null;
         } else {
             // sort entries
             $iAllEntries = 0;
-            $aTmp = [];
+            // $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
@@ -337,11 +340,13 @@ class Shortcode
                 array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
                 $iAllEntries += count($aTmp2);
                 $aTmp[$group] = $aTmp2;
-                unset($aTmp2); // free memory
+                // unset($aTmp2); // free memory
+                $aTmp2 = null;
             }
 
             $aData = $aTmp;
-            unset($aTmp); // free memory
+            // unset($aTmp); // free memory
+            $aTmp = null;
         }
 
         // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
@@ -374,7 +379,8 @@ class Shortcode
             }
 
             $aDegree = $aTmp;
-            unset($aTmp);
+            // unset($aTmp);
+            $aTmp = null;
         }
 
         Functions::console_log('Sort completed', $tsStart);
@@ -451,13 +457,15 @@ class Shortcode
                 }
             }
         }
-        unset($aDegree); // free memory
+        // unset($aDegree); // free memory
+        $aDegree = null;
 
         Functions::console_log('Template parsed', $tsStart);
 
-        // if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
+        if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
+            // in any case tabs.php uses shortcodes
             $content = do_shortcode($content);
-        // }
+        }
 
         Functions::console_log('do_shortcode() executed', $tsStart);
 

@@ -66,12 +66,12 @@ class Template
         return dirname($this->pluginFile) . $template_path;
     }
 
-    public static function getContent(string $template = '', array $data = []): string
+    public static function getContent(string $template = '', array &$data = []): string
     {
         return self::parseContent($template, $data);
     }
 
-    protected static function parseContent(string $template, array $data): string
+    protected static function parseContent(string $template, array &$data): string
     {
         $content = self::getTemplate($template);
         if (empty($content)) {
