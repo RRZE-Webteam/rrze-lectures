@@ -135,6 +135,15 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
+            [
+                'name' => 'limit_lv',
+                'label' => __('Maximum number of lectures', 'rrze-lectures'),
+                'desc' => __('Warning! If you increase this > 25 be aware that the website\'s loading time will increase dramatically and might lead to an HTTP 502 error.', 'rrze-lectures'),
+                'placeholder' => '',
+                'type' => 'text',
+                'default' => '25',
+                'sanitize_callback' => 'sanitize_text_field',
+            ],
         ],
     ];
 
