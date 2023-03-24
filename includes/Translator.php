@@ -22,7 +22,7 @@ class Translator
         $this->display_language = $display_language;
 
         // Input values in Campo are made in GERMAN. There could also be other languages, but default = 'de'
-        $this->display_language_fallback = 'de'; 
+        $this->display_language_fallback = 'de';
 
         // set $this->all_language_codes to 2-letters only (example: ['de', 'en', 'fr'])
         // we need $this->all_language_codes to find out, which API-field is multilingual (API does not provide an explicit key for languages. Keys are the languagecodes f.e. "de" or "en")
@@ -53,6 +53,8 @@ class Translator
     {
         foreach ($aData as $nr => $aLecture) {
             foreach ($aLecture as $fieldName => $field) {
+
+
                 // main part
                 if (is_array($field)) {
                     foreach ($field as $fKey => $val) {
@@ -64,6 +66,22 @@ class Translator
                     }
                 }
             }
+
+            foreach ($aLecture['providerValues']['event_orgunit'] as $orgunitNr => $aOrgunit) {
+                // event_orgunit part
+                foreach ($aOrgunit as $fieldName => $field) {
+                    if (is_array($field)) {
+                        foreach ($field as $fKey => $val) {
+                            if (in_array($fKey, $this->all_language_codes)) {
+                                $translated = $this->getTranslation($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr][$fieldName]);
+                                $aData[$nr]['providerValues']['event_orgunit'][$fieldName][] = $translated;
+                            }
+                        }
+                    }
+                }
+                unset($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr]); // drop array with all languages
+            }
+
 
             foreach ($aLecture['providerValues']['event'] as $fieldName => $field) {
                 // event part

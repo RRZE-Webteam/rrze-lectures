@@ -54,15 +54,16 @@
         <?php echo __('Organizational unit', 'rrze-lectures'); ?>:
         <ul>
             {{/providerValues.event_orgunit}}
-            {{@providerValues.event_orgunit}}
-            <li>{{=_val.orgunit}}</li>
-            {{/@providerValues.event_orgunit}}
+            {{@providerValues.event_orgunit.orgunit}}
+            <li>{{=_val}}</li>
+            {{/@providerValues.event_orgunit.orgunit}}
             {{providerValues.event_orgunit}}
         </ul>
         {{/providerValues.event_orgunit}}
 
         {{providerValues.event.eventtype}}<p><?php echo __('Course type', 'rrze-lectures'); ?>: {{=providerValues.event.eventtype}}</p>{{/providerValues.event.eventtype}}
-        <!-- <p><?php echo __('Module frequency', 'rrze-lectures'); ?>: Feld FEHLT (Stand: 2023-03-22)</p> -->
+        {{providerValues.event.frequency}}<p><?php echo __('Module frequency', 'rrze-lectures'); ?>: {{=providerValues.event.frequency}}</p>{{/providerValues.event.frequency}}
+        {{providerValues.event.semester_hours_per_week}}<p><?php echo __('Semester hours per week', 'rrze-lectures'); ?>: {{=providerValues.event.semester_hours_per_week}}</p>{{/providerValues.event.semester_hours_per_week}}
         <!-- <p><?php echo __('ECTS credits', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-22)</p> -->
         <!-- <p><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?>: Feld FEHLT  (Stand: 2023-03-22)</p> -->
 
@@ -76,6 +77,8 @@
         <br>&nbsp;<br>
 
         {{@providerValues.courses}}
+
+        {{_val.parallelgroup}}<strong>{{=_val.parallelgroup}}</strong>{{/_val.parallelgroup}}
 
         {{_val.url}}<a href="{{=_val.url}}" target="rrze-campo" class="rrze-lectures-linklist"><?php echo __('Link to Campo', 'rrze-lectures'); ?></a>{{/_val.url}}
 
