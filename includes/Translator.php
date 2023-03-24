@@ -67,19 +67,21 @@ class Translator
                 }
             }
 
-            foreach ($aLecture['providerValues']['event_orgunit'] as $orgunitNr => $aOrgunit) {
-                // event_orgunit part
-                foreach ($aOrgunit as $fieldName => $field) {
-                    if (is_array($field)) {
-                        foreach ($field as $fKey => $val) {
-                            if (in_array($fKey, $this->all_language_codes)) {
-                                $translated = $this->getTranslation($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr][$fieldName]);
-                                $aData[$nr]['providerValues']['event_orgunit'][$fieldName][] = $translated;
+            if (!empty($aLecture['providerValues']['event_orgunit'])){
+                foreach ($aLecture['providerValues']['event_orgunit'] as $orgunitNr => $aOrgunit) {
+                    // event_orgunit part
+                    foreach ($aOrgunit as $fieldName => $field) {
+                        if (is_array($field)) {
+                            foreach ($field as $fKey => $val) {
+                                if (in_array($fKey, $this->all_language_codes)) {
+                                    $translated = $this->getTranslation($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr][$fieldName]);
+                                    $aData[$nr]['providerValues']['event_orgunit'][$fieldName][] = $translated;
+                                }
                             }
                         }
                     }
+                    unset($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr]); // drop array with all languages
                 }
-                unset($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr]); // drop array with all languages
             }
 
 
