@@ -110,7 +110,7 @@ class Translator
                             if (is_array($aTranslatable)) {
                                 foreach ($aTranslatable as $lang => $val) {
                                     if (in_array($lang, $this->all_language_codes)) {
-                                        $translated = $this->getTranslation($aLecture['providerValues'][$subName][$coursefieldName]);
+                                        $translated = $this->getTranslation($aLecture['providerValues'][$subName][$cNr][$coursefieldName]);
                                         unset($aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName]); // drop all other languages
                                         $aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName] = $translated;
                                     }

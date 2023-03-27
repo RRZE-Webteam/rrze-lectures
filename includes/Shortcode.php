@@ -248,11 +248,12 @@ class Shortcode
 
         // }
 
-        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-courses-deleted') {
-            echo '<pre>';
-            var_dump($data);
-            echo '</pre>';
-        }
+        // if (isset($_GET['debug']) && $_GET['debug'] == 'screen-courses-deleted') {
+        //     echo '<pre>';
+        //     var_dump($data);
+        //     echo '</pre>';
+        // }
+
 
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
         Sanitizer::sanitizeLectures($data, $this->aLanguages);

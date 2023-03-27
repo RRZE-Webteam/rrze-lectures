@@ -155,7 +155,6 @@
         </table>
         {{:_val.planned_dates}}
             <?php echo __('No planned appointments for this parallel group yet.', 'rrze-lectures'); ?>
-            <hr>
         {{/_val.planned_dates}}
 
         {{/@providerValues.courses}}
