@@ -1,7 +1,6 @@
 # rrze-lectures
 
-- Version 1.x.x liefert nur eine Liste an Links zu Campo
-- Dieses Plugin stellt derzeit lediglich allererste Versin da, um Ihnen schnellstmöglich ein Tool anbieten zu können. Wir bitten um Verständnis, dass es derzeit nur rudimentäre Funktionalität bietet. Aktuelle Informationen hierzu finden Sie stets auf https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
+Aktuelle Informationen hierzu finden Sie stets auf https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
 
 
 ## Download
