@@ -42,7 +42,7 @@ class DIPAPI
         }
     }
 
-    public function getResponse($endpoint = 'educationEvents', $sParam = NULL){
+    public function getResponse(string $endpoint = 'educationEvents', string $sParam = NULL): array{
         $aRet = [
             'valid' => FALSE, 
             'content' => ''

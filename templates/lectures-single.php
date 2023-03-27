@@ -99,7 +99,7 @@ if ($lecture){
                 if (!in_array('ics', $this->hide)) {
                     if (!in_array('ics', $this->hide)) {
                         $aIcsLink = Functions::makeLinkToICS($lecture['lecture_type_long'], $lecture, $term, $t);
-                        $t['ics'] = '<span class="lecture-info-ics" itemprop="ics"><a href="' . $aIcsLink['link'] . '" aria-label="' . $aIcsLink['linkTxt'] . '">' . __('ICS', 'rrze-univis') . '</a></span>';
+                        $t['ics'] = '<span class="lecture-info-ics" itemprop="ics"><a href="' . $aIcsLink['link'] . '" aria-label="' . $aIcsLink['linkTxt'] . '">' . __('ICS', 'rrze-lectures') . '</a></span>';
                     }
                 }
                 $t['time'] .= ',';

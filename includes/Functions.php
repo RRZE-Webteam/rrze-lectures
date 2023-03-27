@@ -33,7 +33,24 @@ class Functions
         // add_action('wp_ajax_nopriv_GenerateICS', [$this, 'ajaxGenerateICS']);
     }
 
-    public static function console_log($msg = '', $tsStart = 0)
+
+    public function adminEnqueueScripts()
+    {
+        wp_enqueue_script(
+            'rrze-lectures-ajax',
+            plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
+            ['jquery'],
+            RRZE_PLUGIN_VERSION
+        );
+
+        wp_localize_script('rrze-lectures-ajax', 'lecture_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('lecture-ajax-nonce'),
+        ]);
+    }
+
+ 
+    public static function console_log(string $msg = '', int $tsStart = 0)
     {
         if (isset($_GET['debug'])) {
             $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';
@@ -41,7 +58,7 @@ class Functions
         }
     }
 
-    public static function getSemester($iSem = 0)
+    public static function getSemester(int $iSem = 0): string
     {
         // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
         // Das Wintersemester entsprechend vom 01.10. des Jahres bis zum 31.03. des folgenden Jahres
@@ -51,7 +68,6 @@ class Functions
         $year = date('Y');
         $sem = 'SoSe';
         $ret = '';
-        $iSem = (int) $iSem;
 
         $soseStart = date('Y-m-d', strtotime($year . '-04-01'));
         $soseEnd = date('Y-m-d', strtotime($year . '-09-30'));
@@ -135,12 +151,12 @@ class Functions
         return $ret;
     }
 
-    public static function isLastElement(array $aArr)
+    public static function isLastElement(array $aArr): bool
     {
         return next($aArr) !== false ?: key($aArr) !== null;
     }
 
-    public static function makeLQ($aIn)
+    public static function makeLQ(array $aIn): string
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
@@ -182,7 +198,7 @@ class Functions
         return implode('&', $aLQ);
     }
 
-    public static function convertDate($tz, $timezone, $format)
+    public static function convertDate(string $tz, string $timezone, string $format): string
     {
         $dt = new \DateTime($tz, new \DateTimeZone($timezone));
         $dt->setTimezone(new \DateTimeZone('Europe/Berlin'));
@@ -215,22 +231,7 @@ class Functions
         return $ret;
     }
 
-    public function adminEnqueueScripts()
-    {
-        wp_enqueue_script(
-            'rrze-lectures-ajax',
-            plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
-            ['jquery'],
-            RRZE_PLUGIN_VERSION
-        );
-
-        wp_localize_script('rrze-lectures-ajax', 'lecture_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('lecture-ajax-nonce'),
-        ]);
-    }
-
-    public static function setDataToCache($data, $aAtts = [])
+    public static function setDataToCache(string &$data, array $aAtts = [])
     {
         $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
 
@@ -248,7 +249,7 @@ class Functions
         // }
     }
 
-    public static function getDataFromCache($aAtts = [])
+    public static function getDataFromCache(array $aAtts = []): mixed
     {
         return get_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)));
     }
@@ -263,16 +264,25 @@ class Functions
         update_option(self::TRANSIENT_OPTION, '');
     }
 
-    public function getTableHTML($aIn, $aFieldnames)
+    public function getTableHTML(array|string $aIn, array $aFieldnames): array|string
     {
         if (!is_array($aIn)) {
             return $aIn;
         }
 
-        $ret = '<table class="wp-list-table widefat striped"><thead><tr><td><strong>' . $aFieldnames[0] . '</strong></td></td><td><strong>' . $aFieldnames[1] . '</strong></td></tr></thead>';
+        $ret = '<table class="wp-list-table widefat striped"><thead><tr>';
 
-        foreach ($aIn as $ID => $val) {
-            $ret .= "<tr><td>$ID</td><td style='word-wrap: break-word;'>$val</td></tr>";
+        foreach($aFieldnames as $fieldname){
+            $ret .= '<td><strong>' . $fieldname . '</strong></td>';
+        }
+        $ret .= '</tr></thead>';
+        
+        foreach ($aIn as $aVal) {
+            $ret .= '<tr>';
+            foreach($aVal as $val){
+                $ret .= '<td style="word-wrap: break-word;">' . $val . '</td>';
+            }
+            $ret .= '</tr>';
         }
         $ret .= '</table>';
 
@@ -283,7 +293,7 @@ class Functions
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
 
-        $inputs = array_map(function($a){
+        $input = array_map(function($a){
             return sanitize_text_field($a);
         }, $_POST['data']);
 
@@ -292,11 +302,11 @@ class Functions
             __('Name of organization', 'rrze-lectures')
         ];
 
-        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']), $aFieldnames);
+        $response = $this->getTableHTML($this->getFAUOrgNr($input['keyword']), $aFieldnames);
         wp_send_json($response);
     }
 
-    public function getFAUOrgNr($keyword = null)
+    public function getFAUOrgNr(string $keyword = null): array|string
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
 
@@ -305,7 +315,7 @@ class Functions
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
 
-        if (!$response['valid']) {
+        if (!$response['valid'] || empty($response['content']['data'])) {
             return $ret;
         } else {
             $data = $response['content']['data'];
@@ -317,10 +327,11 @@ class Functions
             $ret = [];
 
             foreach ($data as $aDetails) {
-                $ret[$aDetails['disambiguatingDescription']] = $aDetails['name'];
+                $ret[] = [
+                    $aDetails['disambiguatingDescription'],
+                    $aDetails['name'],
+                ];
             }
-
-
         }
 
         return $ret;
@@ -329,11 +340,15 @@ class Functions
     public function ajaxGetLecturerIdentifier()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
-        $aInputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+
+        $aInputs = array_map(function($a){
+            return sanitize_text_field($a);
+        }, $_POST['data']);
 
         $aFieldnames = [
             __('Identifier', 'rrze-lectures'),
-            __('Name', 'rrze-lectures')
+            __('Name', 'rrze-lectures'),
+            __('Name of organization', 'rrze-lectures')
         ];
 
         $response = $this->getTableHTML($this->getLecturerIdentifier($aInputs), $aFieldnames);
@@ -341,17 +356,18 @@ class Functions
     }
 
 
-    public function getLecturerIdentifier($aParams = [])
+    public function getLecturerIdentifier(array $aParams = []): array|string
     {
         $ret = __('No matching entries found.', 'rrze-lectures');
         $lq = self::makeLQ($aParams);
 
-        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName') . '&lq=' . urlencode($lq);
+        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName;memberOf.memberOf.name') . '&lq=' . urlencode($lq);
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('persons', $dipParams);
 
-        if (!$response['valid']) {
+
+        if (!$response['valid'] || empty($response['content']['data'])) {
             return $ret;
         } else {
             $data = $response['content']['data'];
@@ -363,14 +379,18 @@ class Functions
             $ret = [];
 
             foreach ($data as $aDetails) {
-                $ret[$aDetails['identifier']] = $aDetails['familyName'] . ', ' . $aDetails['givenName'];
+                $ret[] = [
+                    $aDetails['identifier'],
+                    $aDetails['familyName'] . ', ' . $aDetails['givenName'],
+                    $aDetails['memberOf'][0]['memberOf']['name']
+                ];
             }
         }
 
         return $ret;
     }
 
-    public static function isMaintenanceMode()
+    public static function isMaintenanceMode(): bool
     {
         if (is_multisite()) {
             $settingsOptions = get_site_option('rrze_settings');
@@ -383,7 +403,7 @@ class Functions
 
 
 
-    public function getSelectHTML($aIn)
+    public function getSelectHTML(array $aIn): string
     {
         if (!is_array($aIn)) {
             return "<option value=''>$aIn</option>";
@@ -405,7 +425,7 @@ class Functions
         wp_send_json($response);
     }
 
-    public static function makeLinkToICS($type, $lecture, $term, $t)
+    public static function makeLinkToICS(string $type, array $lecture, array $term, array $t): array
     {
         $aProps = [
             'SUMMARY' => $lecture['title'],

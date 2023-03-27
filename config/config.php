@@ -17,7 +17,20 @@ function getOptionName()
 
 function getAvailableLanguages()
 {
-    return class_exists('\RRZE\Multilang\Locale') ? \RRZE\Multilang\Locale::getAvailableLanguages() : [];
+    if (class_exists('\RRZE\Multilang\Locale')) {
+        // rrze-multilang is used
+        return \RRZE\Multilang\Locale::getAvailableLanguages();
+    } else {
+        if (!function_exists('wp_get_available_translations')) {
+            require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+        }
+        $locale = get_locale();
+        $translations = wp_get_available_translations();
+
+        return [
+            $locale => $translations[$locale]['native_name'],
+        ];
+    }
 }
 
 
@@ -64,6 +77,7 @@ function getConstants()
     return $options;
 }
 
+
 /**
  * Gibt die Einstellungen des Menus zurück.
  * @return array [description]
@@ -106,7 +120,7 @@ function getFields()
             [
                 'name' => 'ApiKey',
                 'label' => __('DIP API-Key', 'rrze-lectures'),
-                'desc' => '',
+                'desc' => __('If you use the CMS offer by RRZE, you do not need to enter the DIP API key.', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
                 'default' => '',
@@ -121,6 +135,15 @@ function getFields()
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
+            [
+                'name' => 'limit_lv',
+                'label' => __('Maximum number of lectures', 'rrze-lectures'),
+                'desc' => __('Warning! If you increase this > 25 be aware that the website\'s loading time will increase dramatically and might lead to an HTTP 502 error.', 'rrze-lectures'),
+                'placeholder' => '',
+                'type' => 'text',
+                'default' => '25',
+                'sanitize_callback' => 'sanitize_text_field',
+            ],
         ],
     ];
 
@@ -130,8 +153,8 @@ function getFields()
     foreach (getAvailableLanguages() as $local => $lang) {
         $aNodata[] = [
             'name' => 'nodata_' . substr($local, 0, 2),
-            'label' => __('No data', 'rrze-lectures') . ' - ' . preg_replace('/\((.+?)\)/', '', $lang),
-            'desc' => __('This sentence will be returned by default if shortcode couln\'t find any data. You can use different messages in each shortcode by using the attribut nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
+            'label' => __('No data', 'rrze-lectures') . ' (' . trim(preg_replace('/\((.+?)\)/', '', $lang)) . ')',
+            'desc' => __('This sentence will be returned by default if shortcode couldn\'t find any data. You can use different messages in each shortcode by using the attribute nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
             'placeholder' => '',
             'type' => 'text',
             'default' => __('No matching entries found.', 'rrze-lectures'),
@@ -188,7 +211,7 @@ function getShortcodeSettings()
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Type f.e. Vorlesung', 'rrze-lectures'),
+                'label' => __('Type f.e. Lecture', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'degree' => [
@@ -204,10 +227,16 @@ function getShortcodeSettings()
                 'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
                 'type' => 'string',
             ],
+            'teaching_language' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Teaching language (f.e. "en" or "de" or "en, de, fr"', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Teaching language (f.e. "en" or "de". "en:de" <= fallback is set to "de"', 'rrze-lectures'),
+                'label' => __('Display language (f.e. "en" or "de" or "fr". If this attribute is not given, website\'s language is used. In every case fallback is "de".)', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'guest' => [
@@ -252,10 +281,10 @@ function getShortcodeSettings()
                         'id' => 'linklist',
                         'val' => 'linklist',
                     ],
-                    // [
-                    //     'id' => 'tabs',
-                    //     'val' => 'tabs',
-                    // ],
+                    [
+                        'id' => 'tabs',
+                        'val' => 'tabs',
+                    ],
                 ],
             ],
             'color' => [
@@ -266,7 +295,7 @@ function getShortcodeSettings()
                 'values' => [
                     [
                         'id' => '',
-                        'val' => __('Kein', 'rrze-lectures'),
+                        'val' => __('Default', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'fau',

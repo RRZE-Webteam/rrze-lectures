@@ -37,6 +37,9 @@ class Main
         $templates = new Template($this->pluginFile, $settings);
         $templates->onLoaded();
 
+        $sanitizer = new Sanitizer($this->pluginFile, $settings);
+        $sanitizer->onLoaded();
+
         $shortcode = new Shortcode($this->pluginFile, $settings);
         $shortcode->onLoaded();
     }

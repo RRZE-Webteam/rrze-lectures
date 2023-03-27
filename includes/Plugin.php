@@ -186,7 +186,7 @@ class Plugin
     public function __call(string $name, array $arguments)
     {
         if (!method_exists($this, $name)) {
-            $message = sprintf(__('Call to undefined method %1$s::%2$s', 'rrze-rsvp'), __CLASS__, $name);
+            $message = sprintf(__('Call to undefined method %1$s::%2$s', 'rrze-lectures'), __CLASS__, $name);
             do_action(
                 'rrze.log.error',
                 $message,

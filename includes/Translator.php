@@ -12,32 +12,27 @@ class Translator
     protected $display_language;
     protected $display_language_fallback;
     protected $all_language_codes = [];
-    // protected $mirrorData;
     protected $aPath = '';
 
     // protected $varFunc;
 
 
-    public function __construct($attTeachingLanguage) // , $aData
-
+    public function __construct(string $display_language)
     {
-        // $this->mirrorData = $aData;
+        $this->display_language = $display_language;
 
-        $aLang = explode(':', $attTeachingLanguage);
-        $this->display_language = $aLang[0];
-        if (count($aLang) > 1) {
-            $this->display_language_fallback = $aLang[1];
-        }
+        // Input values in Campo are made in GERMAN. There could also be other languages, but default = 'de'
+        $this->display_language_fallback = 'de';
 
         // set $this->all_language_codes to 2-letters only (example: ['de', 'en', 'fr'])
+        // we need $this->all_language_codes to find out, which API-field is multilingual (API does not provide an explicit key for languages. Keys are the languagecodes f.e. "de" or "en")
         $this->all_language_codes = array_map(function ($val) {
             return substr($val, 0, 2);
         }, \ResourceBundle::getLocales(''));
-
     }
 
     /* returns translations by language (given attribute and/or settings value) or '' */
-    private function getTranslation(&$aIn)
+    private function getTranslation(string|array|null &$aIn): string|array|null
     {
         if (!is_array($aIn)) {
             // DIP-Field is not a mulitlang-field (== string (and not array with language codes) (["en" => "english text", "de" => "deutscher Text"])
@@ -54,10 +49,12 @@ class Translator
     }
 
 
-    public function setTranslations(&$aData)
+    public function setTranslations(array &$aData)
     {
         foreach ($aData as $nr => $aLecture) {
             foreach ($aLecture as $fieldName => $field) {
+
+
                 // main part
                 if (is_array($field)) {
                     foreach ($field as $fKey => $val) {
@@ -69,6 +66,24 @@ class Translator
                     }
                 }
             }
+
+            if (!empty($aLecture['providerValues']['event_orgunit'])){
+                foreach ($aLecture['providerValues']['event_orgunit'] as $orgunitNr => $aOrgunit) {
+                    // event_orgunit part
+                    foreach ($aOrgunit as $fieldName => $field) {
+                        if (is_array($field)) {
+                            foreach ($field as $fKey => $val) {
+                                if (in_array($fKey, $this->all_language_codes)) {
+                                    $translated = $this->getTranslation($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr][$fieldName]);
+                                    $aData[$nr]['providerValues']['event_orgunit'][$fieldName][] = $translated;
+                                }
+                            }
+                        }
+                    }
+                    unset($aData[$nr]['providerValues']['event_orgunit'][$orgunitNr]); // drop array with all languages
+                }
+            }
+
 
             foreach ($aLecture['providerValues']['event'] as $fieldName => $field) {
                 // event part
@@ -95,7 +110,7 @@ class Translator
                             if (is_array($aTranslatable)) {
                                 foreach ($aTranslatable as $lang => $val) {
                                     if (in_array($lang, $this->all_language_codes)) {
-                                        $translated = $this->getTranslation($aLecture['providerValues'][$subName][$coursefieldName]);
+                                        $translated = $this->getTranslation($aLecture['providerValues'][$subName][$cNr][$coursefieldName]);
                                         unset($aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName]); // drop all other languages
                                         $aData[$nr]['providerValues'][$subName][$cNr][$coursefieldName] = $translated;
                                     }

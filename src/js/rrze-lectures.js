@@ -1,9 +1,8 @@
 "use strict";
 
-
 jQuery(document).ready(function ($) {
-    var loading1 = $('div#loading1').hide();
-    var loading2 = $('div#loading2').hide();
+    var loading1 = $('div#search-fauorgnr-loading').hide();
+    var loading2 = $('div#search-identifier-loading').hide();
 
     $(document)
         .ajaxStop(function () {
@@ -11,18 +10,37 @@ jQuery(document).ready(function ($) {
             loading2.hide();
         });
 
-    $('#searchFAUOrgNr').click(getFAUOrgNr);
-    $('#searchLecturerIdentifier').click(getLecturerIdentifier);
+    $('#search-fauorgnr-button').click(getFAUOrgNr);
+    $('#search-identifier-button').click(getLecturerIdentifier);
 
+    $('form#search-fauorgnr-form').each(function() {
+        $(this).find('input').keypress(function(e) {
+            // Enter pressed?
+            if(e.which == 10 || e.which == 13) {
+                getFAUOrgNr();
+                e.preventDefault();
+            }
+        });
+    });
+
+    $('form#search-identifier-form').each(function() {
+        $(this).find('input').keypress(function(e) {
+            // Enter pressed?
+            if(e.which == 10 || e.which == 13) {
+                getLecturerIdentifier();
+                e.preventDefault();
+            }
+        });
+    });
 });
 
 function getFAUOrgNr() {
     var keyword = jQuery('input#keyword');
     var keywordVal = keyword.val();
-    var resultTab = jQuery('div#dip-fauorgnr-result');
+    var resultTab = jQuery('div#search-fauorgnr-result');
 
     if (keywordVal) {
-        var loading = jQuery('div#loading1');
+        var loading = jQuery('div#search-fauorgnr-loading');
         loading.show();
         resultTab.html();
         keyword.val('');
@@ -33,7 +51,7 @@ function getFAUOrgNr() {
             data: { 'keyword': keywordVal },
         }, function (result) {
             resultTab.html(result);
-            jQuery('div#loading').hide();
+            loading.hide();
         });
     }
 }
@@ -43,11 +61,11 @@ function getLecturerIdentifier() {
     var familyNameVal = familyName.val();
     var givenName = jQuery('input#givenName');
     var givenNameVal = givenName.val();
-    var resultTab = jQuery('div#dip-identifier-result');
+    var resultTab = jQuery('div#search-identifier-result');
 
     if (familyNameVal) {
         // we don't want users to search by givenName only
-        var loading = jQuery('div#loading2');
+        var loading = jQuery('div#search-identifier-loading');
         loading.show();
         resultTab.html();
         familyName.val('');
@@ -64,7 +82,7 @@ function getLecturerIdentifier() {
             data: aIn,
         }, function (result) {
             resultTab.html(result);
-            jQuery('div#loading').hide();
+            loading.hide();
         });
     }
 }

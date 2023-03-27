@@ -179,7 +179,7 @@ class Parser
      * @param string $fragment The fragment.
      * @return mixed Returns the rendered fragment.
      */
-    protected function render(string $fragment)
+    protected function render(string &$fragment)
     {
         $matchTags = preg_replace_callback($this->blockRegex, [$this, 'matchTags'], $fragment);
         $replaceTags = preg_replace_callback($this->valueRegex, [$this, 'replaceTags'], $matchTags);
@@ -193,7 +193,7 @@ class Parser
      * @param array $data An array of data to be replaced.
      * @return string Returns the parsed content.
      */
-    public function parse(string $content, array $data): string
+    public function parse(string $content, array &$data): string
     {
         $this->vars = (array) $data;
         return $this->render($content);

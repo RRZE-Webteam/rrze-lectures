@@ -5,8 +5,9 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
+
 // use RRZE\Lectures\Translator;
-use RRZE\Lectures\Template;
+// use RRZE\Lectures\Template;
 
 /**
  * Shortcode
@@ -17,6 +18,10 @@ class Shortcode
      * Der vollständige Pfad- und Dateiname der Plugin-Datei.
      * @var string
      */
+
+    protected $websiteLocale;
+    protected $websiteLanguage;
+    protected $bLanguageSwitched = false;
     protected $pluginFile;
     protected $options;
     protected $atts;
@@ -24,6 +29,8 @@ class Shortcode
     private $settings = '';
     private $aAllowedColors = [];
     private $aAllowedFormats = [];
+
+    private $aLanguages = [];
     protected $noCache = false;
 
 
@@ -33,6 +40,8 @@ class Shortcode
      */
     public function __construct($pluginFile, $settings)
     {
+        $this->websiteLocale = get_locale();
+        $this->websiteLanguage = substr($this->websiteLocale, 0, 2);
         $this->pluginFile = $pluginFile;
         $this->settings = getShortcodeSettings();
         $this->settings = $this->settings['lectures'];
@@ -40,6 +49,7 @@ class Shortcode
         $constants = getConstants();
         $this->aAllowedColors = $constants['colors'];
         $this->aAllowedFormats = $constants['formats'];
+        $this->aLanguages = $constants['langcodes'];
 
         add_action('admin_enqueue_scripts', [$this, 'enqueueGutenberg']);
         add_action('init', [$this, 'initGutenberg']);
@@ -70,18 +80,13 @@ class Shortcode
      * @param  array   $atts Shortcode-Attribute
      * @return string Gib den Inhalt zurück
      */
-    public function shortcodeLectures($atts, $content = NULL)
+    public function shortcodeLectures(array|string $atts, string $content = NULL): string
     {
-
-        if (Functions::isMaintenanceMode()){
+        if (Functions::isMaintenanceMode()) {
             return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
         }
-        
+
         $tsStart = microtime(true);
-        // show link to DIP only
-        // if (in_array('link', $this->show)) {
-        //     return sprintf('<a href="%1$s">%2$s</a>', $this->options['basic_url'], $this->options['basic_linkTxt']);
-        // }
 
         Functions::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
 
@@ -128,22 +133,29 @@ class Shortcode
                 }
                 break;
             case 'tabs':
-                default:
-                // $attrs = 'identifier;url;providerValues.event.title;providerValues.event_orgunit.orgunit;providerValues.event.eventtype;providerValues.event_responsible;description;maximumAttendeeCapacity;minimumAttendeeCapacity;providerValues.planned_dates;providerValues.modules';
+                // prevent HTTP 502 & too high loading time
+                if (empty($this->atts['degree']) && empty($this->atts['type'])){
+                    $this->atts['max'] = ($this->atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] : $this->atts['max']);
+                }
+
+                // Mit modules: $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.modules.module_cos.degree;providerValues.modules.module_cos.subject;providerValues.modules.module_cos.major;providerValues.modules.module_cos.subject_indicator;providerValues.modules.module_cos.version;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup';
+                $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;
+                providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup;providerValues.modules.module_cos.subject';
+                break;
+            default:
                 $attrs = ''; // TEST
         }
 
         // $attrs = ''; // TEST
-
 
         $aLQ = [];
 
         // uses fauorgnr only if not looking for explicite lectures or lecturers
         if (!empty($this->atts['lecturer_identifier'])) {
             $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
-        }elseif (!empty($this->atts['lecturer_idm'])) {
+        } elseif (!empty($this->atts['lecturer_idm'])) {
             $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        }elseif (!empty($this->atts['lecture_name'])) {
+        } elseif (!empty($this->atts['lecture_name'])) {
             $aLQ['names'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
@@ -169,13 +181,14 @@ class Shortcode
             $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
         }
 
-        // teaching_language (display_language works differently - it is not an attribute for the DIP-Campo-API)
+        // teaching_language (display_language works differently and is not an attribute for the DIP-Campo-API)
         if (!empty($this->atts['teaching_language'])) {
             $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
-        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        // $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -207,36 +220,44 @@ class Shortcode
             return $this->atts['nodata'];
         }
 
-        Functions::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
-
-        // delete all courses that don't fit to given semester
-        foreach ($data as $nr => $aVal) {
-            foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
-                if ($aDetails['semester'] == $this->atts['sem']) {
-                    if (empty($data[$nr]['providerValues']['courses_cleaned'])){
-                        $data[$nr]['providerValues']['courses_cleaned'] = [];
-                    }
-                    $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
-                }
-                unset($data[$nr]['providerValues']['courses'][$cNr]);
-            }
-            // clean up so we have exactly the same schema in $data again as given by DIP
-            if (!empty($data[$nr]['providerValues']['courses_cleaned'])){
-                $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
-                unset($data[$nr]['providerValues']['courses_cleaned']);
-            }
-
+        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw') {
+            echo '<pre>';
+            var_dump($data);
+            echo '</pre>';
         }
 
+        Functions::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
 
-        // 2DO (check if this is still a problem? 2023-03-02): API does not deliver all entries for planned_dates, see: https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=detailView-flow&unitId=108022&navigationPosition=studiesOffered,searchCourses
-    
+        // no need for this any longer -> API provides parameter "lf"
+        // delete all courses that don't fit to given semester
+        // foreach ($data as $nr => $aVal) {
+        //     foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
+        //         if ($aDetails['semester'] == $this->atts['sem']) {
+        //             if (empty($data[$nr]['providerValues']['courses_cleaned'])) {
+        //                 $data[$nr]['providerValues']['courses_cleaned'] = [];
+        //             }
+        //             $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
+        //         }
+        //         unset($data[$nr]['providerValues']['courses'][$cNr]);
+        //     }
+        //     // clean up so we have exactly the same schema in $data again as given by DIP
+        //     if (!empty($data[$nr]['providerValues']['courses_cleaned'])) {
+        //         $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
+        //         unset($data[$nr]['providerValues']['courses_cleaned']);
+        //     }
+
+        // }
+
+        // if (isset($_GET['debug']) && $_GET['debug'] == 'screen-courses-deleted') {
+        //     echo '<pre>';
+        //     var_dump($data);
+        //     echo '</pre>';
+        // }
 
 
         Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
-        Sanitizer::sanitizeLectures($data);
+        Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
-        // get the array elements of multilanguage fields from API:
         $translator = new Translator($this->atts['display_language']);
         $translator->setTranslations($data);
 
@@ -254,7 +275,8 @@ class Shortcode
         foreach ($data as $nr => $aEntries) {
             $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
         }
-        unset($data); // free memory
+        // unset($data); // free memory 
+        $data = null; // free memory see: https://stackoverflow.com/questions/584960/whats-better-at-freeing-memory-with-php-unset-or-var-null
 
         Functions::console_log('Group by eventtype completed', $tsStart);
 
@@ -262,9 +284,9 @@ class Shortcode
         $coll = collator_create('de_DE');
 
         // sort group
+        $aTmp = [];
         if (!empty($this->atts['type'])) {
             // sort in order of $this->atts['type']
-            $aTmp = [];
             $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
 
             foreach ($aGivenTypes as $givenType) {
@@ -273,29 +295,31 @@ class Shortcode
                 }
             }
             $aData = $aTmp;
-            unset($aTmp); // free memory
         } else {
             // sort alphabetically by group
             $arrayKeys = array_keys($aData);
             collator_sort($coll, $arrayKeys);
-            $aTmp = [];
+
             foreach ($arrayKeys as $key) {
                 $aTmp[$key] = $aData[$key];
             }
             $aData = $aTmp;
-            unset($aTmp); // free memory
         }
+
+        // unset($aTmp); // free memory
+        $aTmp = [];
 
         if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
             // combine all entries and sort them
-            $aTmp = [];
+            // $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 foreach ($aDetails as $aEntries) {
                     // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
                     $aTmp[$aEntries['name']] = $aEntries;
                 }
             }
-            unset($aData); // free memory
+            // unset($aData); // free memory
+            $aData = null; // free memory
 
             $arrayKeys = array_keys($aTmp);
             collator_sort($coll, $arrayKeys);
@@ -303,15 +327,17 @@ class Shortcode
             foreach ($arrayKeys as $key) {
                 $aTmp2[$key] = $aTmp[$key];
             }
-            unset($aTmp); // free memory
+            // unset($aTmp); // free memory
+            $aTmp = null;
             $aData = [];
             $aData[] = $aTmp2;
             $iAllEntries = count($aTmp2);
-            unset($aTmp2); // free memory
+            // unset($aTmp2); // free memory
+            $aTmp2 = null;
         } else {
             // sort entries
             $iAllEntries = 0;
-            $aTmp = [];
+            // $aTmp = [];
             foreach ($aData as $group => $aDetails) {
                 $aTmp2 = [];
                 foreach ($aDetails as $identifier => $aEntries) {
@@ -323,11 +349,13 @@ class Shortcode
                 array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
                 $iAllEntries += count($aTmp2);
                 $aTmp[$group] = $aTmp2;
-                unset($aTmp2); // free memory
+                // unset($aTmp2); // free memory
+                $aTmp2 = null;
             }
 
             $aData = $aTmp;
-            unset($aTmp); // free memory
+            // unset($aTmp); // free memory
+            $aTmp = null;
         }
 
         // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
@@ -360,12 +388,13 @@ class Shortcode
             }
 
             $aDegree = $aTmp;
-            unset($aTmp);
+            // unset($aTmp);
+            $aTmp = null;
         }
 
         Functions::console_log('Sort completed', $tsStart);
 
-        $template = 'shortcodes/' . $this->atts['format'] . '.html';
+        $template = 'shortcodes/' . $this->atts['format'] . '.php'; // switched from .html to .php for translations using localization __()
 
         $aTmp = [];
 
@@ -422,7 +451,13 @@ class Shortcode
         }
         $aDegree[$degree][$type][$title]['last'] = true;
 
-        Functions::console_log('Accordion & first/last values set for template', $tsStart);
+        Functions::console_log('Pre tempate', $tsStart);
+
+        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-pre-template') {
+            echo '<pre>';
+            var_dump($aDegree);
+            echo '</pre>';
+        }
 
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
@@ -431,12 +466,13 @@ class Shortcode
                 }
             }
         }
-        unset($aDegree); // free memory
-
+        // unset($aDegree); // free memory
+        $aDegree = null;
 
         Functions::console_log('Template parsed', $tsStart);
 
         if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
+            // in any case tabs.php uses shortcodes
             $content = do_shortcode($content);
         }
 
@@ -448,14 +484,15 @@ class Shortcode
         Functions::console_log('Cache set', $tsStart);
         Functions::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
+        if ($this->bLanguageSwitched){
+            switch_to_locale($this->websiteLocale);
+        }
+
         return $content;
     }
 
-    private function normalize($atts)
+    private function normalize(array $atts): array
     {
-        // website's language
-        $siteLang = substr(get_locale(), 0, 2);
-
         // sanatize all fields
         foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
@@ -463,9 +500,19 @@ class Shortcode
 
         // set display_language / default: website's language
         if (empty($atts['display_language'])) {
-            $atts['display_language'] = $siteLang;
-        }else{
-            $atts['display_language'] = strtolower($atts['display_language']);
+            $atts['display_language'] = $this->websiteLanguage;
+        } else {
+            $atts['display_language'] = strtolower(substr($atts['display_language'], 0, 2));
+
+            // this plugin supports GERMAN and ENGLISH (see .mo/.po)
+            switch ($atts['display_language']) {
+                case 'de':
+                    switch_to_locale('de_DE');
+                    break;
+                default:
+                    switch_to_locale('en_US');
+            }
+            $this->bLanguageSwitched = true;
         }
 
         // dynamically generate hide vars
@@ -521,9 +568,15 @@ class Shortcode
         }
 
         // no data
-        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $siteLang])) {
-            // we allow nodata to be empty in case users don't want any output 
-            $atts['nodata'] = $this->options['basic_nodata_' . $siteLang];
+        // 1. we allow nodata to be empty in case users don't want any output 
+        // (in this case user has to delete nodata entries in settings assigned to website's language and -if attribute is used in shortcode- assigned to display_language)
+        // 2. if shortcode attribute "nodata" is given => use it
+        // 3. else => nodata is set to config's nodata assigned to shortcode attribute "display_language"
+        // 4. if 3 is undefined =>  nodata is set to nodata assigned to website's language
+        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $atts['display_language']])) {
+            $atts['nodata'] = $this->options['basic_nodata_' . $atts['display_language']];
+        } elseif (!empty($this->options['basic_nodata_' . $this->websiteLanguage])) {
+            $atts['nodata'] = $this->options['basic_nodata_' . $this->websiteLanguage];
         }
 
         // hstart
@@ -549,7 +602,7 @@ class Shortcode
     }
 
 
-    public function isGutenberg()
+    public function isGutenberg(): bool
     {
         $postID = get_the_ID();
         if ($postID && !use_block_editor_for_post($postID)) {
@@ -558,7 +611,7 @@ class Shortcode
         return true;
     }
 
-    private function makeDropdown($id, $label, $aData, $all = null)
+    private function makeDropdown(string $id, string $label, array $aData, string $all = null): array
     {
         $ret = [
             'id' => $id,
@@ -580,7 +633,7 @@ class Shortcode
         return $ret;
     }
 
-    private function makeToggle($label)
+    private function makeToggle(string $label): array
     {
         return [
             'label' => $label,
@@ -591,7 +644,7 @@ class Shortcode
         ];
     }
 
-    public function fillGutenbergOptions($aSettings)
+    public function fillGutenbergOptions(array $aSettings): array
     {
         $this->dip = new DIPAPI($this->DIPURL, $this->DIPOrgNr, null);
 
@@ -747,7 +800,7 @@ class Shortcode
     }
 
 
-    public function addMCEButtons($pluginArray)
+    public function addMCEButtons(array $pluginArray): array
     {
         if (current_user_can('edit_posts') && current_user_can('edit_pages')) {
             $pluginArray['rrze_lecture_shortcode'] = plugins_url('../js/tinymce-shortcodes.js', plugin_basename(__FILE__));

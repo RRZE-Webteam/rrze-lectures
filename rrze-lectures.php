@@ -4,7 +4,7 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         1.6.24
+ * Version:         2.0.0
  * Requires at least: 6.1
  * Requires PHP:      8.0
  * Author:          RRZE-Webteam
@@ -45,7 +45,7 @@ spl_autoload_register(function ($class) {
 
 const RRZE_PHP_VERSION = '8.0';
 const RRZE_WP_VERSION = '6.1';
-const RRZE_PLUGIN_VERSION = '1.6.24'; // f.e. to make javascript load on change during development
+const RRZE_PLUGIN_VERSION = '1.7.19'; // f.e. to make javascript load on change during development
 
 // Registriert die Plugin-Funktion, die bei Aktivierung des Plugins ausgeführt werden soll.
 register_activation_hook(__FILE__, __NAMESPACE__ . '\activation');
@@ -59,7 +59,7 @@ add_action('plugins_loaded', __NAMESPACE__ . '\loaded');
  */
 function loadTextDomain()
 {
-    load_plugin_textdomain('rrze-univis', false, sprintf('%s/languages/', dirname(plugin_basename(__FILE__))));
+    load_plugin_textdomain('rrze-lectures', false, sprintf('%s/languages/', dirname(plugin_basename(__FILE__))));
 }
 
 /**
@@ -69,9 +69,9 @@ function systemRequirements(): string
 {
     $error = '';
     if (version_compare(PHP_VERSION, RRZE_PHP_VERSION, '<')) {
-        $error = sprintf(__('The server is running PHP version %1$s. The Plugin requires at least PHP version %2$s.', 'rrze-rsvp'), PHP_VERSION, RRZE_PHP_VERSION);
+        $error = sprintf(__('The server is running PHP version %1$s. The Plugin requires at least PHP version %2$s.', 'rrze-lectures'), PHP_VERSION, RRZE_PHP_VERSION);
     } elseif (version_compare($GLOBALS['wp_version'], RRZE_WP_VERSION, '<')) {
-        $error = sprintf(__('The server is running WordPress version %1$s. The Plugin requires at least WordPress version %2$s.', 'rrze-rsvp'), $GLOBALS['wp_version'], RRZE_WP_VERSION);
+        $error = sprintf(__('The server is running WordPress version %1$s. The Plugin requires at least WordPress version %2$s.', 'rrze-lectures'), $GLOBALS['wp_version'], RRZE_WP_VERSION);
     }
     return $error;
 }
@@ -159,7 +159,7 @@ function loaded()
                     printf(
                         '<div class="notice notice-error"><p>' .
                             /* translators: 1: The plugin name, 2: The error string. */
-                            __('Plugins: %1$s: %2$s', 'rrze-newsletter') .
+                            __('Plugins: %1$s: %2$s', 'rrze-lectures') .
                             '</p></div>',
                         esc_html($pluginName),
                         esc_html($error)
