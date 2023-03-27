@@ -185,7 +185,8 @@ class Shortcode
         }
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
-        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        // $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&page=';
+        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
 
@@ -225,24 +226,25 @@ class Shortcode
 
         Functions::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
 
+        // no need for this any longer -> API provides parameter "lf"
         // delete all courses that don't fit to given semester
-        foreach ($data as $nr => $aVal) {
-            foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
-                if ($aDetails['semester'] == $this->atts['sem']) {
-                    if (empty($data[$nr]['providerValues']['courses_cleaned'])) {
-                        $data[$nr]['providerValues']['courses_cleaned'] = [];
-                    }
-                    $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
-                }
-                unset($data[$nr]['providerValues']['courses'][$cNr]);
-            }
-            // clean up so we have exactly the same schema in $data again as given by DIP
-            if (!empty($data[$nr]['providerValues']['courses_cleaned'])) {
-                $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
-                unset($data[$nr]['providerValues']['courses_cleaned']);
-            }
+        // foreach ($data as $nr => $aVal) {
+        //     foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
+        //         if ($aDetails['semester'] == $this->atts['sem']) {
+        //             if (empty($data[$nr]['providerValues']['courses_cleaned'])) {
+        //                 $data[$nr]['providerValues']['courses_cleaned'] = [];
+        //             }
+        //             $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
+        //         }
+        //         unset($data[$nr]['providerValues']['courses'][$cNr]);
+        //     }
+        //     // clean up so we have exactly the same schema in $data again as given by DIP
+        //     if (!empty($data[$nr]['providerValues']['courses_cleaned'])) {
+        //         $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
+        //         unset($data[$nr]['providerValues']['courses_cleaned']);
+        //     }
 
-        }
+        // }
 
         if (isset($_GET['debug']) && $_GET['debug'] == 'screen-courses-deleted') {
             echo '<pre>';
