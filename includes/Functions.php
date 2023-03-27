@@ -264,7 +264,7 @@ class Functions
         update_option(self::TRANSIENT_OPTION, '');
     }
 
-    public function getTableHTML(array $aIn, array $aFieldnames): array|string
+    public function getTableHTML(array|string $aIn, array $aFieldnames): array|string
     {
         if (!is_array($aIn)) {
             return $aIn;
@@ -293,7 +293,7 @@ class Functions
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
 
-        $inputs = array_map(function($a){
+        $input = array_map(function($a){
             return sanitize_text_field($a);
         }, $_POST['data']);
 
@@ -302,7 +302,7 @@ class Functions
             __('Name of organization', 'rrze-lectures')
         ];
 
-        $response = $this->getTableHTML($this->getFAUOrgNr($inputs['keyword']), $aFieldnames);
+        $response = $this->getTableHTML($this->getFAUOrgNr($input['keyword']), $aFieldnames);
         wp_send_json($response);
     }
 
@@ -315,7 +315,7 @@ class Functions
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
 
-        if (!$response['valid']) {
+        if (!$response['valid'] || empty($response['content']['data'])) {
             return $ret;
         } else {
             $data = $response['content']['data'];
@@ -340,7 +340,10 @@ class Functions
     public function ajaxGetLecturerIdentifier()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
-        $aInputs = filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+
+        $aInputs = array_map(function($a){
+            return sanitize_text_field($a);
+        }, $_POST['data']);
 
         $aFieldnames = [
             __('Identifier', 'rrze-lectures'),
@@ -363,7 +366,8 @@ class Functions
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('persons', $dipParams);
 
-        if (!$response['valid']) {
+
+        if (!$response['valid'] || empty($response['content']['data'])) {
             return $ret;
         } else {
             $data = $response['content']['data'];

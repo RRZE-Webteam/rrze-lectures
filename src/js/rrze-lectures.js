@@ -13,6 +13,25 @@ jQuery(document).ready(function ($) {
     $('#search-fauorgnr-button').click(getFAUOrgNr);
     $('#search-identifier-button').click(getLecturerIdentifier);
 
+    $('form#search-fauorgnr-form').each(function() {
+        $(this).find('input').keypress(function(e) {
+            // Enter pressed?
+            if(e.which == 10 || e.which == 13) {
+                getFAUOrgNr();
+                e.preventDefault();
+            }
+        });
+    });
+
+    $('form#search-identifier-form').each(function() {
+        $(this).find('input').keypress(function(e) {
+            // Enter pressed?
+            if(e.which == 10 || e.which == 13) {
+                getLecturerIdentifier();
+                e.preventDefault();
+            }
+        });
+    });
 });
 
 function getFAUOrgNr() {
@@ -24,7 +43,7 @@ function getFAUOrgNr() {
         var loading = jQuery('div#search-fauorgnr-loading');
         loading.show();
         resultTab.html();
-        // keyword.val('');
+        keyword.val('');
 
         jQuery.post(lecture_ajax.ajax_url, {
             _ajax_nonce: lecture_ajax.nonce,
@@ -49,8 +68,8 @@ function getLecturerIdentifier() {
         var loading = jQuery('div#search-identifier-loading');
         loading.show();
         resultTab.html();
-        // familyName.val('');
-        // givenName.val('');
+        familyName.val('');
+        givenName.val('');
 
         var aIn = {
             "familyName": familyNameVal,
