@@ -41,9 +41,6 @@
 
         <h2><span itemprop="name">{{=name}}</span></h2>
 
-        <!-- name ist 'de' => Ausgabe? -->
-        <!-- Test mit Begleitseminar zu Bachelor- und Masterarbeiten -->
-
         [tabs]
         [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
 
@@ -170,39 +167,23 @@
         [tab title="<?php echo __('Modules and degree programmes', 'rrze-lectures'); ?>"]
         <table>
             <tr>
-                <!-- <th><?php echo __('Default text', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22) -->
-                <!-- <th><?php echo __('Type', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22) -->
                 <th><?php echo __('Degree', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Degree&nbsp;', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Major field of study', 'rrze-lectures'); ?></th>
-                <!-- <th><?php echo __('Course specialization', 'rrze-lectures'); ?></th> -->
                 <th><?php echo __('Subject indicator', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Version of examination regulations', 'rrze-lectures'); ?></th>
-                <!-- <th><?php echo __('Form of study', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22)  -->
-                <!-- <th><?php echo __('Place of study', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22)  -->
-                <!-- <th><?php echo __('Type of study', 'rrze-lectures'); ?></th>: Feld FEHLT (Stand: 2023-03-22)  -->
             </tr>
 
             {{@providerValues.modules}}
-                {{_val.module_cos}}
                     {{@_val.module_cos}}
                         <tr>
-                            <!-- <td></td> -->
-                            <!-- <td></td> -->
                             <td>{{=_val.degree}}</td>
                             <td>{{=_val.subject}}</td>
                             <td>{{=_val.major}}</td>
-                            <!-- <td></td> -->
                             <td>{{=_val.subject_indicator}}</td>
                             <td>{{=_val.version}}</td>
-                            <!-- <td></td> -->
-                            <!-- <td></td> -->
-                            <!-- <td></td> -->
                             </tr>
                     {{/@_val.module_cos}}
-                {{:_val.module_cos}}
-                    <?php echo __('The course has not been assigned to a course of study yet', 'rrze-lectures'); ?>   
-                {{/_val.module_cos}}
             {{/@providerValues.modules}}
         </table>
 
