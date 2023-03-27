@@ -23,7 +23,7 @@ Standard Ausgabe:
 
 Alle Attribute:
 
-`[lectures format="" type="" degree="" fauorgnr="" lecturer_identifier="" lecturer_idm="" lecture_name="" sem="" guest="" max="" hide="" hstart="" color="" nodata=""]`
+`[lectures format="" type="" degree="" fauorgnr="" lecturer_identifier="" lecturer_idm="" lecture_name="" sem="" teaching_language="" display_language="" guest="" max="" hide="" hstart="" color="" nodata=""]`
 
 
 Attribute:
