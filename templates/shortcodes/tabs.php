@@ -162,34 +162,6 @@
 
         [/tab]
 
-        {{providerValues.modules}}
-
-        [tab title="<?php echo __('Modules and degree programmes', 'rrze-lectures'); ?>"]
-        <table>
-            <tr>
-                <th><?php echo __('Degree', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Degree&nbsp;', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Major field of study', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Subject indicator', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Version of examination regulations', 'rrze-lectures'); ?></th>
-            </tr>
-
-            {{@providerValues.modules}}
-                    {{@_val.module_cos}}
-                        <tr>
-                            <td>{{=_val.degree}}</td>
-                            <td>{{=_val.subject}}</td>
-                            <td>{{=_val.major}}</td>
-                            <td>{{=_val.subject_indicator}}</td>
-                            <td>{{=_val.version}}</td>
-                            </tr>
-                    {{/@_val.module_cos}}
-            {{/@providerValues.modules}}
-        </table>
-
-        [/tab]
-
-        {{/providerValues.modules}}
     [/tabs]
 
         {{do_type_accordion}}
