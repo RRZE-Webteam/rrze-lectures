@@ -64,13 +64,15 @@ class DIPAPI
         if ($apiResponse['response']['code'] != 200){
             $aRet = [
                 'valid' => FALSE, 
-                'content' => $apiResponse['response']['code'] . ': ' . $apiResponse['response']['message']
+                'content' => $apiResponse['response']['message'],
+                'code' => $apiResponse['response']['code'],
             ];    
         }else{
             $content = json_decode($apiResponse['body'], true);
             $aRet = [
                 'valid' => TRUE, 
-                'content' => $content
+                'content' => $content,
+                'code' => 200,
             ];
         }
 

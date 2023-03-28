@@ -12,6 +12,8 @@ class Functions
     const TRANSIENT_OPTION = 'rrze_lecture_cache_transients';
     const TRANSIENT_EXPIRATION = DAY_IN_SECONDS;
 
+    const DIP_API_KEY_MSG = 'DIP API-Key Error! Anfragen zu dem API Key senden Sie an idm@fau.de . Bitte beachten Sie, dass die Vergabe von API-Keys derzeit noch in organisatorischer Klärung ist und daher eine Zuteilung noch nicht zeitnah erfolgen kann.';
+
 
     public function __construct($pluginFile)
     {
@@ -26,6 +28,9 @@ class Functions
         
         add_action('wp_ajax_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); 
         add_action('wp_ajax_nopriv_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']);
+
+        add_filter( 'update_option_rrze-lectures',  [$this, 'checkAPIKey'], 10, 1 );
+
 
         // add_action('wp_ajax_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
         // add_action('wp_ajax_nopriv_GetLectureDataForBlockelements', [$this, 'ajaxGetDIPDataForBlockelements']);
@@ -306,22 +311,31 @@ class Functions
         wp_send_json($response);
     }
 
+    public static function checkAPIKey( $options ){
+        $oDIP = new DIPAPI();
+        $response = $oDIP->getResponse('organizations', '');
+
+        if (!$response['valid'] && $response['code'] == 401) {
+            add_settings_error( 'basic_ApiKey', 'dip_api_key_error', self::DIP_API_KEY_MSG, 'error' );        
+        }
+
+        return $options;
+    }
+
     public function getFAUOrgNr(string $keyword = null): array|string
     {
-        $ret = __('No matching entries found.', 'rrze-lectures');
-
         $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') . '&q=' . urlencode($keyword);
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
 
-        if (!$response['valid'] || empty($response['content']['data'])) {
-            return $ret;
+        if (!$response['valid'] && $response['code'] == 401) {
+            return __(self::DIP_API_KEY_MSG, 'rrze-lectures');
         } else {
             $data = $response['content']['data'];
 
             if (empty($data)) {
-                return $ret;
+                return __('No matching entries found.', 'rrze-lectures');
             }
 
             $ret = [];
@@ -358,7 +372,6 @@ class Functions
 
     public function getLecturerIdentifier(array $aParams = []): array|string
     {
-        $ret = __('No matching entries found.', 'rrze-lectures');
         $lq = self::makeLQ($aParams);
 
         $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName;memberOf.memberOf.name') . '&lq=' . urlencode($lq);
@@ -367,13 +380,13 @@ class Functions
         $response = $oDIP->getResponse('persons', $dipParams);
 
 
-        if (!$response['valid'] || empty($response['content']['data'])) {
-            return $ret;
+        if (!$response['valid'] && $response['code'] == 401) {
+            return __(self::DIP_API_KEY_MSG, 'rrze-lectures');
         } else {
             $data = $response['content']['data'];
 
             if (empty($data)) {
-                return $ret;
+                return __('No matching entries found.', 'rrze-lectures');
             }
 
             $ret = [];

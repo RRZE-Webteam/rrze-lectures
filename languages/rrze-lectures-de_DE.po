@@ -3,9 +3,9 @@ msgstr ""
 "Project-Id-Version: RRZE Lectures\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 13:53+0000\n"
-"PO-Revision-Date: 2023-03-27 13:51+0000\n"
+"PO-Revision-Date: 2023-03-28 12:33+0000\n"
 "Last-Translator: \n"
-"Language-Team: German\n"
+"Language-Team: Deutsch\n"
 "Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "X-Loco-Version: 2.6.3; wp-6.1.1\n"
 "X-Domain: rrze-lectures"
 
-#: includes/Functions.php:411 includes/Shortcode.php:623
+#: includes/Functions.php:409 includes/Shortcode.php:623
 msgid "-- All --"
 msgstr "-- Alle --"
 
@@ -73,7 +73,7 @@ msgstr "Veranstaltungsart"
 msgid "Credits"
 msgstr "Punkte"
 
-#: includes/Functions.php:554 templates/lectures-all.php:129
+#: includes/Functions.php:552 templates/lectures-all.php:129
 #: templates/lectures-all.php:129 templates/lectures-all.php:131
 #: templates/lectures-all.php:131 templates/lectures-all.php:134
 msgid "Date"
@@ -94,6 +94,10 @@ msgstr ""
 #: config/config.php:122
 msgid "DIP API-Key"
 msgstr ""
+
+#: includes/Functions.php:317 includes/Functions.php:369
+msgid "DIP-API-Key is missing or invalid."
+msgstr "DIP-API-Key fehlt oder ist ungültig."
 
 #: config/config.php:239
 msgid ""
@@ -218,12 +222,12 @@ msgstr ""
 msgid "https://github.com/RRZE-Webteam/rrze-lectures"
 msgstr ""
 
-#: includes/Functions.php:554 templates/lectures-all.php:177
+#: includes/Functions.php:552 templates/lectures-all.php:177
 #: templates/lectures-single.php:102
 msgid "ICS"
 msgstr ""
 
-#: includes/Functions.php:349
+#: includes/Functions.php:347
 msgid "Identifier"
 msgstr ""
 
@@ -234,7 +238,7 @@ msgstr ""
 "Wenn Sie das CMS-Angebot von RRZE nutzen, müssen Sie den DIP-API-Schlüssel "
 "nicht eingeben."
 
-#: includes/Functions.php:554
+#: includes/Functions.php:552
 msgid "import to calendar"
 msgstr "Kalender importieren"
 
@@ -318,11 +322,11 @@ msgstr "Turnus des Angebots"
 msgid "Mon"
 msgstr "Mo"
 
-#: includes/Functions.php:350
+#: includes/Functions.php:348
 msgid "Name"
 msgstr ""
 
-#: includes/Functions.php:302 includes/Functions.php:351
+#: includes/Functions.php:302 includes/Functions.php:349
 #: includes/Settings.php:865
 msgid "Name of organization"
 msgstr "Name der Organisation"
@@ -341,7 +345,8 @@ msgstr ""
 "Zur angegebenen Lehrveranstaltung können keine Informationen abgerufen "
 "werden."
 
-#: config/config.php:160 includes/Functions.php:311 includes/Functions.php:361
+#: config/config.php:160 includes/Functions.php:322 includes/Functions.php:359
+#: includes/Functions.php:374
 msgid "No matching entries found."
 msgstr "Keine passenden Einträge gefunden."
 
