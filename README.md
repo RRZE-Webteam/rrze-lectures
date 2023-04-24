@@ -31,7 +31,7 @@ Attribute:
 |Attribute|Hinweis|Plichtfeld|Werte|Default|Beispiele|
 |-|-|-|-|-|-|
 |**format**||nein|"linklist" oder "tabs"|linklist|format="tabs"|
-|**type**||nein|Art der Lehrveranstaltung. Mehrere Werte müssen durch Komma getrennt werden. Die Reihenfolge bestimmt die Sortierung|alle Typen werden ausgegeben||type="Vorlesung, Vorlesung mit Übung, Tutorium"|
+|**type**||nein|Art der Lehrveranstaltung. Mehrere Werte müssen durch Komma getrennt werden. Die Reihenfolge bestimmt die Sortierung. Wird jedoch die Ausgabe von "Art der Lehrveranstaltung" mit dem Attribut "hide" unterbunden, erfolgt die Sortierung alphabetisch, da ohne Information zu "Art der Lehrveranstaltung" die Sortierung der Lehrveranstaltungen willkürlich erscheinen würde.|alle Typen werden ausgegeben||type="Vorlesung, Vorlesung mit Übung, Tutorium"|
 |**degree**||nein|Studiengänge. Mehrere Werte müssen durch Komma getrennt werden. Die Reihenfolge bestimmt die Sortierung. Wird degree angegeben, wird zuerst nach Studiengängen gruppiert und innerhalb dieser nach Lehrveranstaltungstypen.|alle Studiengänge werden ausgegeben|degree="Informatik, Artificial Intelligence, Mathematik"|
 |**fauorgnr**|Eine Suchmaske dazu finden Sie unter Einstellungen: /wp-admin/options-general.php?page=rrze-lectures |nein|ist dieser Parameter gesetzt, wird er anstelle der FAU Org Nr in den Settings verwendet|Wert, der in den Einstellungen gesetzt ist|fauorgnr="123"|
 |**lecture_name**||nein|Name der Lehrveranstaltung||lecture_name="Diskrete Optimierung I"|
