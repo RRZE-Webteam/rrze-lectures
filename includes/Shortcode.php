@@ -438,7 +438,7 @@ class Shortcode
                     $aDegree[$degree][$type][$title]['do_type_accordion'] = !$this->atts['hide_type_accordion'];
                     $aDegree[$degree][$type][$title]['first'] = $first;
                     $aDegree[$degree][$type][$title]['last'] = false;
-                    $aDegree[$degree][$type][$title]['type_title'] = ($i == 1 ? $type : false);
+                    $aDegree[$degree][$type][$title]['type_title'] = ($i == 1 && empty($this->atts['hide_type']) ? $type : false);
                     $aDegree[$degree][$type][$title]['type_start'] = ($aDegree[$degree][$type][$title]['type_title'] ? true : false);
                     $aDegree[$degree][$type][$title]['type_end'] = ($i == count($aEntries) ? true : false);
                     $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
