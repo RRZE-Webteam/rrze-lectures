@@ -35,11 +35,12 @@
         <H{{=type_hstart}}>{{=type_title}}</H{{=type_hstart}}>
     {{/type_title}}
 {{/do_type_accordion}}
-{{type_start}}
-    <ul>
-{{/type_start}}
 
+
+{{hide_lecture_name}}
+{{:hide_lecture_name}}
         <h2><span itemprop="name">{{=name}}</span></h2>
+{{/hide_lecture_name}}
 
         [tabs]
         [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
@@ -163,7 +164,7 @@
 
     [/tabs]
 
-        {{do_type_accordion}}
+{{do_type_accordion}}
     {{type_end}}
         {{do_degree_accordion}}
             [/accordion-item]
