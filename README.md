@@ -42,7 +42,7 @@ Attribute:
 |**display_language**||nein|Das Sprachkürzel mit zwei Buchstaben. Fallback ist Deutsch, weil die Daten auf Campo zunächst auf Deutsch eingetragen werden und dann ggfalls in weiteren Sprachen.|Es wird die Sprache verwendet, in der die Website eingestellt ist. Existieren in Campo dafür keine Übersetzungen, so erfolgt die Ausgabe auf Deutsch.|display_language="en" oder display_language="de" oder display_language="fr" ...|
 |**guest**||nein|Für Gaststudium geeignet = 1 / nicht geeignet = 0|alle werden ausgegeben|guest="1"|
 |**max**||nein|Maximale Anzahl an Lehrveranstaltungen.||max="5"|
-|**hide**||nein|Die Anzeige von Teilen der Ausgabe können hiermit unterbunden werden. Derzeit: accordion, type_accordion, degree_accordion, type, degree||hide="accordion" oder hide="accordion, type" oder hide="type_accordion"|
+|**hide**||nein|Die Anzeige von Teilen der Ausgabe können hiermit unterbunden werden. Derzeit: accordion, type_accordion, degree_accordion, type, degree, lecture_name||hide="accordion" oder hide="accordion, type" oder hide="type_accordion"|
 |**hstart**||nein|Dieser Wert wird als Ausgangswert für die Hierachie-Ebene der Überschriften in Abhängigkeit der mit "hide" unterbundenen Akkordeons (accordion, type_accordion, degree_accordion) genutzt|2|hstart="3"|
 |**color**|mehrere Farbwerte für die beiden ineinander verschachtelten Akkordeons: in Entwicklung|nein|med oder phil oder tf oder nat oder rw oder fau|fau|color="med"|
 |**nodata**||nein|Eine beliebige Zeichenkette|Der in den Settings vorgegebene Eintrag. Siehe /wp-admin/options-general.php?page=rrze-lectures |nodata="Es wurden keine Lehrveranstaltungen gefunden."|

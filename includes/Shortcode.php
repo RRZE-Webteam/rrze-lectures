@@ -309,32 +309,32 @@ class Shortcode
         // unset($aTmp); // free memory
         $aTmp = [];
 
-        if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
-            // combine all entries and sort them
-            // $aTmp = [];
-            foreach ($aData as $group => $aDetails) {
-                foreach ($aDetails as $aEntries) {
-                    // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
-                    $aTmp[$aEntries['name']] = $aEntries;
-                }
-            }
-            // unset($aData); // free memory
-            $aData = null; // free memory
+        // if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
+        //     // combine all entries and sort them
+        //     // $aTmp = [];
+        //     foreach ($aData as $group => $aDetails) {
+        //         foreach ($aDetails as $aEntries) {
+        //             // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
+        //             $aTmp[$aEntries['name']] = $aEntries;
+        //         }
+        //     }
+        //     // unset($aData); // free memory
+        //     $aData = null; // free memory
 
-            $arrayKeys = array_keys($aTmp);
-            collator_sort($coll, $arrayKeys);
-            $aTmp2 = [];
-            foreach ($arrayKeys as $key) {
-                $aTmp2[$key] = $aTmp[$key];
-            }
-            // unset($aTmp); // free memory
-            $aTmp = null;
-            $aData = [];
-            $aData[] = $aTmp2;
-            $iAllEntries = count($aTmp2);
-            // unset($aTmp2); // free memory
-            $aTmp2 = null;
-        } else {
+        //     $arrayKeys = array_keys($aTmp);
+        //     collator_sort($coll, $arrayKeys);
+        //     $aTmp2 = [];
+        //     foreach ($arrayKeys as $key) {
+        //         $aTmp2[$key] = $aTmp[$key];
+        //     }
+        //     // unset($aTmp); // free memory
+        //     $aTmp = null;
+        //     $aData = [];
+        //     $aData[] = $aTmp2;
+        //     $iAllEntries = count($aTmp2);
+        //     // unset($aTmp2); // free memory
+        //     $aTmp2 = null;
+        // } else {
             // sort entries
             $iAllEntries = 0;
             // $aTmp = [];
@@ -356,7 +356,7 @@ class Shortcode
             $aData = $aTmp;
             // unset($aTmp); // free memory
             $aTmp = null;
-        }
+        // }
 
         // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
         if (!empty($this->atts['degree'])) {
@@ -443,6 +443,7 @@ class Shortcode
                     $aDegree[$degree][$type][$title]['type_end'] = ($i == count($aEntries) ? true : false);
                     $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
                     $aDegree[$degree][$type][$title]['type_hstart'] = $this->atts['type_hstart'];
+                    $aDegree[$degree][$type][$title]['hide_lecture_name'] = (!empty($this->atts['hide_lecture_name']) ? true : false); // 2DO: improve this: make "hide" 100% dynamically for templates, too
                     $i++;
                     $first = false;
                     $iCnt++;
