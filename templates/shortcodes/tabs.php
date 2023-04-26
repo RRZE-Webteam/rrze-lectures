@@ -185,5 +185,6 @@
     {{do_accordion}}
         [/collapsibles]
     {{/do_accordion}}
+        </div>
     </div>
 {{/last}}
