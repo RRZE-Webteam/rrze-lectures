@@ -203,11 +203,10 @@ class Functions
         return implode('&', $aLQ);
     }
 
-    public static function convertDate(string $tz, string $timezone, string $format): string
+    public static function convertDate(string $tz, string $format): string
     {
-        $dt = new \DateTime($tz, new \DateTimeZone($timezone));
-        $dt->setTimezone(new \DateTimeZone('Europe/Berlin'));
-        $ret = $dt->format($format);
+        $ret = get_date_from_gmt($tz, $format);
+
         if ($format == "N") {
             switch ($ret) {
                 case 1:
