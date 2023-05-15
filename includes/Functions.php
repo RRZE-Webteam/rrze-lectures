@@ -429,7 +429,12 @@ class Functions
         $shortcode = stripslashes(preg_replace('/]/', ' testapi="1" nocache="true"]', $shortcode));
 
         if (is_null($shortcode)){
-            return __('Invalid shortcode. Please check the manual: ', 'rrze_lectures') . ' https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/';
+            return __('Invalid shortcode.', 'rrze-lectures');
+        }
+
+        $ret = do_shortcode($shortcode);
+        if ($shortcode == $ret){
+            return __('Invalid shortcode.', 'rrze-lectures');
         }
         return do_shortcode($shortcode);
     }
