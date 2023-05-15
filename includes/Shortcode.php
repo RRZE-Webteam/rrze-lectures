@@ -32,6 +32,7 @@ class Shortcode
 
     private $aLanguages = [];
     protected $noCache = false;
+    protected $testAPI = false;
 
 
     /**
@@ -92,6 +93,10 @@ class Shortcode
 
         if (!empty($atts['nocache'])) {
             $this->noCache = true;
+        }
+
+        if (!empty($atts['testapi'])) {
+            $this->testAPI = true;
         }
 
         // merge given attributes with default ones
@@ -393,10 +398,6 @@ class Shortcode
 
         Functions::console_log('Sort completed', $tsStart);
 
-        // if (!empty($atts['testapi'])){
-        //     $this->atts['format'] = 'linklist';
-        // }
-
         $template = 'shortcodes/' . $this->atts['format'] . '.php'; // switched from .html to .php for translations using localization __()
 
         $aTmp = [];
@@ -420,6 +421,7 @@ class Shortcode
                         $aDegree[$degree][$type][$title]['degree_start'] = ($aDegree[$degree][$type][$title]['degree_title'] ? true : false);
                         $aDegree[$degree][$type][$title]['degree_end'] = false;
                         $aDegree[$degree][$type][$title]['degree_hstart'] = $this->atts['degree_hstart'];
+                        $aDegree[$degree][$type][$title]['do_tabs'] = !$this->testAPI;
                         $start = false;
                     }
                 }
@@ -447,6 +449,7 @@ class Shortcode
                     $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
                     $aDegree[$degree][$type][$title]['type_hstart'] = $this->atts['type_hstart'];
                     $aDegree[$degree][$type][$title]['hide_lecture_name'] = (!empty($this->atts['hide_lecture_name']) ? true : false); // 2DO: improve this: make "hide" 100% dynamically for templates, too
+                    $aDegree[$degree][$type][$title]['do_tabs'] = !$this->testAPI;
                     $i++;
                     $first = false;
                     $iCnt++;
@@ -538,6 +541,13 @@ class Shortcode
                 $atts['hide_accordion'] = true;
             }
         }
+
+        if ($this->testAPI){
+            $atts['hide_accordion'] = true;
+            $atts['hide_degree_accordion'] = true;
+            $atts['hide_type_accordion'] = true;
+        }
+
 
         // fauorgnr
         if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
