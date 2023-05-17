@@ -105,28 +105,28 @@ class Sanitizer
                     if (!empty($aCourse['planned_dates'])) {
                         foreach ($aCourse['planned_dates'] as $iDate => $aDates) {
                             if (!empty($aDates['startdate'])) {
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['weekday'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'N');
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['startdate'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'd.m.Y');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['weekday'] = Functions::convertDate($aDates['startdate'], 'N');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['startdate'] = Functions::convertDate($aDates['startdate'], 'd.m.Y');
                             }
                             if (!empty($aDates['startdate'])) {
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['weekday'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'N');
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['startdate'] = Functions::convertDate($aDates['startdate'], 'Europe/Berlin', 'd.m.Y');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['weekday'] = Functions::convertDate($aDates['startdate'], 'N');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['startdate'] = Functions::convertDate($aDates['startdate'], 'd.m.Y');
                             }
                             if (!empty($aDates['enddate'])) {
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['enddate'] = Functions::convertDate($aDates['enddate'], 'Europe/Berlin', 'd.m.Y');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['enddate'] = Functions::convertDate($aDates['enddate'], 'd.m.Y');
                             }
                             if (!empty($aDates['starttime'])) {
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['starttime'] = Functions::convertDate($aDates['starttime'], 'Europe/Berlin', 'H:i');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['starttime'] = Functions::convertDate($aDates['starttime'], 'H:i');
                             }
                             if (!empty($aDates['endtime'])) {
-                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['endtime'] = Functions::convertDate($aDates['endtime'], 'Europe/Berlin', 'H:i');
+                                $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['endtime'] = Functions::convertDate($aDates['endtime'], 'H:i');
                             }
 
                             // get "Ausfalltermine"
                             if (!empty($aDates['individual_dates'])) {
                                 foreach ($aDates['individual_dates'] as $iIndividual => $aIndividuals) {
                                     if (!empty($aIndividuals['cancelled']) && !empty($aIndividuals['date']) && $aIndividuals['cancelled'] == 1) {
-                                        $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['misseddates'][] = Functions::convertDate($aIndividuals['date'], 'Europe/Berlin', 'd.m.Y');
+                                        $data[$iEntry]['providerValues']['courses'][$iCourse]['planned_dates'][$iDate]['misseddates'][] = Functions::convertDate($aIndividuals['date'], 'd.m.Y');
                                     }
                                 }
                             }
