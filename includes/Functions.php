@@ -203,7 +203,7 @@ class Functions
             }
         }
 
-        return implode('%26', $aLQ);
+        return implode('&', $aLQ);
     }
 
     public static function convertDate(string $tz, string $format): string
