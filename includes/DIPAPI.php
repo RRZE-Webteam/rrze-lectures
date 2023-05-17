@@ -82,7 +82,7 @@ class DIPAPI
 
     private function setAPI()
     {
-        $this->api = 'https://api.fau.de/pub/v1/vz/';
+        $this->api = 'https://api.fau.de/pub/v2/vz/';
     }
 
     private static function log(string $method, string $logType = 'error', string $msg = '')
