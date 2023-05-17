@@ -173,9 +173,10 @@ class Functions
                     $aLecturers = array_map('trim', explode(';', $attVal));
                     foreach($aLecturers as $lectureName){
                         $aParts = array_map('trim', explode(',', $lectureName));
-                        $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . $aParts[0];
+                        // $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
+                        $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '%5Bin%5D%3D' : '%3D') . rawurlencode($aParts[0]);
                         if (!empty($aParts[1])){
-                            $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '[in]=' : '=') . $aParts[1];
+                            $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '%5Bin%5D%3D' : '%3D') . rawurlencode($aParts[1]);
                         }
                     }
 
@@ -186,7 +187,9 @@ class Functions
                     // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
 
                 } else {
-                    $aTmp = array_map('trim', explode(',', $attVal));
+                    $aTmp = array_map(function ($val) {
+                        return rawurlencode(trim($val));
+                    }, explode(',', $attVal));
 
                     // check if 10 figures hex 
                     if ($dipField == 'providerValues.courses.course_responsible.identifier') {
@@ -197,8 +200,8 @@ class Functions
                         }
                     }
 
-                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
-
+                    // $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
+                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '%5Bin%5D%3D' : '%3D') . implode('%3B', $aTmp);
                 }
             }
         }
