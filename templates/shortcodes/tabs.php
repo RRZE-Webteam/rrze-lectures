@@ -42,13 +42,8 @@
         <h2><span itemprop="name">{{=name}}</span></h2>
 {{/hide_lecture_name}}
 
-
-{{do_tabs}}
         [tabs]
         [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
-{{:do_tabs}}
-    <?php echo __('Basic data', 'rrze-lectures'); ?>
-{{/do_tabs}}
 
         {{providerValues.event.title}}<?php echo __('Title', 'rrze-lectures'); ?>: {{=providerValues.event.title}}{{/providerValues.event.title}}
         {{providerValues.event.shorttext}}<?php echo __('Short text', 'rrze-lectures'); ?>: {{=providerValues.event.shorttext}}{{/providerValues.event.shorttext}}
@@ -72,13 +67,8 @@
 
         {{providerValues.event.comment}}[alert style="warning"]<strong><?php echo __('Comment', 'rrze-lectures'); ?></strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
 
-        {{do_tabs}}
         [/tab]
         [tab title="<?php echo __('Parallel groups / dates', 'rrze-lectures'); ?>"]
-        {{:do_tabs}}
-        <br>
-        <?php echo __('Parallel groups / dates', 'rrze-lectures'); ?>
-        {{/do_tabs}}
 
 
 
@@ -170,11 +160,9 @@
 
         {{/@providerValues.courses}}
 
-
-{{do_tabs}}
         [/tab]
+
     [/tabs]
-{{/do_tabs}}
 
 {{do_type_accordion}}
     {{type_end}}

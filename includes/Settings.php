@@ -917,41 +917,6 @@ class Settings
             </form>
         </div>
         <div id="search-identifier-result"></div>
-        <br><hr><br>
-        <div class="wrap">
-            <h3>
-                <?php echo __('Test API', 'rrze-lectures'); ?>
-            </h3>
-            <p>
-                <?php 
-                    echo __('Note that the plugin only displays data from Campo using an API. If the data is not displayed as expected, please contact ', 'rrze-lectures') . ' <a href="mailto:campo@fau.de">Campo Support</a>';                    
-                    echo '<br>';
-                    echo __('Enter the shortcode to test the Application Programming Interface (API).', 'rrze-lectures') . ' <a href="https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/">' . __('Manual for "RRZE Lectures"', 'rrze-lectures') . '</a>'; 
-                ?>
-            </p>
-            <form method="post" id="test-api-form">
-                <table class="form-table" role="presentation" class="striped">
-                    <tbody>
-                        <tr>
-                            <th scope="row">
-                                <?php echo __('Shortcode', 'rrze-lectures'); ?>
-                            </th>
-                            <td><input type="text" name="shortcode" id="shortcode" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="button" id="test-api-button" class="button button-primary"
-                                    value="<?php echo __('Test', 'rrze-lectures'); ?>">
-                            </td>
-                            <td>
-                                <div id="test-api-loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
-        </div>
-        <div id="test-api-result"></div>
 
     <?php
     }

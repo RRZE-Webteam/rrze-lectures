@@ -29,9 +29,6 @@ class Functions
         add_action('wp_ajax_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']); 
         add_action('wp_ajax_nopriv_GetLecturerIdentifier', [$this, 'ajaxGetLecturerIdentifier']);
 
-        add_action('wp_ajax_GetTestAPI', [$this, 'ajaxGetTestAPI']); 
-        add_action('wp_ajax_nopriv_GetTestAPI', [$this, 'ajaxGetTestAPI']);
-
         add_filter( 'update_option_rrze-lectures',  [$this, 'checkAPIKey'], 10, 1 );
 
 
@@ -299,18 +296,6 @@ class Functions
         return $ret;
     }
 
-    public static function checkAPIKey( $options ){
-        $oDIP = new DIPAPI();
-        $response = $oDIP->getResponse('organizations', '');
-
-        if (!$response['valid'] && $response['code'] == 401) {
-            add_settings_error( 'basic_ApiKey', 'dip_api_key_error', self::DIP_API_KEY_MSG, 'error' );        
-        }
-
-        return $options;
-    }
-
-
     public function ajaxGetFAUOrgNr()
     {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
@@ -326,6 +311,17 @@ class Functions
 
         $response = $this->getTableHTML($this->getFAUOrgNr($input['keyword']), $aFieldnames);
         wp_send_json($response);
+    }
+
+    public static function checkAPIKey( $options ){
+        $oDIP = new DIPAPI();
+        $response = $oDIP->getResponse('organizations', '');
+
+        if (!$response['valid'] && $response['code'] == 401) {
+            add_settings_error( 'basic_ApiKey', 'dip_api_key_error', self::DIP_API_KEY_MSG, 'error' );        
+        }
+
+        return $options;
     }
 
     public function getFAUOrgNr(string $keyword = null): array|string
@@ -408,40 +404,6 @@ class Functions
 
         return $ret;
     }
-
-    public function ajaxGetTestAPI()
-    {
-        check_ajax_referer('lecture-ajax-nonce', 'nonce');
-
-        $input = array_map(function($a){
-            return sanitize_text_field($a);
-        }, $_POST['data']);
-
-        $aFieldnames = [
-            __('FAU Org Number', 'rrze-lectures'),
-            __('Name of organization', 'rrze-lectures')
-        ];
-
-        $response = $this->getTableHTML($this->getTestAPI($input['shortcode']), $aFieldnames);
-        wp_send_json($response);
-    }
-
-    public function getTestAPI(string $shortcode = null): array|string
-    {
-        // add shortcode attributs testapi and nocache and stripslashes added by sanitize_text_field
-        $shortcode = stripslashes(preg_replace('/]/', ' testapi="1" nocache="true"]', $shortcode));
-
-        if (is_null($shortcode)){
-            return __('Invalid shortcode.', 'rrze-lectures');
-        }
-
-        $ret = do_shortcode($shortcode);
-        if ($shortcode == $ret){
-            return __('Invalid shortcode.', 'rrze-lectures');
-        }
-        return do_shortcode($shortcode);
-    }
-
 
     public static function isMaintenanceMode(): bool
     {
