@@ -199,7 +199,7 @@ class Functions
                     }
 
                     // $aLQ[] = $dipField . (count($aTmp) > 1 ? '%5Bin%5D%3D' : '%3D') . implode('%3B', $aTmp);
-                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(';', $aTmp);
+                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
                 }
             }
         }

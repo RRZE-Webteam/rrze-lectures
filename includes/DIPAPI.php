@@ -59,14 +59,7 @@ class DIPAPI
             echo $this->api . $endpoint . '/' . $sParam . '<br>';
         }
         
-        // if (isset($_GET["debug"])){
-        //     echo 'https://api.fau.de/pub/v2/vz/educationEvents/?limit=100&lq=providerValues.event_orgunit.fauorg%3D1413110000%26providerValues.courses.semester%3DSoSe2023%26providerValues.event.eventtypes%5Bin%5D%3DHauptseminar%253BVorlesung%253BExkursion%253BMasterseminar%253BVorlesung%2520mit%2520%25C3%259Cbung%26providerValues.modules.module_cos.subject%3DPhysical%2520Geography%253A%2520Climate%2520%2526%2520Environmental%2520Sciences&lf=providerValues.courses.semester%3DSoSe2023&page=1<br>';
-        // }
-        
         $apiResponse = wp_remote_get($this->api . $endpoint . '/' . $sParam, $aGetArgs);
-
-        // Test
-        // $apiResponse = wp_remote_get('https://api.fau.de/pub/v2/vz/educationEvents/?limit=100&lq=providerValues.event_orgunit.fauorg%3D1413110000%26providerValues.courses.semester%3DSoSe2023%26providerValues.event.eventtypes%5Bin%5D%3DHauptseminar%253BVorlesung%253BExkursion%253BMasterseminar%253BVorlesung%2520mit%2520%25C3%259Cbung%26providerValues.modules.module_cos.subject%3DPhysical%2520Geography%253A%2520Climate%2520%2526%2520Environmental%2520Sciences&lf=providerValues.courses.semester%3DSoSe2023&page=1', $aGetArgs);
 
         if ($apiResponse['response']['code'] != 200){
             $aRet = [

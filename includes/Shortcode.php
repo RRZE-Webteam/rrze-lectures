@@ -187,7 +187,6 @@ class Shortcode
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
         // $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
-        // $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
