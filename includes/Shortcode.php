@@ -154,10 +154,12 @@ class Shortcode
             $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         } elseif (!empty($this->atts['lecturer_idm'])) {
             $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        } elseif (!empty($this->atts['lecture_name'])) {
-            $aLQ['names'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+        }
+
+        if (!empty($this->atts['lecture_name'])) {
+            $aLQ['names'] = $this->atts['lecture_name'];
         }
 
         // all the other filters
@@ -184,6 +186,8 @@ class Shortcode
         if (!empty($this->atts['teaching_language'])) {
             $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
         }
+
+
 
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
         // $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
