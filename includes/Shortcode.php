@@ -163,6 +163,9 @@ class Shortcode
         }
 
         // all the other filters
+        // no cancelled courses
+        $aLQ['providerValues.courses.cancelled'] = 0;
+
         // sem
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 

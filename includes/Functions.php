@@ -165,7 +165,7 @@ class Functions
     {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {
-            if (!empty($attVal)) {
+            if (!empty($attVal) || $attVal == 0 ) {
                 if ($dipField == 'lecturerName') {
                     $aLecturers = array_map('trim', explode(';', $attVal));
                     foreach($aLecturers as $lectureName){
