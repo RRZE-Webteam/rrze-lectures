@@ -154,13 +154,18 @@ class Shortcode
             $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
         } elseif (!empty($this->atts['lecturer_idm'])) {
             $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        } elseif (!empty($this->atts['lecture_name'])) {
-            $aLQ['names'] = $this->atts['lecture_name'];
         } else {
             $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
         }
 
+        if (!empty($this->atts['lecture_name'])) {
+            $aLQ['names'] = $this->atts['lecture_name'];
+        }
+
         // all the other filters
+        // no cancelled courses
+        $aLQ['providerValues.courses.cancelled'] = 0;
+
         // sem
         $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
 
@@ -185,8 +190,9 @@ class Shortcode
             $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
         }
 
+
+
         // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
-        // $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
         $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
 
         Functions::console_log('Set params for DIP', $tsStart);
@@ -334,28 +340,53 @@ class Shortcode
         //     // unset($aTmp2); // free memory
         //     $aTmp2 = null;
         // } else {
-            // sort entries
-            $iAllEntries = 0;
-            // $aTmp = [];
-            foreach ($aData as $group => $aDetails) {
-                $aTmp2 = [];
-                foreach ($aDetails as $identifier => $aEntries) {
-                    $name = $aEntries['name'];
-                    $aTmp2[$name] = $aEntries;
+        
+        // sort entries
+        $iAllEntries = 0;
+        // $aTmp = [];
+
+        foreach ($aData as $group => $aDetails) {
+            $aTmp2 = [];
+            foreach ($aDetails as $identifier => $aEntries) {
+                $name = $aEntries['name'];
+                $aTmp2[$name] = $aEntries;
+
+                $aTmp3 = [];
+                foreach ($aEntries['providerValues']['courses'] as $nr => $aCourses){
+                    // BK 2023-06-28 : explicitely delete cancelled parallelgroups (API ignores this parameter sometimes)
+                    if ($aCourses['cancelled'] == false){
+                        // sort by parallelgroup
+                        $parallelgroup = $aCourses['parallelgroup'];
+                        $aTmp3[$parallelgroup] = $aCourses;    
+                    }
+
                 }
 
-                $arrayKeys = array_keys($aTmp2);
-                array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-                $iAllEntries += count($aTmp2);
-                $aTmp[$group] = $aTmp2;
-                // unset($aTmp2); // free memory
-                $aTmp2 = null;
+                $arrayKeys = array_keys($aTmp3);
+                if (count($arrayKeys) > 1){
+                    array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp3);
+                }else{
+                    $aTmp3[array_key_first($aTmp3)]['parallelgroup'] = '';
+                }
+
+                $aTmp2[$name]['providerValues']['courses'] = $aTmp3;
+                $aTmp3 = null;    
             }
 
-            $aData = $aTmp;
-            // unset($aTmp); // free memory
-            $aTmp = null;
-        // }
+            $arrayKeys = array_keys($aTmp2);
+            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+            $iAllEntries += count($aTmp2);
+            $aTmp[$group] = $aTmp2;
+            // unset($aTmp2); // free memory
+            $aTmp2 = null;
+        }
+
+
+
+        $aData = $aTmp;
+        // unset($aTmp); // free memory
+        $aTmp = null;
+    // }
 
         // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
         if (!empty($this->atts['degree'])) {
