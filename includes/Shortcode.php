@@ -355,13 +355,19 @@ class Shortcode
                 foreach ($aEntries['providerValues']['courses'] as $nr => $aCourses){
                     // BK 2023-06-28 : explicitely delete cancelled parallelgroups (API ignores this parameter sometimes)
                     if ($aCourses['cancelled'] == false){
+                        // sort by parallelgroup
                         $parallelgroup = $aCourses['parallelgroup'];
                         $aTmp3[$parallelgroup] = $aCourses;    
                     }
 
                 }
+
                 $arrayKeys = array_keys($aTmp3);
-                array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp3);
+                if (count($arrayKeys) > 1){
+                    array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp3);
+                }else{
+                    $aTmp3[array_key_first($aTmp3)]['parallelgroup'] = '';
+                }
 
                 $aTmp2[$name]['providerValues']['courses'] = $aTmp3;
                 $aTmp3 = null;    
