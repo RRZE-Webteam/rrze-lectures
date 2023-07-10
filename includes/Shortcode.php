@@ -493,7 +493,11 @@ class Shortcode
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
-                    $content .= Template::getContent($template, $aDetails);
+                    // get Campo Link from first Course
+                   $first_course = array_key_first($aDetails['providerValues']['courses']);               
+                   $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
+                   $aDetails['campo_url'] = $compo_link;
+                   $content .= Template::getContent($template, $aDetails);
                 }
             }
         }
