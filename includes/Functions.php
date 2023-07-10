@@ -55,7 +55,7 @@ class Functions
     }
 
  
-    public static function console_log(string $msg = '', int $tsStart = 0)
+    public static function console_log(string $msg = '', float $tsStart = 0)
     {
         if (isset($_GET['debug'])) {
             $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';

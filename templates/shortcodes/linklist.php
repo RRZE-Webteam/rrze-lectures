@@ -37,7 +37,7 @@
     <ul>
 {{/type_start}}
 
-<li><a href="{{=providerValues.courses.0.url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
+<li><a href="{{=campo_url}}" target="rrze-campo" class="rrze-lectures-linklist">{{=name}}</a></li>
 
 {{type_end}}
     </ul>

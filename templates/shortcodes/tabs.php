@@ -44,8 +44,6 @@
 
         [tabs]
         [tab title="<?php echo __('Basic data', 'rrze-lectures'); ?>"]
-
-        {{providerValues.event.title}}<?php echo __('Title', 'rrze-lectures'); ?>: {{=providerValues.event.title}}{{/providerValues.event.title}}
         {{providerValues.event.shorttext}}<?php echo __('Short text', 'rrze-lectures'); ?>: {{=providerValues.event.shorttext}}{{/providerValues.event.shorttext}}
 
         {{providerValues.event_orgunit}}
