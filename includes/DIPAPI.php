@@ -56,7 +56,10 @@ class DIPAPI
             ];
             
         if (isset($_GET["debug"])){
-            echo $this->api . $endpoint . '/' . $sParam . '<br>';
+           
+            $apirequest =  $this->api . $endpoint . '/' . $sParam;
+            echo Debug::get_notice('<b>API-Request:</b> <pre>'.$apirequest.'</pre>');
+
         }
         
         $apiResponse = wp_remote_get($this->api . $endpoint . '/' . $sParam, $aGetArgs);

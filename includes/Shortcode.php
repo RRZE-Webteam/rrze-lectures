@@ -5,15 +5,14 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
-
+use RRZE\Lectures\Cache;
 // use RRZE\Lectures\Translator;
 // use RRZE\Lectures\Template;
 
 /**
  * Shortcode
  */
-class Shortcode
-{
+class Shortcode {
     /**
      * Der vollständige Pfad- und Dateiname der Plugin-Datei.
      * @var string
@@ -31,26 +30,25 @@ class Shortcode
     private $aAllowedFormats = [];
 
     private $aLanguages = [];
-    protected $noCache = false;
 
 
     /**
      * Variablen Werte zuweisen.
      * @param string $pluginFile Pfad- und Dateiname der Plugin-Datei
      */
-    public function __construct($pluginFile, $settings)
-    {
-        $this->websiteLocale = get_locale();
-        $this->websiteLanguage = substr($this->websiteLocale, 0, 2);
-        $this->pluginFile = $pluginFile;
-        $this->settings = getShortcodeSettings();
-        $this->settings = $this->settings['lectures'];
-        $this->options = get_option('rrze-lectures');
-        $constants = getConstants();
-        $this->aAllowedColors = $constants['colors'];
-        $this->aAllowedFormats = $constants['formats'];
-        $this->aLanguages = $constants['langcodes'];
-
+    public function __construct($pluginFile, $settings) {
+        $this->websiteLocale    = get_locale();
+        $this->websiteLanguage  = substr($this->websiteLocale, 0, 2);
+        $this->pluginFile       = $pluginFile;
+        $this->settings         = getShortcodeSettings();
+        $this->settings         = $this->settings['lectures'];
+        $this->options          = get_option('rrze-lectures');
+        $constants              = getConstants();
+        $this->aAllowedColors   = $constants['colors'];
+        $this->aAllowedFormats  = $constants['formats'];
+        $this->aLanguages       = $constants['langcodes'];
+        $this->use_cache = true;
+        
         add_action('admin_enqueue_scripts', [$this, 'enqueueGutenberg']);
         add_action('init', [$this, 'initGutenberg']);
         add_action('enqueue_block_assets', [$this, 'enqueueBlockAssets']);
@@ -61,18 +59,13 @@ class Shortcode
      * Er wird ausgeführt, sobald die Klasse instanziiert wird.
      * @return void
      */
-    public function onLoaded()
-    {
+    public function onLoaded() {
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
         add_shortcode('lectures', [$this, 'shortcodeLectures']);
     }
 
-    public function enqueueScripts()
-    {
+    public function enqueueScripts() {
         wp_register_style('rrze-lectures', plugins_url('css/rrze-lectures.css', plugin_basename($this->pluginFile)));
-        if (file_exists(WP_PLUGIN_DIR . '/rrze-elements/assets/css/rrze-elements.css')) {
-            wp_register_style('rrze-elements', plugins_url() . '/rrze-elements/assets/css/rrze-elements.css');
-        }
     }
 
     /**
@@ -80,18 +73,17 @@ class Shortcode
      * @param  array   $atts Shortcode-Attribute
      * @return string Gib den Inhalt zurück
      */
-    public function shortcodeLectures(array|string $atts, string $content = NULL): string
-    {
+    public function shortcodeLectures(array|string $atts, string $content = NULL): string {
         if (Functions::isMaintenanceMode()) {
             return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
         }
-
+        $debugmsg = '';
         $tsStart = microtime(true);
 
-        Functions::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
+        Debug::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
 
         if (!empty($atts['nocache'])) {
-            $this->noCache = true;
+            $this->use_cache = false;
         }
 
         // merge given attributes with default ones
@@ -104,14 +96,26 @@ class Shortcode
 
         $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
 
-        // get cache
-        if (!$this->noCache) {
-            $content = Functions::getDataFromCache($this->atts);
-
+        $cache = new Cache();
+        if ($this->use_cache) {
+            $this->atts['cachetype'] = 'output';
+            $content = $cache->get_cached_data($this->atts);
+            
             if (!empty($content)) {
-                Functions::console_log('Cache found and returned', $tsStart);
-                return $content;
+                $debugmsg .= Debug::get_notice("Returned Cache");
+                Debug::console_log('Cache found and returned', $tsStart);
+                wp_enqueue_style('fontawesome');
+                wp_enqueue_style('rrze-elements');
+                wp_enqueue_script('rrze-accordions');
+
+                $output = $debugmsg ."\n".$content;
+                return $output;
+
+            } else {
+                 $debugmsg .= Debug::get_notice("No Cache found. Cache-Args: ". Debug::get_html_var_dump($this->atts));
             }
+        } else {
+            $debugmsg .= Debug::get_notice("No Cache used");
         }
 
         // one of these values must be given - see normalize()
@@ -121,92 +125,127 @@ class Shortcode
 
 
         // check atts
+        //Notice 26.07.2023, WW): sollte das nicht schon in normalize passiert sein?
         $this->atts['format'] = (in_array($this->atts['format'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
         $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
         $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
-        switch ($this->atts['format']) {
-            case 'linklist':
-                $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
-                if (!empty($this->atts['degree'])) {
-                    $attrs .= ';providerValues.modules.module_cos.subject';
-                }
-                break;
-            case 'tabs':
-                // prevent HTTP 502 & too high loading time
-                if (empty($this->atts['degree']) && empty($this->atts['type'])){
-                    $this->atts['max'] = ($this->atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] : $this->atts['max']);
-                }
-
-                // Mit modules: $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.modules.module_cos.degree;providerValues.modules.module_cos.subject;providerValues.modules.module_cos.major;providerValues.modules.module_cos.subject_indicator;providerValues.modules.module_cos.version;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup';
-                $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup;providerValues.modules.module_cos.subject';
-                break;
-            default:
-                $attrs = ''; // TEST
-        }
-
-        $attrs = ''; // TEST
-
-        $aLQ = [];
-
-        // uses fauorgnr only if not looking for explicite lectures or lecturers
-        if (!empty($this->atts['lecturer_identifier'])) {
-            $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
-        } elseif (!empty($this->atts['lecturer_idm'])) {
-            $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-        } else {
-            $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
-        }
-
-        if (!empty($this->atts['lecture_name'])) {
-            $aLQ['names'] = $this->atts['lecture_name'];
-        }
-
-        // all the other filters
-        // no cancelled courses
-        $aLQ['providerValues.courses.cancelled'] = 0;
-
-        // sem
-        $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
-
-        // type
-        if (!empty($this->atts['type'])) {
-            $aLQ['providerValues.event.eventtypes'] = $this->atts['type'];
-        }
-
-        // guest
-        if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
-            // we cannot use empty() because it can contain 0
-            $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
-        }
-
-        // degree
-        if (!empty($this->atts['degree'])) {
-            $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
-        }
-
-        // teaching_language (display_language works differently and is not an attribute for the DIP-Campo-API)
-        if (!empty($this->atts['teaching_language'])) {
-            $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
-        }
-
-
-
-        // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
-        $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
-
-        Functions::console_log('Set params for DIP', $tsStart);
-
+        
         $data = [];
+        if ($this->use_cache) {
+            $this->atts['cachetype'] = 'data';
+            $data = $cache->get_cached_data($this->atts);
+            
+            if (!empty($data)) {
+                $debugmsg .= Debug::get_notice("Returned Cache for data");
+                Debug::console_log('Cache for data found and returned', $tsStart);
+                
+            } else {
+                 $debugmsg .= Debug::get_notice("No Cache for data found. Cache-Args: ". Debug::get_html_var_dump($this->atts));
+            }
+        } else {
+            $debugmsg .= Debug::get_notice("No Cache for data used");
+        }
+        
+        if (empty($data)) {           
+            $debugmsg .= Debug::get_notice("Generating API Request to get new data");
+            switch ($this->atts['format']) {
+                case 'linklist':
+                    $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
+                    if (!empty($this->atts['degree'])) {
+                        $attrs .= ';providerValues.modules.module_cos.subject';
+                    }
+                    break;
+                case 'tabs':
+                    // prevent HTTP 502 & too high loading time
+                    if (empty($this->atts['degree']) && empty($this->atts['type'])){
+                        $this->atts['max'] = ($this->atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] : $this->atts['max']);
+                    }
 
-        if (empty($data)) {
+                    // Mit modules: $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.modules.module_cos.degree;providerValues.modules.module_cos.subject;providerValues.modules.module_cos.major;providerValues.modules.module_cos.subject_indicator;providerValues.modules.module_cos.version;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup';
+                    $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup;providerValues.modules.module_cos.subject';
+                    break;
+                default:
+                    $attrs = ''; // TEST
+            }
+
+            $attrs = ''; // TEST  Hä??
+            $aLQ = [];
+
+            // uses fauorgnr only if not looking for explicite lectures or lecturers
+
+            // what if i want to check a degree, no matter what fauorg i am?
+            // I get no degrees for specials fau.orgs
+
+            if (!empty($this->atts['lecturer_identifier'])) {
+                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
+            } elseif (!empty($this->atts['lecturer_idm'])) {
+                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
+            } else {
+                $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+            }
+
+            if (!empty($this->atts['lecture_name'])) {
+                $aLQ['names'] = $this->atts['lecture_name'];
+            }
+
+            if (!empty($this->atts['lecture_identifier'])) {
+                $aLQ['identifier'] = $this->atts['lecture_identifier'];
+            }
+
+            // all the other filters
+            // no cancelled courses
+            $aLQ['providerValues.courses.cancelled'] = 0;
+
+            // sem
+            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
+
+            // type
+            if (!empty($this->atts['type'])) {
+                $aLQ['providerValues.event.eventtypes'] = $this->atts['type'];
+            }
+
+            // guest
+            if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
+                // we cannot use empty() because it can contain 0
+                $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
+            }
+
+            // degree
+            if (!empty($this->atts['degree'])) {
+                $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
+            }
+
+            // teaching_language (display_language works differently and is not an attribute for the DIP-Campo-API)
+            if (!empty($this->atts['teaching_language'])) {
+                $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
+            }
+
+            if (!empty($attrs)) {
+                $debugmsg .= Debug::get_notice("Requestet Attributes: ".Debug::get_html_var_dump($attrs));
+            }
+            if (!empty($aLQ)) {
+                $debugmsg .= Debug::get_notice("LQ RAW: ".Debug::get_html_var_dump($aLQ));
+                $debugmsg .= Debug::get_notice("LQ: ".Debug::get_html_var_dump(Functions::makeLQ($aLQ)));
+            }
+
+            // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
+            $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
+
+            Debug::console_log('Set params for DIP', $tsStart);
+
+
+
+
             $page = 1;
 
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
 
             if (!$response['valid']) {
-                return $this->atts['nodata'];
+                $output = $debugmsg .$this->atts['nodata'];
+                return $output;
+
             } else {
                 $data = $response['content']['data'];
 
@@ -219,58 +258,41 @@ class Shortcode
                     }
                 }
             }
+            if (empty($data)) {
+                $output = $debugmsg .$this->atts['nodata'];
+                return $output;
+            }
+            if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw') {
+                $debugmsg .= Debug::get_html_var_dump($data);
+            }
+
+            Debug::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
+            Sanitizer::sanitizeLectures($data, $this->aLanguages);
+
+            $translator = new Translator($this->atts['display_language']);
+            $translator->setTranslations($data);
+
+            Debug::console_log('after Sanitize and Translator ' . json_encode($data), $tsStart);
+
+            if (empty($data)) {            
+                $output = $debugmsg .$this->atts['nodata'];
+                return $output;
+            }
+            
+            // set cache for data
+            if ($this->use_cache) {
+                $this->atts['cachetype'] = 'data';
+                $rescache = $cache->set_cached_data($data, $this->atts);
+
+                if (!$rescache) {
+                     $debugmsg .= Debug::get_notice("CACHE FOR DATA RETURNED FALSE");
+                }
+            }
         }
 
-        if (empty($data)) {
-            return $this->atts['nodata'];
-        }
+       
 
-        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw') {
-            echo '<pre>';
-            var_dump($data);
-            echo '</pre>';
-        }
-
-        Functions::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
-
-        // no need for this any longer -> API provides parameter "lf"
-        // delete all courses that don't fit to given semester
-        // foreach ($data as $nr => $aVal) {
-        //     foreach ($aVal['providerValues']['courses'] as $cNr => $aDetails) {
-        //         if ($aDetails['semester'] == $this->atts['sem']) {
-        //             if (empty($data[$nr]['providerValues']['courses_cleaned'])) {
-        //                 $data[$nr]['providerValues']['courses_cleaned'] = [];
-        //             }
-        //             $data[$nr]['providerValues']['courses_cleaned'][] = $aDetails;
-        //         }
-        //         unset($data[$nr]['providerValues']['courses'][$cNr]);
-        //     }
-        //     // clean up so we have exactly the same schema in $data again as given by DIP
-        //     if (!empty($data[$nr]['providerValues']['courses_cleaned'])) {
-        //         $data[$nr]['providerValues']['courses'] = $data[$nr]['providerValues']['courses_cleaned'];
-        //         unset($data[$nr]['providerValues']['courses_cleaned']);
-        //     }
-
-        // }
-
-        // if (isset($_GET['debug']) && $_GET['debug'] == 'screen-courses-deleted') {
-        //     echo '<pre>';
-        //     var_dump($data);
-        //     echo '</pre>';
-        // }
-
-
-        Functions::console_log('before sanitizeLectures ' . json_encode($data), $tsStart);
-        Sanitizer::sanitizeLectures($data, $this->aLanguages);
-
-        $translator = new Translator($this->atts['display_language']);
-        $translator->setTranslations($data);
-
-        Functions::console_log('after Translator ' . json_encode($data), $tsStart);
-
-        if (empty($data)) {
-            return $this->atts['nodata'];
-        }
+       
 
 
         // group & sort
@@ -283,7 +305,7 @@ class Shortcode
         // unset($data); // free memory 
         $data = null; // free memory see: https://stackoverflow.com/questions/584960/whats-better-at-freeing-memory-with-php-unset-or-var-null
 
-        Functions::console_log('Group by eventtype completed', $tsStart);
+        Debug::console_log('Group by eventtype completed', $tsStart);
 
         // sort
         $coll = collator_create('de_DE');
@@ -314,33 +336,7 @@ class Shortcode
         // unset($aTmp); // free memory
         $aTmp = [];
 
-        // if (!empty($this->atts['hide_accordion']) && !empty($this->atts['hide_type'])) {
-        //     // combine all entries and sort them
-        //     // $aTmp = [];
-        //     foreach ($aData as $group => $aDetails) {
-        //         foreach ($aDetails as $aEntries) {
-        //             // $aTmp[$aEntries['providerValues']['event']['title']] = $aEntries;
-        //             $aTmp[$aEntries['name']] = $aEntries;
-        //         }
-        //     }
-        //     // unset($aData); // free memory
-        //     $aData = null; // free memory
-
-        //     $arrayKeys = array_keys($aTmp);
-        //     collator_sort($coll, $arrayKeys);
-        //     $aTmp2 = [];
-        //     foreach ($arrayKeys as $key) {
-        //         $aTmp2[$key] = $aTmp[$key];
-        //     }
-        //     // unset($aTmp); // free memory
-        //     $aTmp = null;
-        //     $aData = [];
-        //     $aData[] = $aTmp2;
-        //     $iAllEntries = count($aTmp2);
-        //     // unset($aTmp2); // free memory
-        //     $aTmp2 = null;
-        // } else {
-        
+       
         // sort entries
         $iAllEntries = 0;
         // $aTmp = [];
@@ -422,7 +418,7 @@ class Shortcode
             $aTmp = null;
         }
 
-        Functions::console_log('Sort completed', $tsStart);
+        Debug::console_log('Sort completed', $tsStart);
 
         $template = 'shortcodes/' . $this->atts['format'] . '.php'; // switched from .html to .php for translations using localization __()
 
@@ -482,12 +478,10 @@ class Shortcode
         }
         $aDegree[$degree][$type][$title]['last'] = true;
 
-        Functions::console_log('Pre tempate', $tsStart);
+        Debug::console_log('Pre tempate', $tsStart);
 
         if (isset($_GET['debug']) && $_GET['debug'] == 'screen-pre-template') {
-            echo '<pre>';
-            var_dump($aDegree);
-            echo '</pre>';
+            $debugmsg .= Debug::get_html_var_dump($data);
         }
 
         foreach ($aDegree as $degree => $aData) {
@@ -504,28 +498,39 @@ class Shortcode
         // unset($aDegree); // free memory
         $aDegree = null;
 
-        Functions::console_log('Template parsed', $tsStart);
+        Debug::console_log('Template parsed', $tsStart);
 
         if (empty($this->atts['hide_accordion']) || ($this->atts['format'] == 'tabs')) {
             // in any case tabs.php uses shortcodes
             $content = do_shortcode($content);
         }
 
-        Functions::console_log('do_shortcode() executed', $tsStart);
+        Debug::console_log('do_shortcode() executed', $tsStart);
 
         // set cache
-        Functions::setDataToCache($content, $this->atts);
+        if ($this->use_cache) {
+            $this->atts['cachetype'] = 'output';
+            $rescache = $cache->set_cached_data($content, $this->atts);
+            
+            if (!$rescache) {
+                 $debugmsg .= Debug::get_notice("CACHE RETURNED FALSE");
+            }
+        }
+       
 
-        Functions::console_log('Cache set', $tsStart);
-        Functions::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
+        Debug::console_log('Cache set', $tsStart);
+        Debug::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
         if ($this->bLanguageSwitched){
             switch_to_locale($this->websiteLocale);
         }
-
-        return $content;
+        
+        $output = $debugmsg ."\n".$content;
+        return $output;
     }
 
+    
+    
     private function normalize(array $atts): array
     {
         // sanatize all fields
@@ -577,6 +582,9 @@ class Shortcode
 
         if (!empty($atts['lecture_name'])) {
             $atts['lecture_name'] = trim($atts['lecture_name']);
+        }
+         if (!empty($atts['lecture_identifier'])) {
+            $atts['lecture_identifier'] = trim($atts['lecture_identifier']);
         }
 
         // sem

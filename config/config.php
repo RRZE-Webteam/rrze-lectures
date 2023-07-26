@@ -60,6 +60,13 @@ function getConstants()
             "ru" => __('Russian', 'rrze-lectures'),
             "zh" => __('Chinese', 'rrze-lectures'),
         ],
+      	'Transient_Prefix' => 'rrze_lectures',
+        // Default Transient time
+        'Transient_Seconds' =>  3 * HOUR_IN_SECONDS,
+        // Transient Time for generated Outpzut. Smaller as all. 10 - 60 minutes would fit
+        'Transient_Seconds_Output' =>  15 * 60,
+        // Transient Time for raw data we got from the API
+        'Transient_Seconds_Rawdata' =>  6 * HOUR_IN_SECONDS,
     );
 
     $aTmp = getShortcodeSettings();
@@ -194,6 +201,12 @@ function getShortcodeSettings()
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Lecture\'s name', 'rrze-lectures'),
+                'type' => 'string',
+            ],
+            'lecture_identifier' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Lecture identifier', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lecturer_identifier' => [

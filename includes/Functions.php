@@ -4,13 +4,9 @@ namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
-class Functions
-{
+class Functions {
 
     protected $pluginFile;
-    const TRANSIENT_PREFIX = 'rrze_lecture_cache_';
-    const TRANSIENT_OPTION = 'rrze_lecture_cache_transients';
-    const TRANSIENT_EXPIRATION = DAY_IN_SECONDS;
 
     const DIP_API_KEY_MSG = 'DIP API-Key Error! Anfragen zu dem API Key senden Sie an idm@fau.de . Bitte beachten Sie, dass die Vergabe von API-Keys derzeit noch in organisatorischer Klärung ist und daher eine Zuteilung noch nicht zeitnah erfolgen kann.';
 
@@ -55,13 +51,6 @@ class Functions
     }
 
  
-    public static function console_log(string $msg = '', float $tsStart = 0)
-    {
-        if (isset($_GET['debug'])) {
-            $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';
-            echo '<script>console.log(' . json_encode($msg, JSON_HEX_TAG) . ');</script>';
-        }
-    }
 
     public static function getSemester(int $iSem = 0): string
     {
@@ -240,38 +229,9 @@ class Functions
         return $ret;
     }
 
-    public static function setDataToCache(string &$data, array $aAtts = [])
-    {
-        $ret = set_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)), $data, self::TRANSIENT_EXPIRATION);
+    
 
-        // if ($ret){
-        //     // lets store $transient in an option to delete them on save using deleteTransients()
-        //     $aOptions = get_option(self::TRANSIENT_OPTION);
-
-        //     if (!empty($aOptions)) {
-        //         $aOptions[] = $transient;
-        //     } else {
-        //         $aOptions = [$transient];
-        //     }
-
-        //     update_option(self::TRANSIENT_OPTION, $aOptions);
-        // }
-    }
-
-    public static function getDataFromCache(array $aAtts = []): mixed
-    {
-        return get_transient(self::TRANSIENT_PREFIX . md5(json_encode($aAtts)));
-    }
-
-
-    public function deleteTransients()
-    {
-        $aTransients = get_option(self::TRANSIENT_OPTION);
-        foreach ($aTransients as $transient) {
-            delete_transient($transient);
-        }
-        update_option(self::TRANSIENT_OPTION, '');
-    }
+   
 
     public function getTableHTML(array|string $aIn, array $aFieldnames): array|string
     {
@@ -571,5 +531,6 @@ class Functions
             'linkTxt' => __('ICS', 'rrze-lectures') . ': ' . __('Date', 'rrze-lectures') . ' ' . (!empty($t['repeat']) ? $t['repeat'] : '') . ' ' . (!empty($t['date']) ? $t['date'] . ' ' : '') . $t['time'] . ' ' . __('import to calendar', 'rrze-lectures'),
         ];
     }
+
 
 }
