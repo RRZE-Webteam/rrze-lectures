@@ -49,5 +49,16 @@ class Debug {
             echo '<script>console.log(' . json_encode($msg, JSON_HEX_TAG) . ');</script>';
         }
     }
-
+    
+    // Log to RRZE Error log
+    private static function log(string $method, string $logType = 'error', string $msg = '') {
+        // uses plugin rrze-log
+        $pre = __NAMESPACE__ . ' ' . $method . '() : ';
+        if ($logType == 'DB') {
+            global $wpdb;
+            do_action('rrze.log.error', $pre . '$wpdb->last_result= ' . json_encode($wpdb->last_result) . '| $wpdb->last_query= ' . json_encode($wpdb->last_query . '| $wpdb->last_error= ' . json_encode($wpdb->last_error)));
+        } else {
+            do_action('rrze.log.' . $logType, __NAMESPACE__ . ' ' . $method . '() : ' . $msg);
+        }
+    }
 }

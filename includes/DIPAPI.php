@@ -11,8 +11,7 @@ if (!function_exists('__')) {
     }
 }
 
-class DIPAPI
-{
+class DIPAPI {
 
     protected $api;
     // protected $orgID;
@@ -22,8 +21,7 @@ class DIPAPI
     protected $gast;
 
     // public function __construct($api, $orgID, $atts)
-    public function __construct()
-    {
+    public function __construct() {
         $this->setAPI();
     }
 
@@ -42,7 +40,7 @@ class DIPAPI
         }
     }
 
-    public function getResponse(string $endpoint = 'educationEvents', string $sParam = NULL): array{
+    public function getResponse(string $endpoint = 'educationEvents', string $sParam = NULL): array {
         $aRet = [
             'valid' => FALSE, 
             'content' => ''
@@ -55,13 +53,7 @@ class DIPAPI
                 ]
             ];
             
-        if (isset($_GET["debug"])){
-           
-            $apirequest =  $this->api . $endpoint . '/' . $sParam;
-            echo Debug::get_notice('<b>API-Request:</b> <pre>'.$apirequest.'</pre>');
-
-        }
-        
+        $apirequest =  $this->api . $endpoint . '/' . $sParam;
         $apiResponse = wp_remote_get($this->api . $endpoint . '/' . $sParam, $aGetArgs);
 
         if ($apiResponse['response']['code'] != 200){
@@ -69,13 +61,15 @@ class DIPAPI
                 'valid' => FALSE, 
                 'content' => $apiResponse['response']['message'],
                 'code' => $apiResponse['response']['code'],
+                'request_string'    => $apirequest
             ];    
-        }else{
+        } else {
             $content = json_decode($apiResponse['body'], true);
             $aRet = [
                 'valid' => TRUE, 
                 'content' => $content,
                 'code' => 200,
+                'request_string'    => $apirequest
             ];
         }
 
@@ -83,21 +77,10 @@ class DIPAPI
     }
 
 
-    private function setAPI()
-    {
+    private function setAPI() {
         $this->api = 'https://api.fau.de/pub/v2/vz/';
     }
 
-    private static function log(string $method, string $logType = 'error', string $msg = '')
-    {
-        // uses plugin rrze-log
-        $pre = __NAMESPACE__ . ' ' . $method . '() : ';
-        if ($logType == 'DB') {
-            global $wpdb;
-            do_action('rrze.log.error', $pre . '$wpdb->last_result= ' . json_encode($wpdb->last_result) . '| $wpdb->last_query= ' . json_encode($wpdb->last_query . '| $wpdb->last_error= ' . json_encode($wpdb->last_error)));
-        } else {
-            do_action('rrze.log.' . $logType, __NAMESPACE__ . ' ' . $method . '() : ' . $msg);
-        }
-    }
+   
     
 }

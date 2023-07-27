@@ -108,6 +108,12 @@ class Cache  {
             $format = $aAtts['cachetype'];
             $format = preg_replace('/[^a-z0-9]+/i', '', $format);
         }
+        if ($format == 'html') {
+            // add the format-type in case someuse uses the same content for different views
+            if (!empty($aAtts['format'])) {
+                $format .= '-'.$aAtts['format'];
+            }
+        }
         
         return $prefix."-".$orgnr."-".$degree."-".$lecture."-".$dozent."-".$module."-".$format;
     }

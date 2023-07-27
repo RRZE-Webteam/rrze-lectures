@@ -47,6 +47,20 @@ class Shortcode {
         $this->aAllowedColors   = $constants['colors'];
         $this->aAllowedFormats  = $constants['formats'];
         $this->aLanguages       = $constants['langcodes'];
+        
+        $this->RequiredAttributs= array(
+            "fauorgnr",
+                // Eine oder mehrere FAUORG NUmmern
+            "lecture_name", "lecture_id",
+                // Lehrveranstaltung(en)
+            "lecturer_idm", "lecturer_identifier",
+                // Dozent(en)
+            "degree", "degree_his_identifier",
+                // Ein oder mehrere Studiengänge
+            "module_name", "module_id"
+                // Ein oder mehrere Module
+        );
+        
         $this->use_cache = true;
         
         add_action('admin_enqueue_scripts', [$this, 'enqueueGutenberg']);
@@ -68,6 +82,28 @@ class Shortcode {
         wp_register_style('rrze-lectures', plugins_url('css/rrze-lectures.css', plugin_basename($this->pluginFile)));
     }
 
+    
+    /*
+     * Enqueue Scripts und CSS von RRZE-Elements 
+     * Diese Funktion soll aufgerufen werden, wenn wir erfolgreich Content 
+     * erhalten haben und dieses zurück liefern.
+     * Zwar wird bei do_shortcode() das entsprechende automatisch enqueued und
+     * der HTML-Code erzeugt; Dies gilt allerdings nicht bei Ausgaben aus 
+     * dem Cache. Hier muss das notwendige enqueue extra aufgerufen werden.
+     */
+    private function enqueue_rrze_elements() {
+        wp_enqueue_style('fontawesome');
+        wp_enqueue_style('rrze-elements');
+        wp_enqueue_script('rrze-accordions');
+        
+        
+        if ($this->atts['format'] == 'tabs') {
+            wp_enqueue_script('rrze-tabs');
+        }
+        return;
+    }
+    
+    
     /**
      * Generieren Sie die Shortcode-Ausgabe
      * @param  array   $atts Shortcode-Attribute
@@ -82,7 +118,7 @@ class Shortcode {
 
         Debug::console_log('START rrze-lectures shortcodeLectures()', $tsStart);
 
-        if (!empty($atts['nocache'])) {
+        if ((!empty($atts['nocache'])) || (isset($_GET['nocache']))) {
             $this->use_cache = false;
         }
 
@@ -94,41 +130,34 @@ class Shortcode {
             }
         }
 
-        $this->atts = $this->normalize(shortcode_atts($atts_default, $atts));
-
+        $this->normalize(shortcode_atts($atts_default, $atts));
+        
+        $debugmsg .= Debug::get_notice("Shortcode-Parameters:<br>".Debug::get_html_var_dump($atts));
+        $debugmsg .= Debug::get_notice("Generated Attributs:<br>".Debug::get_html_var_dump($this->atts));
+        
         $cache = new Cache();
         if ($this->use_cache) {
-            $this->atts['cachetype'] = 'output';
+            $this->atts['cachetype'] = 'html';
             $content = $cache->get_cached_data($this->atts);
             
             if (!empty($content)) {
                 $debugmsg .= Debug::get_notice("Returned Cache");
                 Debug::console_log('Cache found and returned', $tsStart);
-                wp_enqueue_style('fontawesome');
-                wp_enqueue_style('rrze-elements');
-                wp_enqueue_script('rrze-accordions');
-
+                
+                $this->enqueue_rrze_elements();              
                 $output = $debugmsg ."\n".$content;
                 return $output;
 
             } else {
-                 $debugmsg .= Debug::get_notice("No Cache found. Cache-Args: ". Debug::get_html_var_dump($this->atts));
+                 $debugmsg .= Debug::get_notice("No Cache found.");
             }
         } else {
             $debugmsg .= Debug::get_notice("No Cache used");
         }
 
-        // one of these values must be given - see normalize()
-        if (empty($this->atts['fauorgnr']) && empty($this->atts['lecture_name']) && empty($this->atts['lecturer_idm']) && empty($this->atts['lecturer_identifier'])) {
+        if (!$this->isRequiredExists()) {
             return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures');
         }
-
-
-        // check atts
-        //Notice 26.07.2023, WW): sollte das nicht schon in normalize passiert sein?
-        $this->atts['format'] = (in_array($this->atts['format'], $this->aAllowedFormats) ? $this->atts['format'] : 'linklist');
-        $this->atts['color'] = (in_array($this->atts['color'], $this->aAllowedColors) ? $this->atts['color'] : 'fau');
-        $this->atts['max'] = (!empty($this->atts['max']) && $this->atts['max'] < 100 ? $this->atts['max'] : 100);
 
         
         $data = [];
@@ -141,10 +170,8 @@ class Shortcode {
                 Debug::console_log('Cache for data found and returned', $tsStart);
                 
             } else {
-                 $debugmsg .= Debug::get_notice("No Cache for data found. Cache-Args: ". Debug::get_html_var_dump($this->atts));
+                $debugmsg .= Debug::get_notice("No Cache for data found.");
             }
-        } else {
-            $debugmsg .= Debug::get_notice("No Cache for data used");
         }
         
         if (empty($data)) {           
@@ -172,27 +199,34 @@ class Shortcode {
             $attrs = ''; // TEST  Hä??
             $aLQ = [];
 
-            // uses fauorgnr only if not looking for explicite lectures or lecturers
-
-            // what if i want to check a degree, no matter what fauorg i am?
-            // I get no degrees for specials fau.orgs
-
+            
+            // First the required parameters
+            
+            // Filter for dozent
             if (!empty($this->atts['lecturer_identifier'])) {
                 $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
             } elseif (!empty($this->atts['lecturer_idm'])) {
                 $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-            } else {
-                $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
-            }
+            } 
 
-            if (!empty($this->atts['lecture_name'])) {
-                $aLQ['names'] = $this->atts['lecture_name'];
-            }
-
+            // Filter for lecture
             if (!empty($this->atts['lecture_identifier'])) {
                 $aLQ['identifier'] = $this->atts['lecture_identifier'];
+            } elseif (!empty($this->atts['lecture_name'])) {
+                $aLQ['names'] = $this->atts['lecture_name'];
+            }
+            
+            // filter for degree
+            if (!empty($this->atts['degree'])) {
+                $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
             }
 
+            // Filter for FAUOrg 
+            if (!empty($this->atts['fauorgnr'])) {
+                $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
+            }
+            
+            
             // all the other filters
             // no cancelled courses
             $aLQ['providerValues.courses.cancelled'] = 0;
@@ -211,22 +245,19 @@ class Shortcode {
                 $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
             }
 
-            // degree
-            if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
-            }
-
+           
             // teaching_language (display_language works differently and is not an attribute for the DIP-Campo-API)
             if (!empty($this->atts['teaching_language'])) {
                 $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
             }
 
-            if (!empty($attrs)) {
-                $debugmsg .= Debug::get_notice("Requestet Attributes: ".Debug::get_html_var_dump($attrs));
-            }
+            
             if (!empty($aLQ)) {
                 $debugmsg .= Debug::get_notice("LQ RAW: ".Debug::get_html_var_dump($aLQ));
                 $debugmsg .= Debug::get_notice("LQ: ".Debug::get_html_var_dump(Functions::makeLQ($aLQ)));
+            }
+            if (!empty($attrs)) {
+                $debugmsg .= Debug::get_notice("Requestet Attributes: ".Debug::get_html_var_dump($attrs));
             }
 
             // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
@@ -241,7 +272,9 @@ class Shortcode {
 
             $this->oDIP = new DIPAPI();
             $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
-
+            if (!empty($response['request_string'])) {
+                $debugmsg .= Debug::get_notice("Request String: <br><code>".$response['request_string']."</code>");     
+            }
             if (!$response['valid']) {
                 $output = $debugmsg .$this->atts['nodata'];
                 return $output;
@@ -253,6 +286,9 @@ class Shortcode {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
                         $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
+                        if (!empty($response['request_string'])) {
+                            $debugmsg .= Debug::get_notice("Request String: <br><code>".$response['request_string'].'</code>');     
+                        }
                         $data = array_merge($response['content']['data'], $data);
                         // $iAllEntries += $response['content']['pagination']['count'];
                     }
@@ -282,11 +318,7 @@ class Shortcode {
             // set cache for data
             if ($this->use_cache) {
                 $this->atts['cachetype'] = 'data';
-                $rescache = $cache->set_cached_data($data, $this->atts);
-
-                if (!$rescache) {
-                     $debugmsg .= Debug::get_notice("CACHE FOR DATA RETURNED FALSE");
-                }
+                $cache->set_cached_data($data, $this->atts);
             }
         }
 
@@ -509,12 +541,8 @@ class Shortcode {
 
         // set cache
         if ($this->use_cache) {
-            $this->atts['cachetype'] = 'output';
-            $rescache = $cache->set_cached_data($content, $this->atts);
-            
-            if (!$rescache) {
-                 $debugmsg .= Debug::get_notice("CACHE RETURNED FALSE");
-            }
+            $this->atts['cachetype'] = 'html';
+            $cache->set_cached_data($content, $this->atts);
         }
        
 
@@ -529,10 +557,28 @@ class Shortcode {
         return $output;
     }
 
+    /*
+     * Check if at least one of the required parameters was set
+     * Otherwiese this function will return false
+     */
+    private function isRequiredExists(): bool {
+        $required = $this->RequiredAttributs;
+       
+        $found = false;
+        foreach ($required as $field) {
+            if (!empty($this->atts[$field])) {
+                $found = true;
+                break;
+            }
+        }
+        return $found;
+    }
     
-    
-    private function normalize(array $atts): array
-    {
+    /*
+     * Sanitize und normalisiere Attribute
+     * Wenn nötig befülle diese mit Defaults
+     */
+    private function normalize(array $atts): array  {
         // sanatize all fields
         foreach ($atts as $key => $val) {
             $atts[$key] = sanitize_text_field($val);
@@ -575,15 +621,19 @@ class Shortcode {
             }
         }
 
-        // fauorgnr
-        if (empty($atts['fauorgnr']) && !empty($this->options['basic_FAUOrgNr'])) {
-            $atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+        
+        if (!empty($atts['degree'])) {
+            $atts['degree'] = trim($atts['degree']);
         }
-
+        
+        
+        if (!empty($atts['lecture_identifier'])) {
+            $atts['lecture_identifier'] = trim($atts['lecture_identifier']);
+        }        
         if (!empty($atts['lecture_name'])) {
             $atts['lecture_name'] = trim($atts['lecture_name']);
         }
-         if (!empty($atts['lecture_identifier'])) {
+        if (!empty($atts['lecture_identifier'])) {
             $atts['lecture_identifier'] = trim($atts['lecture_identifier']);
         }
 
@@ -640,8 +690,24 @@ class Shortcode {
                 $atts['type_hstart'] = ($atts['hide_degree_accordion'] ? 2 : 3);
             }
         }
+        
 
-        return $atts;
+        $atts['format'] = (in_array($atts['format'], $this->aAllowedFormats) ? $atts['format'] : 'linklist');
+        $atts['color'] = (in_array($atts['color'], $this->aAllowedColors) ? $atts['color'] : 'fau');
+        $atts['max'] = (!empty($atts['max']) && $atts['max'] < 100 ? $atts['max'] : 100);
+
+        // Now move it all into the object
+        $this->atts = $atts;
+        
+        // If required Paras are missing, but the backend settings contains 
+        // a fauorg-value, we add this in the atts
+        
+        if ((!$this->isRequiredExists()) && !empty($this->options['basic_FAUOrgNr'])) { 
+            $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+        }
+
+        
+        return $this->atts;
     }
 
 
