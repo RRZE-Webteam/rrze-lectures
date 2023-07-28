@@ -51,7 +51,7 @@ class Debug {
     }
     
     // Log to RRZE Error log
-    private static function log(string $method, string $logType = 'error', string $msg = '') {
+    public static function log(string $method, string $logType = 'error', string $msg = '') {
         // uses plugin rrze-log
         $pre = __NAMESPACE__ . ' ' . $method . '() : ';
         if ($logType == 'DB') {

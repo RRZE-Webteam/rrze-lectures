@@ -7,7 +7,7 @@ use function RRZE\Lectures\Config\getShortcodeSettings;
 use function RRZE\Lectures\Config\getConstants;
 use RRZE\Lectures\Cache;
 // use RRZE\Lectures\Translator;
-// use RRZE\Lectures\Template;
+use RRZE\Lectures\Template;
 
 /**
  * Shortcode
@@ -132,7 +132,6 @@ class Shortcode {
 
         $this->normalize(shortcode_atts($atts_default, $atts));
         
-        $debugmsg .= Debug::get_notice("Shortcode-Parameters:<br>".Debug::get_html_var_dump($atts));
         $debugmsg .= Debug::get_notice("Generated Attributs:<br>".Debug::get_html_var_dump($this->atts));
         
         $cache = new Cache();
@@ -176,104 +175,23 @@ class Shortcode {
         
         if (empty($data)) {           
             $debugmsg .= Debug::get_notice("Generating API Request to get new data");
-            switch ($this->atts['format']) {
-                case 'linklist':
-                    $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester';
-                    if (!empty($this->atts['degree'])) {
-                        $attrs .= ';providerValues.modules.module_cos.subject';
-                    }
-                    break;
-                case 'tabs':
-                    // prevent HTTP 502 & too high loading time
-                    if (empty($this->atts['degree']) && empty($this->atts['type'])){
-                        $this->atts['max'] = ($this->atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] : $this->atts['max']);
-                    }
-
-                    // Mit modules: $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.modules.module_cos.degree;providerValues.modules.module_cos.subject;providerValues.modules.module_cos.major;providerValues.modules.module_cos.subject_indicator;providerValues.modules.module_cos.version;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup';
-                    $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup;providerValues.modules.module_cos.subject';
-                    break;
-                default:
-                    $attrs = ''; // TEST
-            }
-
-            $attrs = ''; // TEST  Hä??
-            $aLQ = [];
-
             
-            // First the required parameters
-            
-            // Filter for dozent
-            if (!empty($this->atts['lecturer_identifier'])) {
-                $aLQ['providerValues.courses.course_responsible.identifier'] = $this->atts['lecturer_identifier'];
-            } elseif (!empty($this->atts['lecturer_idm'])) {
-                $aLQ['providerValues.courses.course_responsible.idm_uid'] = $this->atts['lecturer_idm'];
-            } 
-
-            // Filter for lecture
-            if (!empty($this->atts['lecture_identifier'])) {
-                $aLQ['identifier'] = $this->atts['lecture_identifier'];
-            } elseif (!empty($this->atts['lecture_name'])) {
-                $aLQ['names'] = $this->atts['lecture_name'];
-            }
-            
-            // filter for degree
-            if (!empty($this->atts['degree'])) {
-                $aLQ['providerValues.modules.module_cos.subject'] = $this->atts['degree'];
+            if ($this->atts['format'] == 'tabs') {
+                // prevent HTTP 502 & too high loading time
+                if (empty($this->atts['degree']) && empty($this->atts['type'])){
+                    $this->atts['max'] = ($this->atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] : $this->atts['max']);
+                }
             }
 
-            // Filter for FAUOrg 
-            if (!empty($this->atts['fauorgnr'])) {
-                $aLQ['providerValues.event_orgunit.fauorg'] = $this->atts['fauorgnr'];
-            }
-            
-            
-            // all the other filters
-            // no cancelled courses
-            $aLQ['providerValues.courses.cancelled'] = 0;
-
-            // sem
-            $aLQ['providerValues.courses.semester'] = $this->atts['sem'];
-
-            // type
-            if (!empty($this->atts['type'])) {
-                $aLQ['providerValues.event.eventtypes'] = $this->atts['type'];
-            }
-
-            // guest
-            if (isset($this->atts['guest']) && $this->atts['guest'] != '') {
-                // we cannot use empty() because it can contain 0
-                $aLQ['providerValues.event.guest'] = (int) $this->atts['guest'];
-            }
-
-           
-            // teaching_language (display_language works differently and is not an attribute for the DIP-Campo-API)
-            if (!empty($this->atts['teaching_language'])) {
-                $aLQ['providerValues.courses.teaching_language'] = $this->atts['teaching_language'];
-            }
-
-            
-            if (!empty($aLQ)) {
-                $debugmsg .= Debug::get_notice("LQ RAW: ".Debug::get_html_var_dump($aLQ));
-                $debugmsg .= Debug::get_notice("LQ: ".Debug::get_html_var_dump(Functions::makeLQ($aLQ)));
-            }
-            if (!empty($attrs)) {
-                $debugmsg .= Debug::get_notice("Requestet Attributes: ".Debug::get_html_var_dump($attrs));
-            }
-
-            // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
-            $dipParams = '?limit=' . $this->atts['max'] . (!empty($attrs) ? '&attrs=' . urlencode($attrs) : '') . '&lq=' . urlencode(Functions::makeLQ($aLQ)) . '&lf=' . urlencode('providerValues.courses.semester=' . $this->atts['sem']) . '&page=';
-
+            $this->oDIP = new DIPAPI();         
+            $dipParams = $this->oDIP->getAPIParamsPrefix($this->atts);
+            $debugmsg .= Debug::get_notice("dipParams: <br><pre>".$dipParams."</pre>");
             Debug::console_log('Set params for DIP', $tsStart);
-
-
-
-
+            
             $page = 1;
-
-            $this->oDIP = new DIPAPI();
-            $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
+            $response = $this->oDIP->getResponse('educationEvents', $dipParams . '&page='.$page);
             if (!empty($response['request_string'])) {
-                $debugmsg .= Debug::get_notice("Request String: <br><code>".$response['request_string']."</code>");     
+                $debugmsg .= Debug::get_notice("Request String: <br><pre>".$response['request_string']."</pre>");     
             }
             if (!$response['valid']) {
                 $output = $debugmsg .$this->atts['nodata'];
@@ -285,9 +203,9 @@ class Shortcode {
                 if ($this->atts['max'] == 100) {
                     while ($response['content']['pagination']['remaining'] > 0) {
                         $page++;
-                        $response = $this->oDIP->getResponse('educationEvents', $dipParams . $page);
+                        $response = $this->oDIP->getResponse('educationEvents', $dipParams . '&page='.$page);
                         if (!empty($response['request_string'])) {
-                            $debugmsg .= Debug::get_notice("Request String: <br><code>".$response['request_string'].'</code>');     
+                            $debugmsg .= Debug::get_notice("Request String: <br><pre>".$response['request_string'].'</pre>');     
                         }
                         $data = array_merge($response['content']['data'], $data);
                         // $iAllEntries += $response['content']['pagination']['count'];
@@ -382,7 +300,7 @@ class Shortcode {
                 $aTmp3 = [];
                 foreach ($aEntries['providerValues']['courses'] as $nr => $aCourses){
                     // BK 2023-06-28 : explicitely delete cancelled parallelgroups (API ignores this parameter sometimes)
-                    if ($aCourses['cancelled'] == false){
+                    if ((isset($aCourses['cancelled']) && ($aCourses['cancelled'] == false))) {
                         // sort by parallelgroup
                         $parallelgroup = $aCourses['parallelgroup'];
                         $aTmp3[$parallelgroup] = $aCourses;    
@@ -452,8 +370,7 @@ class Shortcode {
 
         Debug::console_log('Sort completed', $tsStart);
 
-        $template = 'shortcodes/' . $this->atts['format'] . '.php'; // switched from .html to .php for translations using localization __()
-
+        
         $aTmp = [];
 
         if (empty($aData)) {
@@ -502,6 +419,13 @@ class Shortcode {
                     $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
                     $aDegree[$degree][$type][$title]['type_hstart'] = $this->atts['type_hstart'];
                     $aDegree[$degree][$type][$title]['hide_lecture_name'] = (!empty($this->atts['hide_lecture_name']) ? true : false); // 2DO: improve this: make "hide" 100% dynamically for templates, too
+                    
+                    
+                     // get Campo Link from first Course
+                   $first_course = array_key_first($aDetails['providerValues']['courses']);               
+                   $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
+                   $aDegree[$degree][$type][$title]['campo_url'] = $compo_link;
+                    
                     $i++;
                     $first = false;
                     $iCnt++;
@@ -512,18 +436,15 @@ class Shortcode {
 
         Debug::console_log('Pre tempate', $tsStart);
 
-        if (isset($_GET['debug']) && $_GET['debug'] == 'screen-pre-template') {
-            $debugmsg .= Debug::get_html_var_dump($data);
-        }
+        $templateparser = new Template();
 
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
-                    // get Campo Link from first Course
-                   $first_course = array_key_first($aDetails['providerValues']['courses']);               
-                   $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
-                   $aDetails['campo_url'] = $compo_link;
-                   $content .= Template::getContent($template, $aDetails);
+
+                   $debugmsg .= Debug::get_notice("DATA:<br>".Debug::get_html_var_dump($aDetails));
+                   $content .= $templateparser->parseSetting($this->atts['format'], $aDetails, $this->atts);
+                   
                 }
             }
         }
@@ -543,16 +464,14 @@ class Shortcode {
         if ($this->use_cache) {
             $this->atts['cachetype'] = 'html';
             $cache->set_cached_data($content, $this->atts);
+            Debug::console_log('Cache set', $tsStart);
         }
-       
 
-        Debug::console_log('Cache set', $tsStart);
-        Debug::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
 
         if ($this->bLanguageSwitched){
             switch_to_locale($this->websiteLocale);
         }
-        
+        Debug::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
         $output = $debugmsg ."\n".$content;
         return $output;
     }

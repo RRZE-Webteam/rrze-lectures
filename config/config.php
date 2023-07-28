@@ -67,6 +67,52 @@ function getConstants()
         'Transient_Seconds_Output' =>  15 * 60,
         // Transient Time for raw data we got from the API
         'Transient_Seconds_Rawdata' =>  6 * HOUR_IN_SECONDS,
+        
+        'template_formats' => [
+            
+            'tabs'      => [
+                'name'  => 'tabs',
+                    // definiert das Verzeichnis des Templates und
+                    // den Filename der Basis-Template. Hier:  tabs/tabs.php
+                    // Die Basistempöate wird immer geladen und ausgeführt.
+                    
+                'contains'  => [
+                    // Wenn der Array nicht leer ist, kann man hier subtemplates 
+                    // definieren, die geladen und interpretiert werden und
+                    // deren Inhalt dann als Variable in dem Basistemplate 
+                    // eingefügt werden.
+                    'base'  => [
+                        'name'      => 'base',
+                            // definiert den Templatenamen im Verzeichnis
+                            // und auch wie dessen Inhalte dann mit {{=variable}}
+                            // in der darüber liegenden Template File addressiert 
+                            // werden
+                            // Darf nicht identisch sein mit dem Namen
+                            // des Verzeichnisses und der Haupt-Templatefile
+                        'attribut'  => 'base',
+                            // Attribut zum schalten via show/hide
+                            // Sollte nicht den selben Namen tragen wie andere Attribute
+                            // aus der API. Aber kann durchaus :) 
+                        'default'   => true,                      
+                            // Definiert ob per Default sichtbar oder nicht
+                    ],
+                    'termine'  => [
+                        'name'      => 'termine',
+                        'attribut'  => 'termine',
+                        'default'   => true,                      
+                    ],
+                    'orgunit'  => [
+                        'name'      => 'orgunit',
+                        'attribut'  => 'organisationseinheit',
+                        'default'   => true,                      
+                    ]
+                ]
+            ],
+            'linklist'  => [
+                'name'  => 'linklist',
+                'contains'  => []
+            ]   
+        ]
     );
 
     $aTmp = getShortcodeSettings();
