@@ -46,6 +46,7 @@
     [tabs]
         {{=subtemplate_base}}
         {{=subtemplate_termine}}
+        {{=subtemplate_module}}
         {{=subtemplate_orgunit}}
     [/tabs]
 </div>

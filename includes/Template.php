@@ -89,7 +89,7 @@ class Template {
                     }
                     
                     if (!empty($subcontent)) {
-                        $content .= Debug::get_notice("Parsing Subtemplate ".$subtemplate['name']." with file ".$subtemplate_file);      
+             //           $content .= Debug::get_notice("Parsing Subtemplate ".$subtemplate['name']." with file ".$subtemplate_file);      
                         $parsed_subcontent = $parser->parse($subcontent, $data);
                     
                         if (!empty($parsed_subcontent)) {
@@ -113,7 +113,7 @@ class Template {
             $base_content = $this->template_cache[$cachename];
         }
        
-        $content .= Debug::get_notice("Base Template: $template_name in $basetemplate ");      
+   //     $content .= Debug::get_notice("Base Template: $template_name in $basetemplate ");      
         if (!empty($base_content)) {
            $content .= $parser->parse($base_content, $data); 
         }

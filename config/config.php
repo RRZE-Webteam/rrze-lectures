@@ -101,6 +101,11 @@ function getConstants()
                         'attribut'  => 'termine',
                         'default'   => true,                      
                     ],
+                     'module'  => [
+                        'name'      => 'module',
+                        'attribut'  => 'module',
+                        'default'   => true,                      
+                    ],
                     'orgunit'  => [
                         'name'      => 'orgunit',
                         'attribut'  => 'organisationseinheit',
