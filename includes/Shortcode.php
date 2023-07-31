@@ -135,7 +135,7 @@ class Shortcode {
         $debugmsg .= Debug::get_notice("Generated Attributs:<br>".Debug::get_html_var_dump($this->atts));
         
         $cache = new Cache();
-        if ($this->use_cache) {
+        if (($this->use_cache) && ($this->options['Transient_Output']==true)) {
             $this->atts['cachetype'] = 'html';
             $content = $cache->get_cached_data($this->atts);
             
@@ -143,7 +143,8 @@ class Shortcode {
                 $debugmsg .= Debug::get_notice("Returned Cache");
                 Debug::console_log('Cache found and returned', $tsStart);
                 
-                $this->enqueue_rrze_elements();              
+                $this->enqueue_rrze_elements();  
+                wp_enqueue_style('rrze-lectures');
                 $output = $debugmsg ."\n".$content;
                 return $output;
 
@@ -223,8 +224,8 @@ class Shortcode {
             Debug::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
             Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
-            $translator = new Translator($this->atts['display_language']);
-            $translator->setTranslations($data);
+           $translator = new Translator($this->atts['display_language']);
+           $translator->setTranslations($data);
 
             Debug::console_log('after Sanitize and Translator ' . json_encode($data), $tsStart);
 
@@ -461,7 +462,7 @@ class Shortcode {
         Debug::console_log('do_shortcode() executed', $tsStart);
 
         // set cache
-        if ($this->use_cache) {
+        if (($this->use_cache) && ($this->options['Transient_Output']==true)) {
             $this->atts['cachetype'] = 'html';
             $cache->set_cached_data($content, $this->atts);
             Debug::console_log('Cache set', $tsStart);
@@ -472,6 +473,7 @@ class Shortcode {
             switch_to_locale($this->websiteLocale);
         }
         Debug::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
+        wp_enqueue_style('rrze-lectures');
         $output = $debugmsg ."\n".$content;
         return $output;
     }
@@ -538,6 +540,16 @@ class Shortcode {
             if ($atts['hide_degree_accordion'] && $atts['hide_type_accordion']) {
                 $atts['hide_accordion'] = true;
             }
+             unset($atts['hide']);
+        }
+        
+        if (!empty($atts['show'])) {
+            $aHide = explode(',', str_replace(' ', '', $atts['show']));
+
+            foreach ($aHide as $val) {
+                $atts['show_' . $val] = true;
+            }
+            unset($atts['show']);
         }
 
         

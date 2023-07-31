@@ -65,6 +65,9 @@ function getConstants()
         'Transient_Seconds' =>  3 * HOUR_IN_SECONDS,
         // Transient Time for generated Outpzut. Smaller as all. 10 - 60 minutes would fit
         'Transient_Seconds_Output' =>  15 * 60,
+        // Activate/Deactivate Template Cache. If tis is false, cache will only 
+        // used for DIP-Data, but not for the generated HTML
+        'Transient_Output' => false,
         // Transient Time for raw data we got from the API
         'Transient_Seconds_Rawdata' =>  6 * HOUR_IN_SECONDS,
         
@@ -104,12 +107,12 @@ function getConstants()
                      'module'  => [
                         'name'      => 'module',
                         'attribut'  => 'module',
-                        'default'   => true,                      
+                        'default'   => false,                      
                     ],
                     'orgunit'  => [
                         'name'      => 'orgunit',
-                        'attribut'  => 'organisationseinheit',
-                        'default'   => true,                      
+                        'attribut'  => 'orgunit',
+                        'default'   => false,                      
                     ]
                 ]
             ],
@@ -327,6 +330,12 @@ function getShortcodeSettings()
                 'default' => '',
                 'field_type' => 'text',
                 'label' => __('Hide', 'rrze-lectures'),
+                'type' => 'string',
+            ],
+            'show' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Show', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'hstart' => [

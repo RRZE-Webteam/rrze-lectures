@@ -2,6 +2,9 @@
 
         {{@providerValues.courses}}
 
+        {{_val.contents}}
+        <p itemprop="description" class="course-contents">{{=_val.contents}}</p>
+        {{/_val.contents}}
         
         [columns]
 		[column]
@@ -21,17 +24,13 @@
 
          </td></tr>
         {{/_val.course_responsible}}
-        
-        
+
         </table>
-       
+
        
         [/column]
 		[column]
-         {{_val.contents}}
-        <strong><?php echo __('Content', 'rrze-lectures'); ?></strong>
-        <p itemprop="description">{{=_val.contents}}</p>
-        {{/_val.contents}}
+       
 
         {{_val.literature}}
         <p><?php echo __('Literature references', 'rrze-lectures'); ?>: {{=_val.literature}}</p>

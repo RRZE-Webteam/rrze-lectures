@@ -5,3 +5,14 @@ languages/.DS_Store
 src/js/.DS_Store
 templates/.DS_Store
 .DS_Store
+nbproject/project.properties
+/nbproject/private/
+nbproject/project.xml
+node_modules
+.idea*
+.sass-cache*
+/package-lock.json
+tmp
+*.map
+/npm-debug.log
+Browse.plb

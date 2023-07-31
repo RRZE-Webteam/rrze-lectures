@@ -11,7 +11,7 @@
 {{:do_degree_accordion}}
     {{degree_title}}
         {{show_degree_title}}
-            <H{{=degree_hstart}}>{{=degree_title}}</H{{=degree_hstart}}>
+            <h{{=degree_hstart}}>{{=degree_title}}</h{{=degree_hstart}}>
         {{:show_degree_title}}
             <br>&nbsp;<br>
         {{/show_degree_title}}
@@ -30,7 +30,7 @@
     {{/type_title}}
 {{:do_type_accordion}}
     {{type_title}}
-        <H{{=type_hstart}}>{{=type_title}}</H{{=type_hstart}}>
+        <h{{=type_hstart}}>{{=type_title}}</h{{=type_hstart}}>
     {{/type_title}}
 {{/do_type_accordion}}
 {{type_start}}
