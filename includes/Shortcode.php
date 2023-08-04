@@ -47,7 +47,9 @@ class Shortcode {
         $this->aAllowedColors   = $constants['colors'];
         $this->aAllowedFormats  = $constants['formats'];
         $this->aLanguages       = $constants['langcodes'];
-        
+        $this->Transient_Output = $constants['Transient_Output'];
+        $this->DPIAPI_limit_max = $constants['DIPAPI_limit_max'];
+        $this->DPIAPI_totalentries_max = $constants['DIPAPI_totalentries_max'];
         $this->RequiredAttributs= array(
             "fauorgnr",
                 // Eine oder mehrere FAUORG NUmmern
@@ -111,7 +113,7 @@ class Shortcode {
      */
     public function shortcodeLectures(array|string $atts, string $content = NULL): string {
         if (Functions::isMaintenanceMode()) {
-            return 'Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>';
+            return Functions::getErrorMessage("503");
         }
         $debugmsg = '';
         $tsStart = microtime(true);
@@ -135,14 +137,11 @@ class Shortcode {
         $debugmsg .= Debug::get_notice("Generated Attributs:<br>".Debug::get_html_var_dump($this->atts));
         
         $cache = new Cache();
-        if (($this->use_cache) && ($this->options['Transient_Output']==true)) {
+        if (($this->use_cache) && ($this->Transient_Output==true)) {
             $this->atts['cachetype'] = 'html';
             $content = $cache->get_cached_data($this->atts);
             
-            if (!empty($content)) {
-                $debugmsg .= Debug::get_notice("Returned Cache");
-                Debug::console_log('Cache found and returned', $tsStart);
-                
+            if (!empty($content)) {                
                 $this->enqueue_rrze_elements();  
                 wp_enqueue_style('rrze-lectures');
                 $output = $debugmsg ."\n".$content;
@@ -156,7 +155,7 @@ class Shortcode {
         }
 
         if (!$this->isRequiredExists()) {
-            return __('FAU Org Nr is missing. Either enter it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures');
+            return Functions::getErrorMessage("norequired");
         }
 
         
@@ -177,60 +176,78 @@ class Shortcode {
         if (empty($data)) {           
             $debugmsg .= Debug::get_notice("Generating API Request to get new data");
             
-            if ($this->atts['format'] == 'tabs') {
-                // prevent HTTP 502 & too high loading time
-                if (empty($this->atts['degree']) && empty($this->atts['type'])){
-                    $this->atts['max'] = ($this->atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] : $this->atts['max']);
-                }
-            }
 
             $this->oDIP = new DIPAPI();         
             $dipParams = $this->oDIP->getAPIParamsPrefix($this->atts);
-            $debugmsg .= Debug::get_notice("dipParams: <br><pre>".$dipParams."</pre>");
             Debug::console_log('Set params for DIP', $tsStart);
             
             $page = 1;
             $response = $this->oDIP->getResponse('educationEvents', $dipParams . '&page='.$page);
+            
+            
+            
             if (!empty($response['request_string'])) {
-                $debugmsg .= Debug::get_notice("Request String: <br><pre>".$response['request_string']."</pre>");     
+                $debugmsg .= Debug::get_notice(Debug::get_html_uri_encoded($response['request_string']));              
             }
+              $debugmsg .= Debug::get_notice(Debug::get_html_var_dump($response));
+            
+            
             if (!$response['valid']) {
-                $output = $debugmsg .$this->atts['nodata'];
+                $output = $debugmsg . Functions::getErrorMessage($response['code'],$this->atts['nodata']);
+                if (isset($_GET['debug'])) {
+                    $output .= "<br> Message: ".$response['content'];
+                    $output .= "<br> Code: ".$response['code'];
+                }
                 return $output;
 
             } else {
                 $data = $response['content']['data'];
+                
+            //     $debugmsg .= Debug::get_html_var_dump($response['content']);
+                
 
-                if ($this->atts['max'] == 100) {
-                    while ($response['content']['pagination']['remaining'] > 0) {
-                        $page++;
-                        $response = $this->oDIP->getResponse('educationEvents', $dipParams . '&page='.$page);
-                        if (!empty($response['request_string'])) {
-                            $debugmsg .= Debug::get_notice("Request String: <br><pre>".$response['request_string'].'</pre>');     
+                if ((is_array($response['content'])) && (isset($response['content']['pagination'])) && (isset($response['content']['pagination']['remaining']))) {
+                    $countentries = $this->atts['max'];
+                    if ($response['content']['pagination']['remaining'] > 0) {
+
+
+                        while (($response['content']['pagination']['remaining'] > 0) && ($countentries < $this->DPIAPI_totalentries_max)) {
+                            $page++;                           
+                            $response = $this->oDIP->getResponse('educationEvents', $dipParams . '&page='.$page);
+
+                            
+                            if (isset($response['content']['data'])) {
+                                $data = array_merge($response['content']['data'], $data);
+                                $countentries +=  $response['content']['pagination']['count'];
+
+                            }
                         }
-                        $data = array_merge($response['content']['data'], $data);
-                        // $iAllEntries += $response['content']['pagination']['count'];
+
+                        if (($countentries >= $this->DPIAPI_totalentries_max) && ($response['content']['pagination']['remaining'] > 0)) {
+                             $remain = $response['content']['pagination']['remaining'];
+                            $debugmsg .= Debug::get_notice("To much results: <br>". Debug::get_html_var_dump($response['content']['pagination'])."<br>Got already ".$countentries." (max: ".$this->DPIAPI_totalentries_max."), ignoring remaining ".$remain);
+                        }
+                        
                     }
                 }
+              
             }
             if (empty($data)) {
-                $output = $debugmsg .$this->atts['nodata'];
+                $debugmsg .= Debug::get_notice("Empty Data: <br>".Debug::get_html_var_dump($response));
+                $output = $debugmsg . Functions::getErrorMessage(204,$this->atts['nodata']);
                 return $output;
             }
-            if (isset($_GET['debug']) && $_GET['debug'] == 'screen-raw') {
-                $debugmsg .= Debug::get_html_var_dump($data);
-            }
+            
 
-            Debug::console_log('pure DIP feedback before anything else ' . json_encode($data), $tsStart);
+
             Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
            $translator = new Translator($this->atts['display_language']);
            $translator->setTranslations($data);
 
-            Debug::console_log('after Sanitize and Translator ' . json_encode($data), $tsStart);
 
             if (empty($data)) {            
-                $output = $debugmsg .$this->atts['nodata'];
+                $output = $debugmsg .Functions::getErrorMessage(204,$this->atts['nodata']);
                 return $output;
             }
             
@@ -243,9 +260,15 @@ class Shortcode {
 
        
 
+        // TODO: Sortierung muss abhängig von dem Format sein!
+        // So ist das viel zu verwirrend und vermischt miteinander.
+        // Daher kommen sicher auch ein Teil der Speicherprobleme
+        
+        
        
 
-
+ $debugmsg .= Debug::get_notice("Data from API:<br>".Debug::get_html_var_dump($data));
+// return $debugmsg;
         // group & sort
         $aData = [];
 
@@ -375,24 +398,21 @@ class Shortcode {
         $aTmp = [];
 
         if (empty($aData)) {
-            return $this->atts['nodata'];
+            return Functions::getErrorMessage(206,$this->atts['nodata']);
         }
 
         if (!empty($this->atts['degree'])) {
             if (empty($aDegree)) {
-                return $this->atts['nodata'];
+                return Functions::getErrorMessage(206,$this->atts['nodata']);
             }
 
             foreach ($aDegree as $degree => $aTypes) {
                 $start = true;
                 foreach ($aTypes as $type => $aLectures) {
                     foreach ($aLectures as $title => $aDetails) {
-                        $aDegree[$degree][$type][$title]['show_degree_title'] = (empty($this->atts['hide_degree']) && $start ? true : false);
-                        $aDegree[$degree][$type][$title]['do_degree_accordion'] = !$this->atts['hide_degree_accordion'];
                         $aDegree[$degree][$type][$title]['degree_title'] = ($start ? $degree : false);
                         $aDegree[$degree][$type][$title]['degree_start'] = ($aDegree[$degree][$type][$title]['degree_title'] ? true : false);
                         $aDegree[$degree][$type][$title]['degree_end'] = false;
-                        $aDegree[$degree][$type][$title]['degree_hstart'] = $this->atts['degree_hstart'];
                         $start = false;
                     }
                 }
@@ -405,26 +425,24 @@ class Shortcode {
 
         $iCnt = 0;
         $first = true;
-
+        $compo_link = '';
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 $i = 1;
                 foreach ($aEntries as $title => $aDetails) {
-                    $aDegree[$degree][$type][$title]['do_accordion'] = !($this->atts['hide_degree_accordion'] && $this->atts['hide_type_accordion']);
-                    $aDegree[$degree][$type][$title]['do_type_accordion'] = !$this->atts['hide_type_accordion'];
+
                     $aDegree[$degree][$type][$title]['first'] = $first;
                     $aDegree[$degree][$type][$title]['last'] = false;
                     $aDegree[$degree][$type][$title]['type_title'] = ($i == 1 && empty($this->atts['hide_type']) ? $type : false);
                     $aDegree[$degree][$type][$title]['type_start'] = ($aDegree[$degree][$type][$title]['type_title'] ? true : false);
                     $aDegree[$degree][$type][$title]['type_end'] = ($i == count($aEntries) ? true : false);
-                    $aDegree[$degree][$type][$title]['color'] = $this->atts['color'];
-                    $aDegree[$degree][$type][$title]['type_hstart'] = $this->atts['type_hstart'];
-                    $aDegree[$degree][$type][$title]['hide_lecture_name'] = (!empty($this->atts['hide_lecture_name']) ? true : false); // 2DO: improve this: make "hide" 100% dynamically for templates, too
                     
                     
                      // get Campo Link from first Course
-                   $first_course = array_key_first($aDetails['providerValues']['courses']);               
-                   $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
+                   $first_course = array_key_first($aDetails['providerValues']['courses']);       
+                   if (isset($aDetails['providerValues']['courses'][$first_course]['url'])) {
+                    $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
+                   }
                    $aDegree[$degree][$type][$title]['campo_url'] = $compo_link;
                     
                     $i++;
@@ -438,12 +456,12 @@ class Shortcode {
         Debug::console_log('Pre tempate', $tsStart);
 
         $templateparser = new Template();
-
+ $debugmsg .= Debug::get_notice("Data for Template ".$this->atts['format'].":<br>".Debug::get_html_var_dump($aDegree));
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
 
-                   $debugmsg .= Debug::get_notice("DATA:<br>".Debug::get_html_var_dump($aDetails));
+                  
                    $content .= $templateparser->parseSetting($this->atts['format'], $aDetails, $this->atts);
                    
                 }
@@ -462,7 +480,7 @@ class Shortcode {
         Debug::console_log('do_shortcode() executed', $tsStart);
 
         // set cache
-        if (($this->use_cache) && ($this->options['Transient_Output']==true)) {
+        if (($this->use_cache) && ($this->Transient_Output==true)) {
             $this->atts['cachetype'] = 'html';
             $cache->set_cached_data($content, $this->atts);
             Debug::console_log('Cache set', $tsStart);
@@ -478,6 +496,8 @@ class Shortcode {
         return $output;
     }
 
+    
+    
     /*
      * Check if at least one of the required parameters was set
      * Otherwiese this function will return false
@@ -591,17 +611,13 @@ class Shortcode {
             }
         }
 
-        // no data
-        // 1. we allow nodata to be empty in case users don't want any output 
-        // (in this case user has to delete nodata entries in settings assigned to website's language and -if attribute is used in shortcode- assigned to display_language)
-        // 2. if shortcode attribute "nodata" is given => use it
-        // 3. else => nodata is set to config's nodata assigned to shortcode attribute "display_language"
-        // 4. if 3 is undefined =>  nodata is set to nodata assigned to website's language
-        if (empty($atts['nodata']) && !empty($this->options['basic_nodata_' . $atts['display_language']])) {
-            $atts['nodata'] = $this->options['basic_nodata_' . $atts['display_language']];
-        } elseif (!empty($this->options['basic_nodata_' . $this->websiteLanguage])) {
-            $atts['nodata'] = $this->options['basic_nodata_' . $this->websiteLanguage];
-        }
+     
+        
+        if (!empty($atts['nodata']))  {
+             $atts['nodata'] = esc_html($atts['nodata']);
+        } 
+        
+      
 
         // hstart
         $hstart = (empty($atts['hstart']) ? 2 : intval($atts['hstart']));
@@ -625,8 +641,15 @@ class Shortcode {
 
         $atts['format'] = (in_array($atts['format'], $this->aAllowedFormats) ? $atts['format'] : 'linklist');
         $atts['color'] = (in_array($atts['color'], $this->aAllowedColors) ? $atts['color'] : 'fau');
-        $atts['max'] = (!empty($atts['max']) && $atts['max'] < 100 ? $atts['max'] : 100);
-
+        
+        
+        $atts['max'] = (!empty($atts['max']) && $atts['max'] < $this->DPIAPI_limit_max ? $atts['max'] : $this->DPIAPI_limit_max);
+         // prevent HTTP 502 & too high loading time
+        if (empty($atts['degree']) && empty($atts['type'])){
+             $atts['max'] = ( $atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] :  $atts['max']);
+        }
+        
+        
         // Now move it all into the object
         $this->atts = $atts;
         

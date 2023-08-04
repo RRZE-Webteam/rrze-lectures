@@ -15,17 +15,60 @@ class Debug {
    // Gets an Variable, that can be an string, array or object and modifies its output in a more readable form 
    public static function get_html_var_dump($input) {
         $out = Debug::get_var_dump($input);
+        
+        
+        $patterns_replacements = array( 
+            '/=>[\r\n\s]+/'         => ' => ',            
+            "/\s+bool\(true\)/"     => ' <span style="color:green">TRUE</span>,',
+            "/\s+bool\(false\)/"    => ' <span style="color:red">FALSE</span>,',
+            "/,([\r\n\s]+})/"       => "$1",
+            "/\s+string\(\d+\)/"    => '',
+            '/\[\"([a-z\-_0-9]+)\"\]/i' => '["<span style="color:#dd8800">$1</span>"]',
+            '/\s\[(\d+)\]\s/'         => " <strong>[$1]</strong> ",
+            '/\sarray\((\d+)\)\s/'         => " <strong>array($1)</strong> ",
+            "/^\s+/"    => '',
+        );
+        $processed_string = preg_replace(array_keys($patterns_replacements), array_values($patterns_replacements), $out);
+        
 
-        $out = preg_replace("/=>[\r\n\s]+/", ' => ', $out);
-        $out = preg_replace("/\s+bool\(true\)/", ' <span style="color:green">TRUE</span>,', $out);
-        $out = preg_replace("/\s+bool\(false\)/", ' <span style="color:red">FALSE</span>,', $out);
-        $out = preg_replace("/,([\r\n\s]+})/", "$1", $out);
-        $out = preg_replace("/\s+string\(\d+\)/", '', $out);
-        $out = preg_replace("/\[\"([a-z\-_0-9]+)\"\]/i", "[\"<span style=\"color:#dd8800\">$1</span>\"]", $out);
+        if (!empty($processed_string)) {
+            $out = $processed_string;
+        }
+         return '<pre class="var_dump">'.$out.'</pre>';
 
-        return '<pre>'.$out.'</pre>';
     }
 
+    public static function get_html_uri_encoded($uri_string) {
+         // Extrahiere den Query String aus der URL
+        $query_string = parse_url($uri_string, PHP_URL_QUERY);
+
+        // Splitten des Query Strings nach den &-Zeichen und Umwandlung in ein Array
+        $params = explode('&', $query_string);
+       
+        $pattern = '/%[0-9A-Fa-f]{2}/';
+        $out = "<code>$uri_string</code>";
+        $out .= '<br>=&gt; URI Parts: <ul class="nolist">';
+        $first = true;
+        foreach ($params as $value) {
+            if ($first) {
+                $out .= '<li><span style="color:red">?</span>';
+                $first = false;
+            } else {
+                $out .= '<li><span style="color:green">&</span>';
+            }
+            $rawoutstring = rawurldecode($value);
+            $rawoutstring = preg_replace("/&/", '<br>&nbsp;&nbsp;<em style="color: blue;">$0</em>', $rawoutstring);
+            $rawoutstring = preg_replace($pattern, '<em style="color: #ff8800;">$0</em>', $rawoutstring);
+            $out .= '<code>'.$rawoutstring.'</code>';
+            $out .= '</li>';
+        }
+        $out .= '</ul>';
+      
+
+        return $out;
+    }
+
+    
     // prrints var dump as variable
     public static function get_var_dump($input) {
         ob_start(); 

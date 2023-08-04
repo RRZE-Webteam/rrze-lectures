@@ -1,6 +1,7 @@
 <?php
 
 namespace RRZE\Lectures;
+use function RRZE\Lectures\Config\getConstants;
 
 defined('ABSPATH') || exit;
 
@@ -8,16 +9,11 @@ class Functions {
 
     protected $pluginFile;
 
-    const DIP_API_KEY_MSG = 'DIP API-Key Error! Anfragen zu dem API Key senden Sie an idm@fau.de . Bitte beachten Sie, dass die Vergabe von API-Keys derzeit noch in organisatorischer Klärung ist und daher eine Zuteilung noch nicht zeitnah erfolgen kann.';
-
-
-    public function __construct($pluginFile)
-    {
+    public function __construct($pluginFile) {
         $this->pluginFile = $pluginFile;
     }
 
-    public function onLoaded()
-    {
+    public function onLoaded() {
         add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
         add_action('wp_ajax_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
         add_action('wp_ajax_nopriv_GetFAUOrgNr', [$this, 'ajaxGetFAUOrgNr']);
@@ -35,8 +31,7 @@ class Functions {
     }
 
 
-    public function adminEnqueueScripts()
-    {
+    public function adminEnqueueScripts()  {
         wp_enqueue_script(
             'rrze-lectures-ajax',
             plugins_url('js/rrze-lectures.js', plugin_basename($this->pluginFile)),
@@ -50,10 +45,23 @@ class Functions {
         ]);
     }
 
- 
+    /*
+     * Gets the Errormessage from the config by the given errorkey/code
+     */
+    public static function getErrorMessage(string|int $errorkey, string $userstring): string {
+        if (isset($userstring) && (!empty($userstring))) {
+            return $userstring;
+        }
+        $constants = getConstants();
+        if (isset($constants['errors'][$errorkey])) {
+             return $constants['errors'][$errorkey];
+        }
+        return $constants['errors']['default'];
+    }
 
-    public static function getSemester(int $iSem = 0): string
-    {
+    
+    
+    public static function getSemester(int $iSem = 0): string  {
         // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
         // Das Wintersemester entsprechend vom 01.10. des Jahres bis zum 31.03. des folgenden Jahres
         $today = date('Y-m-d');
@@ -145,58 +153,12 @@ class Functions {
         return $ret;
     }
 
-    public static function isLastElement(array $aArr): bool
-    {
+    public static function isLastElement(array $aArr): bool {
         return next($aArr) !== false ?: key($aArr) !== null;
     }
 
-    public static function makeLQ(array $aIn): string
-    {
-        $aLQ = [];
-        foreach ($aIn as $dipField => $attVal) {
-            if (!empty($attVal) || $attVal == 0 ) {
-                if ($dipField == 'lecturerName') {
-                    $aLecturers = array_map('trim', explode(';', $attVal));
-                    foreach($aLecturers as $lectureName){
-                        $aParts = array_map('trim', explode(',', $lectureName));
-                        $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
-                        // $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '%5Bin%5D%3D' : '%3D') . rawurlencode($aParts[0]);
-                        if (!empty($aParts[1])){
-                            $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[1]);
-                            // $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '%5Bin%5D%3D' : '%3D') . rawurlencode($aParts[1]);
-                        }
-                    }
-
-                    // 2DO:
-                    // (lastname1 AND firstname1) OR (lastname2) OR (lastname3 AND firstname3)
-                    // see:
-                    // use [or] to or value criteria
-                    // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
-
-                } else {
-                    $aTmp = array_map(function ($val) {
-                        return rawurlencode(trim($val));
-                    }, explode(',', $attVal));
-
-                    // check if 10 figures hex 
-                    if ($dipField == 'providerValues.courses.course_responsible.identifier') {
-                        foreach ($aTmp as $nr => $val) {
-                            if (!(ctype_xdigit($val) && strlen($val) == 10)) {
-                                unset($aTmp[$nr]);
-                            }
-                        }
-                    }
-
-                    // $aLQ[] = $dipField . (count($aTmp) > 1 ? '%5Bin%5D%3D' : '%3D') . implode('%3B', $aTmp);
-                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
-                }
-            }
-        }
-
-        // return implode('%26', $aLQ);
-        return implode('&', $aLQ);
-    }
-
+   
+    // TODO: Move to sanitizer
     public static function convertDate(string $tz, string $format): string
     {
         $ret = get_date_from_gmt($tz, $format);
@@ -280,26 +242,26 @@ class Functions {
         $response = $oDIP->getResponse('organizations', '');
 
         if (!$response['valid'] && $response['code'] == 401) {
-            add_settings_error( 'basic_ApiKey', 'dip_api_key_error', self::DIP_API_KEY_MSG, 'error' );        
+            add_settings_error( 'basic_ApiKey', 'dip_api_key_error', self::getErrorMessage('apikeymissing'), 'error' );        
         }
 
         return $options;
     }
 
-    public function getFAUOrgNr(string $keyword = null): array|string
-    {
+    // TODO: Move to DIPAPI class
+    public function getFAUOrgNr(string $keyword = null): array|string {
         $dipParams = '?sort=' . urlencode('name=1') . '&attrs=' . urlencode('disambiguatingDescription;name') . '&q=' . urlencode($keyword);
 
         $oDIP = new DIPAPI();
         $response = $oDIP->getResponse('organizations', $dipParams);
 
         if (!$response['valid'] && $response['code'] == 401) {
-            return __(self::DIP_API_KEY_MSG, 'rrze-lectures');
+            return self::getErrorMessage('apikeymissing');
         } else {
             $data = $response['content']['data'];
 
             if (empty($data)) {
-                return __('No matching entries found.', 'rrze-lectures');
+                return self::getErrorMessage('204');
             }
 
             $ret = [];
@@ -315,8 +277,7 @@ class Functions {
         return $ret;
     }
 
-    public function ajaxGetLecturerIdentifier()
-    {
+    public function ajaxGetLecturerIdentifier()  {
         check_ajax_referer('lecture-ajax-nonce', 'nonce');
 
         $aInputs = array_map(function($a){
@@ -333,24 +294,21 @@ class Functions {
         wp_send_json($response);
     }
 
-
-    public function getLecturerIdentifier(array $aParams = []): array|string
-    {
-        $lq = self::makeLQ($aParams);
-
-        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName;memberOf.memberOf.name') . '&lq=' . urlencode($lq);
-
+    // TODO: Move to DIPAPI class
+    public function getLecturerIdentifier(array $aParams = []): array|string {
         $oDIP = new DIPAPI();
+        $lq = $oDIP->makeLQ($aParams);
+        $dipParams = '?sort=' . urlencode('familyName=1&givenName=1') . '&attrs=' . urlencode('identifier;familyName;givenName;memberOf.memberOf.name') . '&lq=' . urlencode($lq);
         $response = $oDIP->getResponse('persons', $dipParams);
 
 
         if (!$response['valid'] && $response['code'] == 401) {
-            return __(self::DIP_API_KEY_MSG, 'rrze-lectures');
+            return self::getErrorMessage('apikeymissing');
         } else {
             $data = $response['content']['data'];
 
             if (empty($data)) {
-                return __('No matching entries found.', 'rrze-lectures');
+                return self::getErrorMessage('204');
             }
 
             $ret = [];

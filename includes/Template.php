@@ -69,6 +69,20 @@ class Template {
         $content = '';
         $parser = new Parser();
         
+        // Also add $atts to $data 
+        foreach ($atts as $name => $value) {
+            $attvarname = "atts_".$name;
+            $data[$attvarname] = $value;
+        }    
+        
+        // Generate special atts
+        $data['atts_show_degree_title'] = (empty($atts['hide_degree'])? true : false);  
+        $data['atts_do_accordion'] = !($atts['hide_degree_accordion'] && $atts['hide_type_accordion']);
+        $data['atts_do_type_accordion'] = !$atts['hide_type_accordion'];
+        $data['atts_do_degree_accordion'] = !$atts['hide_degree_accordion'];
+        
+
+        
         if (!empty($this->formatlist[$template_name]['contains'])) {
             // Enthält Sub-Template
             foreach ($this->formatlist[$template_name]['contains'] as $subtemplate) {

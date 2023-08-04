@@ -46,7 +46,7 @@ function js() {
 
 function patchPackageVersion() {
     var newVer = semver.inc(info.version, 'patch');
-    return src(['./package.json', './' + info.main])
+    return src(['./package.json', './' + info.main, './docs/rrze-lectures-shordcode.md'])
         .pipe(bump({
             version: newVer
         }))
@@ -55,7 +55,7 @@ function patchPackageVersion() {
 };
 function prereleasePackageVersion() {
     var newVer = semver.inc(info.version, 'prerelease');
-    return src(['./package.json', './' + info.main])
+    return src(['./package.json', './' + info.main, './docs/rrze-lectures-shordcode.md'])
         .pipe(bump({
             version: newVer
         }))

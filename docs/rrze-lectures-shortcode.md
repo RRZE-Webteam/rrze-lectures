@@ -18,22 +18,20 @@ See below for a list of supported attributes.
 | `degree`        | filters the lists of educationalEvent by degrees  |          | Comma-separated list                |
 | `lecture_name`  | filters by the name of the lecture event          |          | String                              |
 | `hide`          | hides fields in output                            |          | Comma-separated list below          |
+| `show`          | shows fields in output                            |          | module, orgunit                     |
 | `lecturer_idm`  | filters by responsible people with login          |          | Comma-separated list of login names |
 | `lecturer_identifier`  | filters by responsible people with id      |          | Comma-separated list of identifier  |
 | `guest`         | filters by events that are avaible for guests     |          | 1                                   |
 
 
-
-
 ## Special commands for developing purpose only
 
-Its possible to get debug informations by adding a 
+Its possible to get debug informations by adding an URI Parameter.
 
 | URI-Parameter                | Description                                                          |
 |------------------------------|----------------------------------------------------------------------|
-| `?debug`                     | shows the API request without AUTH Key                               |
-| `?debug=screen-raw`          | shows the data that came from the API                                |
-| `?debug=screen-pre-template` | shows the translated and sanitized data that goes into the template  |  
+| `debug=1`                    | shows the API request without AUTH Key                               |
+| `nocache=1`                  | deactivates the cache                                                |  
 
 
 If `?debug` ist set, debug informations will also be piped into the JS console.

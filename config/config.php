@@ -70,7 +70,15 @@ function getConstants()
         'Transient_Output' => false,
         // Transient Time for raw data we got from the API
         'Transient_Seconds_Rawdata' =>  6 * HOUR_IN_SECONDS,
-        
+        // maximum number for limit at requesting data from api for one round
+        'DIPAPI_limit_max'  => 50,
+        // maximal number of total results
+        'DIPAPI_totalentries_max' => 100,
+        // maximal timeout in seconds we give the api
+        'DIPAPI_timeout'  => 5,
+        // maximum Btyes for the response
+        'DIPAPI_max_response_bytes' => 1024 * 1024,
+        // Output Template Formats
         'template_formats' => [
             
             'tabs'      => [
@@ -120,6 +128,18 @@ function getConstants()
                 'name'  => 'linklist',
                 'contains'  => []
             ]   
+        ],
+        'errors'    => [
+            'default'   => __('No matching entries found.', 'rrze-lectures'),
+            'norequired'  => __('Required attributes mssing. Either enter the FAUOrg number it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures'),
+            'apikeymissing' => __('DIP API-Key Error! Anfragen zu dem API Key senden Sie an idm@fau.de . Bitte beachten Sie, dass die Vergabe von API-Keys derzeit noch in organisatorischer Klärung ist und daher eine Zuteilung noch nicht zeitnah erfolgen kann.', 'rrze-lectures'),
+            'oversize'  => __('We got too much data from the API. Please narrow your search filter!', 'rrze-lectures'),
+            '204'       => __('No matching entries found.', 'rrze-lectures'),
+            '206'       => __('The server is delivering only part of the resource, therfor no matching entries was found.', 'rrze-lectures'),
+            '403'       => __('The request contained valid data and was understood by the server, but the server is refusing action. This may be due to the user not having the necessary permissions for a resource or needing an account of some sort, or attempting a prohibited action.', 'rrze-lectures'),
+            '404'       => __('The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.', 'rrze-lectures'),
+            '503'       => __('Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>', 'rrze-lectures'),
+            '504'       => __('The server did not receive a timely response.','rrze-lectures'),
         ]
     );
 
@@ -199,15 +219,42 @@ function getFields()
             [
                 'name' => 'limit_lv',
                 'label' => __('Maximum number of lectures', 'rrze-lectures'),
-                'desc' => __('Warning! If you increase this > 25 be aware that the website\'s loading time will increase dramatically and might lead to an HTTP 502 error.', 'rrze-lectures'),
+                'desc' => __('Warning! If you increase this > 15 be aware that the website\'s loading time will increase dramatically and might lead to an HTTP 502 error.', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
-                'default' => '25',
+                'default' => '15',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
         ],
     ];
 
+    
+      /* 
+         *  Der untere Teil nun doch nach Überlegungen deaktiviert auch auch die Settings im Backend für Deutsch und Englishc weggemacht.
+         *   Erwägungsgründe:
+         *   - Wenn wir überall egal was ist, immer dieselbe Antwort im Fehlerfall geben, können wir
+         *     niht kenntlich machen, ob keine Daten kommen, weil es zu viele Daten waren, weil die Anfrage falsch war 
+         *     oder die API überlastet ist u.a. 
+         *     Der Webmaster hat somit keine einfache Möglichkeit den Shortcode zu reparieren oder die ANfrage zu verfeinern, 
+         *    wenn er nicht weiß´aus welcher Richtung das Problem kam.
+         *   - Wenn wir aber jeden Fehlerfall mit eigenen de/en - Fehlermeldungen anspeichern lassen, wird allein dadurch das
+         *     Setting voll und somit für den unbedarften Anwender erscheint das alles komplexer als es ist.
+         *     ZUdem sind das Fehlermeldungen, die normalerweise ohnehin nicht nach aussen sollten.
+         *   - Nach aussen hin, zum Leser der Website wäre in der Tat nur eine Meldung azseichend.
+         *     Aber diese kann durchaus so bleiben wie sie ist.
+         * 
+         * Daher:
+         *    Wir entfernen doch lieber die Settings aus dem Backend  
+         *    Es gibt verschiedene Fehlermeldungen die wir per Default vorgeben 
+         *    Wenn der Webmaster  für den Leser der Website eine eigene Meldung vorgeben möchte,
+         *     dann kann und soll er das individuell pro Shortcode machen.
+         *     Dann entfällt auch er AUfwand das zweisprachig zu sichern, denn jeder Shortcode wird ja 
+         *     bereits in einem definierten SPrachkontext geführt.
+         * 
+         * Unabhängig davon: Der vorherige Ansatz und die Lösung das mit den Settings so zu machen mit der
+         * Sprachabhängigkeit war genial und high sophisticated.
+
+      
     // generate fields for nodata by available languages
     $aNodata = [];
 
@@ -224,7 +271,7 @@ function getFields()
     }
 
     $aRet['basic'] = array_merge($aRet['basic'], $aNodata);
-
+   */
     return $aRet;
 }
 
@@ -399,14 +446,14 @@ function getShortcodeSettings()
             'max' => [
                 'default' => '',
                 'min' => 1,
-                'max' => 100,
+                'max' => 10,
                 'step' => '1',
                 'field_type' => 'number',
             ],
             'nodata' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Show', 'rrze-lectures'),
+                'label' => __('Own errormessage in case an error occurs', 'rrze-lectures'),
                 'type' => 'string',
             ],
         ],
