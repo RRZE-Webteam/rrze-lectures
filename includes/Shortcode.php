@@ -134,8 +134,8 @@ class Shortcode {
 
         $this->normalize(shortcode_atts($atts_default, $atts));
         
-        $debugmsg .= Debug::get_notice("Generated Attributs:<br>".Debug::get_html_var_dump($this->atts));
-        
+//        $debugmsg .= Debug::get_notice("Attributs:<br>".Debug::get_html_var_dump($this->atts));
+   
         $cache = new Cache();
         if (($this->use_cache) && ($this->Transient_Output==true)) {
             $this->atts['cachetype'] = 'html';
@@ -177,27 +177,104 @@ class Shortcode {
             $debugmsg .= Debug::get_notice("Generating API Request to get new data");
             
 
-            $this->oDIP = new DIPAPI();         
-            $dipParams = $this->oDIP->getAPIParamsPrefix($this->atts);
+                // Hinweis zur Umsetzung:
+                // Wenn wir nach Kursen zu Studiengängen suchen, degree="..."
+                // dann haben wir große Probleme bei der Rückgabe nach
+                // Degrees zu suchen, diese sauber zu filtern, zu sorieren etc.
+                // Dies verursacht signifikanten RAM-Verbrauch und Performance.
+                // Im Worst Case führt dies zu FATAL Errors oder sehr lange
+                // laufenden Prozessen.
+                // 
+                // Daher werden wir erstmal der Einfachheit halber bei dem Attribut
+                // degree="" nur ein Wert erlauben.
+                //  
+                // Wir bauen daher hier die Shortcodes der EInzelaufrufe und führen
+                // sie mit do_shortcode aus. Dies erspart uns auch ein Workaround 
+                // mit einem Selbstaufruf der Shortcode-Funktion.
+                // 
+                // Jeder API Request wird je Degree gecacht. Wenn also irgendwo
+                // auf der Website schonmal nur nach den einen Degree gesucht
+                // wurde (z.v. weil wir hier nur ein Index haben wollen und woanders
+                // dann Detaildaten), dann haben wir den schon im Cache
+                // Somit entspricht eine eingabe zweier oder mehrere Degrees
+                // den hintereinander ausführen deselben Shortcodes mit 
+                // unterschiedlichen einzelnen degree=""-Einträgen.
+                // 
+                // Somit ersparen wir uns auch die Sortierung.
+                // Die Reihenfolge der Ausgaben wird bestimmt durch Reihenfolge
+                // im degree=""-Attribut.
+            
+            
+                if (!empty($this->atts['degree'])) {
+                       // group by degree
+                       $aGivenDegrees = array_map('trim', explode(',', $this->atts['degree']));
+                     
+                       if (count($aGivenDegrees)>1) {
+                            $output = '';
+                            $foundshow = false;
+                            foreach ($aGivenDegrees as $searchdegree) {
+                                $shortcode = '[lectures';
+                                foreach ($atts as $name => $value) {
+                                    if ($name !== 'degree') {
+                                        $shortcode .= ' '.$name.'="'.$value.'"';  
+                                    }
+                                    if ($name == 'show') {
+                                       $value .= ',degree';
+                                       $foundshow = true;
+                                    }
+                                }
+                                if (! $foundshow) {
+                                    $shortcode .= ' show="degree"';  
+                                }
+                                $shortcode .= ' degree="'.$searchdegree.'"';
+                                $shortcode .= ']';
+                                $output .= $shortcode. "\n";
+                            }
+                            
+                          
+                            return do_shortcode($output);
+                       }
+                }
+                
             Debug::console_log('Set params for DIP', $tsStart);
+            $this->oDIP = new DIPAPI();       
+            
+            // First we check for the amount of data we may get. 
+            // If its too much, we break here
+            $datacount = $this->oDIP->getDataCount('educationEvents',$this->atts);
+            if (!$datacount['valid']) {
+                $debugmsg .= Debug::get_notice("Invalid Response. Message: ".$datacount['content']."<br>Code: ".$datacount['code']);
+                $output = $debugmsg . Functions::getErrorMessage($datacount['code'],$this->atts['nodata']);
+                return $output;
+            } else {
+                if ((is_array($datacount['content'])) && (isset($datacount['content']['pagination'])) ) {
+
+                    if (($datacount['content']['pagination']['total'] > $this->DPIAPI_totalentries_max)) {
+                        $debugmsg .= Debug::get_notice("To much results: Total: ".$datacount['content']['pagination']['total']." (max: ".$this->DPIAPI_totalentries_max.")");
+                        $output = $debugmsg . Functions::getErrorMessage('oversize',$this->atts['nodata']);
+                        return $output;
+                    }                       
+                }
+            }
+
+            // ok, the test-querys showed a valid response, so that we can now
+            // ask for the whole data vault :)
+            
+            $dipParams = $this->oDIP->getAPIParamsPrefix($this->atts);
+            
             
             $page = 1;
             $response = $this->oDIP->getResponse('educationEvents', $dipParams . '&page='.$page);
-            
-            
-            
+                    
             if (!empty($response['request_string'])) {
                 $debugmsg .= Debug::get_notice(Debug::get_html_uri_encoded($response['request_string']));              
             }
-              $debugmsg .= Debug::get_notice(Debug::get_html_var_dump($response));
             
             
             if (!$response['valid']) {
-                $output = $debugmsg . Functions::getErrorMessage($response['code'],$this->atts['nodata']);
-                if (isset($_GET['debug'])) {
-                    $output .= "<br> Message: ".$response['content'];
-                    $output .= "<br> Code: ".$response['code'];
-                }
+                // The query for the first page failed...
+                $debugmsg .= Debug::get_notice("Invalid Response. Message: ".$response['content']."<br>Code: ".$response['code']);
+                $output = $debugmsg . Functions::getErrorMessage($response['code'],$this->atts['nodata']);         
                 return $output;
 
             } else {
@@ -238,14 +315,6 @@ class Shortcode {
                 return $output;
             }
             
-
-
-            Sanitizer::sanitizeLectures($data, $this->aLanguages);
-
-           $translator = new Translator($this->atts['display_language']);
-           $translator->setTranslations($data);
-
-
             if (empty($data)) {            
                 $output = $debugmsg .Functions::getErrorMessage(204,$this->atts['nodata']);
                 return $output;
@@ -258,170 +327,54 @@ class Shortcode {
             }
         }
 
+        // Ok, nun endlich haben wir alle Daten, sie sind plausibel, sie
+        // sind vollständig und hoffentlich nutzbar.
+        // Also machen wir was draus.
        
+     // $debugmsg .= Debug::get_notice("Data from API:<br>".Debug::get_html_var_dump($data));
+      
+        // Sanitize Data Fields to avoid surprising gifts from the api
+        Sanitizer::sanitizeLectures($data, $this->aLanguages);
 
-        // TODO: Sortierung muss abhängig von dem Format sein!
-        // So ist das viel zu verwirrend und vermischt miteinander.
-        // Daher kommen sicher auch ein Teil der Speicherprobleme
+        // Init Data Formater
+        $formatData = new FormatData($this->atts['display_language']);
         
+        // Set translateable fields  to the desired output language
+        $formatData->setTranslations($data);
+        
+        // Group Data by Event-Types
+        $data = $formatData->groupbyEventType($data);
+        $debugmsg .= Debug::get_notice("Data grouped by type:<br>".Debug::get_html_var_dump($data));
+
+        // Remove duplicate Courses
+        $data = $formatData->removeDuplicateCourses($data);
+        $debugmsg .= Debug::get_notice("Duplicate Courses Removed:<br>".Debug::get_html_var_dump($data));
+        
+        // Sortiere nach den EventTypen
+       // $data = $formatData->sortbyEventType($data,$this->atts['type']);
+       // $debugmsg .= Debug::get_notice("Data sortet by type: ".$this->atts['type']."<br>".Debug::get_html_var_dump($data));
+
         
        
-
- $debugmsg .= Debug::get_notice("Data from API:<br>".Debug::get_html_var_dump($data));
-// return $debugmsg;
-        // group & sort
-        $aData = [];
-
-        // group by type
-        foreach ($data as $nr => $aEntries) {
-            $aData[$aEntries['providerValues']['event']['eventtype']][$aEntries['identifier']] = $aEntries;
-        }
-        // unset($data); // free memory 
-        $data = null; // free memory see: https://stackoverflow.com/questions/584960/whats-better-at-freeing-memory-with-php-unset-or-var-null
-
         Debug::console_log('Group by eventtype completed', $tsStart);
 
-        // sort
-        $coll = collator_create('de_DE');
-
-        // sort group
-        $aTmp = [];
-        if (!empty($this->atts['type'])) {
-            // sort in order of $this->atts['type']
-            $aGivenTypes = array_map('trim', explode(',', $this->atts['type']));
-
-            foreach ($aGivenTypes as $givenType) {
-                if (!empty($aData[$givenType])) {
-                    $aTmp[$givenType] = $aData[$givenType];
-                }
-            }
-            $aData = $aTmp;
-        } else {
-            // sort alphabetically by group
-            $arrayKeys = array_keys($aData);
-            collator_sort($coll, $arrayKeys);
-
-            foreach ($arrayKeys as $key) {
-                $aTmp[$key] = $aData[$key];
-            }
-            $aData = $aTmp;
-        }
-
-        // unset($aTmp); // free memory
-        $aTmp = [];
-
        
-        // sort entries
-        $iAllEntries = 0;
-        // $aTmp = [];
-
-        foreach ($aData as $group => $aDetails) {
-            $aTmp2 = [];
-            foreach ($aDetails as $identifier => $aEntries) {
-                $name = $aEntries['name'];
-                $aTmp2[$name] = $aEntries;
-
-                $aTmp3 = [];
-                foreach ($aEntries['providerValues']['courses'] as $nr => $aCourses){
-                    // BK 2023-06-28 : explicitely delete cancelled parallelgroups (API ignores this parameter sometimes)
-                    if ((isset($aCourses['cancelled']) && ($aCourses['cancelled'] == false))) {
-                        // sort by parallelgroup
-                        $parallelgroup = $aCourses['parallelgroup'];
-                        $aTmp3[$parallelgroup] = $aCourses;    
-                    }
-
-                }
-
-                $arrayKeys = array_keys($aTmp3);
-                if (count($arrayKeys) > 1){
-                    array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp3);
-                }else{
-                    $aTmp3[array_key_first($aTmp3)]['parallelgroup'] = '';
-                }
-
-                $aTmp2[$name]['providerValues']['courses'] = $aTmp3;
-                $aTmp3 = null;    
-            }
-
-            $arrayKeys = array_keys($aTmp2);
-            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
-            $iAllEntries += count($aTmp2);
-            $aTmp[$group] = $aTmp2;
-            // unset($aTmp2); // free memory
-            $aTmp2 = null;
+        if (empty($data)) {
+            // Hierhin sollten wir normalerweise nicht kommen; Wenn doch, dann 
+            // stimmte etwas mit den Daten von der API nicht; 
+            // Zum Beispiel waren sie nicht vollständig. 
+            
+           $debugmsg .= Debug::get_notice("Partly Data: <br>".Debug::get_html_var_dump($data));
+           $output = $debugmsg . Functions::getErrorMessage(206,$this->atts['nodata']);
+           return $output;
         }
-
-
-
-        $aData = $aTmp;
-        // unset($aTmp); // free memory
-        $aTmp = null;
-    // }
-
-        // we filter by degree after all others to keep it simple and because there cannot be any lecture that doesn't fit to given degrees
-        if (!empty($this->atts['degree'])) {
-            // group by degree
-            $aGivenDegrees = array_map('trim', explode(',', $this->atts['degree']));
-
-            $aTmp = [];
-
-            foreach ($aData as $type => $aVal) {
-                foreach ($aVal as $title => $aLectures) {
-                    foreach ($aLectures['providerValues']['modules'] as $mNr => $aModules) {
-                        foreach ($aModules['module_cos'] as $cNr => $aDetails) {
-                            if (in_array($aDetails['subject'], $aGivenDegrees)) {
-                                $aTmp[$aDetails['subject']][$type][$title] = $aLectures;
-                            }
-                        }
-                    }
-
-                }
-            }
-            $aDegree = $aTmp;
-            $aTmp = [];
-
-            // sort by given degrees
-            foreach ($aGivenDegrees as $degree) {
-                if (!empty($aDegree[$degree])) {
-                    $aTmp[$degree] = $aDegree[$degree];
-                }
-            }
-
-            $aDegree = $aTmp;
-            // unset($aTmp);
-            $aTmp = null;
-        }
-
-        Debug::console_log('Sort completed', $tsStart);
-
         
-        $aTmp = [];
+        $debugmsg .= Debug::get_notice("OK; lets go on ");
 
-        if (empty($aData)) {
-            return Functions::getErrorMessage(206,$this->atts['nodata']);
-        }
 
-        if (!empty($this->atts['degree'])) {
-            if (empty($aDegree)) {
-                return Functions::getErrorMessage(206,$this->atts['nodata']);
-            }
-
-            foreach ($aDegree as $degree => $aTypes) {
-                $start = true;
-                foreach ($aTypes as $type => $aLectures) {
-                    foreach ($aLectures as $title => $aDetails) {
-                        $aDegree[$degree][$type][$title]['degree_title'] = ($start ? $degree : false);
-                        $aDegree[$degree][$type][$title]['degree_start'] = ($aDegree[$degree][$type][$title]['degree_title'] ? true : false);
-                        $aDegree[$degree][$type][$title]['degree_end'] = false;
-                        $start = false;
-                    }
-                }
-                $aDegree[$degree][$type][$title]['degree_end'] = true;
-            }
-        } else {
-            $aDegree = [];
-            $aDegree[] = $aData;
-        }
+        $aDegree = [];
+        $aDegree[] = $data;
+        
 
         $iCnt = 0;
         $first = true;
@@ -441,7 +394,7 @@ class Shortcode {
                      // get Campo Link from first Course
                    $first_course = array_key_first($aDetails['providerValues']['courses']);       
                    if (isset($aDetails['providerValues']['courses'][$first_course]['url'])) {
-                    $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
+                        $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
                    }
                    $aDegree[$degree][$type][$title]['campo_url'] = $compo_link;
                     
@@ -456,7 +409,9 @@ class Shortcode {
         Debug::console_log('Pre tempate', $tsStart);
 
         $templateparser = new Template();
- $debugmsg .= Debug::get_notice("Data for Template ".$this->atts['format'].":<br>".Debug::get_html_var_dump($aDegree));
+        $debugmsg .= Debug::get_notice("Data for Template ".$this->atts['format'].":<br>".Debug::get_html_var_dump($aDegree));
+        
+        
         foreach ($aDegree as $degree => $aData) {
             foreach ($aData as $type => $aEntries) {
                 foreach ($aEntries as $title => $aDetails) {
@@ -641,6 +596,10 @@ class Shortcode {
 
         $atts['format'] = (in_array($atts['format'], $this->aAllowedFormats) ? $atts['format'] : 'linklist');
         $atts['color'] = (in_array($atts['color'], $this->aAllowedColors) ? $atts['color'] : 'fau');
+        
+        if (($atts['format']=='linklist') && (!empty($atts['degree']))) {
+            $atts['format'] = 'degree-linklist';
+        } 
         
         
         $atts['max'] = (!empty($atts['max']) && $atts['max'] < $this->DPIAPI_limit_max ? $atts['max'] : $this->DPIAPI_limit_max);

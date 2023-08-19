@@ -73,11 +73,11 @@ function getConstants()
         // maximum number for limit at requesting data from api for one round
         'DIPAPI_limit_max'  => 50,
         // maximal number of total results
-        'DIPAPI_totalentries_max' => 100,
+        'DIPAPI_totalentries_max' => 250,
         // maximal timeout in seconds we give the api
         'DIPAPI_timeout'  => 5,
         // maximum Btyes for the response
-        'DIPAPI_max_response_bytes' => 1024 * 1024,
+        'DIPAPI_max_response_bytes' =>  1024 * 1024,
         // Output Template Formats
         'template_formats' => [
             
@@ -115,24 +115,28 @@ function getConstants()
                      'module'  => [
                         'name'      => 'module',
                         'attribut'  => 'module',
-                        'default'   => false,                      
+                        'default'   => true,                      
                     ],
                     'orgunit'  => [
                         'name'      => 'orgunit',
                         'attribut'  => 'orgunit',
-                        'default'   => false,                      
+                        'default'   => true,                      
                     ]
                 ]
             ],
             'linklist'  => [
                 'name'  => 'linklist',
                 'contains'  => []
-            ]   
+            ],
+            'degree-linklist'  => [
+                'name'  => 'degree-linklist',
+                'contains'  => []
+            ]  
         ],
         'errors'    => [
             'default'   => __('No matching entries found.', 'rrze-lectures'),
             'norequired'  => __('Required attributes mssing. Either enter the FAUOrg number it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures'),
-            'apikeymissing' => __('DIP API-Key Error! Anfragen zu dem API Key senden Sie an idm@fau.de . Bitte beachten Sie, dass die Vergabe von API-Keys derzeit noch in organisatorischer Klärung ist und daher eine Zuteilung noch nicht zeitnah erfolgen kann.', 'rrze-lectures'),
+            'apikeymissing' => __('DIP API-Key Error! Um eine DIP API Key zu erhalten, rufen Sie bitte die Seite <code>https://gitos.rrze.fau.de/fauapi/keyman</code> auf und flgenden den dortigen Schritten.', 'rrze-lectures'),
             'oversize'  => __('We got too much data from the API. Please narrow your search filter!', 'rrze-lectures'),
             '204'       => __('No matching entries found.', 'rrze-lectures'),
             '206'       => __('The server is delivering only part of the resource, therfor no matching entries was found.', 'rrze-lectures'),
@@ -142,6 +146,7 @@ function getConstants()
             '504'       => __('The server did not receive a timely response.','rrze-lectures'),
         ]
     );
+    
 
     $aTmp = getShortcodeSettings();
 

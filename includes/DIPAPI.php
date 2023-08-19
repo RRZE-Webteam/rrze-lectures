@@ -14,7 +14,6 @@ if (!function_exists('__')) {
 class DIPAPI {
 
     protected $api;
-    // protected $orgID;
     protected $atts;
     protected $lectureParam;
     protected $sem;
@@ -43,6 +42,94 @@ class DIPAPI {
             return '';
         }
     }
+
+     public function getDataCount(string $endpoint = 'educationEvents', array $atts): array {
+        $aRet = [
+            'valid' => FALSE, 
+            'content' => ''
+        ];
+
+        $aGetArgs = [
+            'timeout' => $this->api_timeout,
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'X-Api-Key' => $this->getKey(),
+                ]
+            ];
+            
+        $atts['max'] = 1;
+        $atts['format'] = '_countresults';
+        $dipParams = $this->getAPIParamsPrefix($atts);
+        
+        $apirequest =  $this->api . $endpoint . '/' . $dipParams;
+        $apiResponse = wp_remote_get($this->api . $endpoint . '/' . $dipParams, $aGetArgs);
+        if ( is_array( $apiResponse ) && ! is_wp_error( $apiResponse ) ) {
+           if ($apiResponse['response']['code'] != 200){
+                $aRet = [
+                    'valid' => FALSE, 
+                    'content' => $apiResponse['response']['message'],
+                    'code' => $apiResponse['response']['code'],
+                    'request_string'    => $apirequest,
+                    'size'  => 0
+                ];    
+            } else {
+                $headers = wp_remote_retrieve_headers($apiResponse);
+                  // Die Content-Length-Header verwenden, um die Größe in Bytes zu erhalten
+                $size_in_bytes = isset($headers['content-length']) ? (int) $headers['content-length'] : 0;
+                
+                $aRet = [
+                        'valid'     => TRUE, 
+                        'content'   => '',
+                        'code'      => 200,
+                        'request_string'    => $apirequest,
+                        'size'      => $size_in_bytes
+                 ];  
+                 
+                 
+                if (empty($apiResponse['body'])) {
+                    $aRet['valid']  = FALSE;
+                    $aRet['code']   = 404;
+                    
+
+                } else {
+                    if ($size_in_bytes==0) {
+                        $size_in_bytes = strlen($apiResponse['body']);
+                        $aRet['size'] = $size_in_bytes;
+                    }
+                    
+                    
+                    if ($size_in_bytes > $this->api_maxbytes) {
+                        $aRet['valid'] = FALSE;
+                        $aRet['code'] = 'oversize';
+                    } else {
+                        $content = json_decode($apiResponse['body'], true);
+
+                        if (empty($content['data'])) {
+                            $aRet['valid'] = FALSE;
+                            $aRet['code'] = 404;
+
+                        } else {
+                            $aRet['content'] = $content;
+                        }
+                    }
+                }
+            }
+        } else {
+            $aRet = [
+                'valid'     => FALSE, 
+                'content'   => $apiResponse->get_error_message(),
+                'code'      =>  $apiResponse->get_error_code(),
+                'request_string'    => $apirequest,
+                'size'      => 0
+            ];   
+        }
+        
+        /*
+         * Please do not ask me for the reason for all these tests :) 
+         */
+
+        return $aRet;    
+     }
 
     public function getResponse(string $endpoint = 'educationEvents', string $sParam = NULL): array {
         $aRet = [
@@ -137,6 +224,13 @@ class DIPAPI {
     public function getAPIResponseArgs(array $atts = []): string {
         $attrs = '';
         switch ($atts['format']) {
+                case '_countresults':
+                    // this call is used to make a pre-test to look how many 
+                    // results i get by the query. This may help to reduce
+                    // load for the real request.
+                    $attrs = 'identifier;name;';
+                    break;
+                case 'degree-linklist':
                 case 'linklist':
                     $attrs = 'identifier;name;'
                         . 'providerValues.event.eventtype;'
@@ -144,13 +238,27 @@ class DIPAPI {
                         . 'providerValues.courses.shorttext;'
                         . 'providerValues.courses.url;'
                         . 'providerValues.courses.teaching_language;'
-                        . 'providerValues.courses.course_responsible';
-                    if (!empty($atts['degree'])) {
-                        $attrs .= ';providerValues.modules.module_cos.subject;'
-                                . 'providerValues.modules.module_nr;'
-                                . 'providerValues.modules.module_cos.major;'
-                                . 'providerValues.modules.module_cos.degree';
-                    }
+                        . 'providerValues.courses.course_responsible.sortorder'
+                        . 'providerValues.courses.course_responsible.identifier';
+                            // von den Personen holen wir nur noch die identifier
+                            // um Berge an redundanten Daten bei jedem Kurs zu vermeiden
+                            // Die Daten der Personen holen wir danach aus dem 
+                            // eigenen Persons Endpoint, wenn wir sie wirklich brauchen.
+                    
+                    
+            //        if (!empty($atts['degree'])) {
+                            // wenn eine Suche nach degree erfolgte,
+                            // ist auch möglich, dass der Suchsttring nur ein Teil des
+                            // Namens enthielt. Daher muss ich bei der Abfrage dann auch 
+                            // en Abschlussnamen holen um danach ggf. zu filtern
+              //              $attrs .= ';providerValues.modules.module_cos.subject;'
+                                       // subject = Name
+               //                     . 'providerValues.modules.module_nr;'
+               //                     . 'providerValues.modules.module_cos.major;'
+                //                    . 'providerValues.modules.module_cos.degree';
+                                        // degree hier = Abschluss, wie Master of Arts oder Bachelor of Arts
+                   
+                  //  }
                     break;
                 case 'tabs':
                     $attrs = 'identifier;name;description;'
@@ -158,8 +266,10 @@ class DIPAPI {
                         . 'providerValues.event;'
                         . 'providerValues.event_orgunit;'
                         . 'providerValues.event_responsible;'
+                        // TODO: Hier auch die Daten aus den persons Endpoint holen
                         . 'providerValues.modules.module_nr;'
                         . 'providerValues.modules.module_name;'
+                        . 'providerValues.modules.his_key;'
                         . 'providerValues.modules.module_cos;';
                     // Mit modules: $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.modules.module_cos.degree;providerValues.modules.module_cos.subject;providerValues.modules.module_cos.major;providerValues.modules.module_cos.subject_indicator;providerValues.modules.module_cos.version;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup';
                //     $attrs = 'identifier;name;providerValues.event.eventtype;providerValues.courses.url;providerValues.courses.semester;providerValues.event.title;providerValues.event.shorttext;providerValues.event_orgunit.orgunit;providerValues.event.comment;providerValues.courses.hours_per_week;providerValues.courses.teaching_language;providerValues.courses.course_responsible.prefixTitle;providerValues.courses.course_responsible.firstname;providerValues.courses.course_responsible.surname;providerValues.courses.contents;providerValues.courses.literature;providerValues.courses.compulsory_requirement;providerValues.courses.attendee_maximum;providerValues.courses.attendee_minimum;providerValues.courses.planned_dates.rhythm;providerValues.courses.planned_dates.weekday;providerValues.courses.planned_dates.starttime;providerValues.courses.planned_dates.endtime;providerValues.courses.planned_dates.individual_dates.cancelled;providerValues.courses.planned_dates.individual_dates.date;providerValues.courses.planned_dates.startdate;providerValues.courses.planned_dates.enddate;providerValues.courses.planned_dates.expected_attendees_count;providerValues.courses.planned_dates.comment;providerValues.courses.planned_dates.instructor.prefixTitle;providerValues.courses.planned_dates.instructor.firstname;providerValues.courses.planned_dates.instructor.surname;providerValues.courses.planned_dates.famos_code;providerValues.event.frequency;providerValues.event.semester_hours_per_week;providerValues.courses.parallelgroup;providerValues.modules.module_cos.subject';
@@ -236,8 +346,7 @@ class DIPAPI {
             // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
             $dipParams = '?limit=' . $atts['max'];
             $dipParams .= '&lq=' . urlencode($this->makeLQ($aLQ));
-//            $dipParams .= '&lf=' . urlencode('providerValues.courses.semester=' . $atts['sem']);
-                // brauchen wir den lf, wenn das Semester oben schon in lq steht?
+
             $attrs = $this->getAPIResponseArgs($atts);
             if (!empty($attrs)) {
                 $dipParams .= '&attrs=' . urlencode($attrs);             

@@ -81,6 +81,9 @@ class Debug {
         if (!isset($_GET['debug'])) {
             return;
         }
+        if (!self::isRRZEUser()) {
+            return;
+        }
         return '<div class="alert clearfix clear alert-info">'.$text.'</div>';
 
     }
@@ -88,6 +91,11 @@ class Debug {
     // prints a message on browser console
     public static function console_log(string $msg = '', float $tsStart = 0) {
         if (isset($_GET['debug'])) {
+            
+            if (!self::isRRZEUser()) {
+                return;
+            }
+            
             $msg .= ' execTime: ' . sprintf('%.2f', microtime(true) - $tsStart) . ' s';
             echo '<script>console.log(' . json_encode($msg, JSON_HEX_TAG) . ');</script>';
         }
@@ -104,4 +112,77 @@ class Debug {
             do_action('rrze.log.' . $logType, __NAMESPACE__ . ' ' . $method . '() : ' . $msg);
         }
     }
+    
+
+    
+    private static function isFAUUser() {
+         $knownhostsuser = [
+            '/\.uni\-erlangen\.de/i'
+        ];
+        $knownhostadresses = [
+            '/^131\.188\./i',
+            '/^10\./i'
+        ];
+
+        $found = false;	  
+        $remip = $_SERVER['REMOTE_ADDR'];
+
+        foreach ($knownhostadresses as $regexp) {
+            if (preg_match($regexp,$remip)) {
+                $found = true;
+                break;
+            }
+        }
+
+        $remotehost = 	 $_SERVER['REMOTE_HOST']; 
+
+        foreach ($knownhostsuser as $regexp) {
+            if (preg_match($regexp,$remotehost)) {
+                $found = true;
+                break;
+            }
+        }
+
+        return $found;
+    }
+
+
+    private static function isRRZEUser() {
+        $knownhostsuser = [
+            '/unrz59\.vpn\.rrze\.uni\-erlangen\.de/i',
+            '/zo95zofo\.vpn\.rrze\.uni\-erlangen\.de/i',
+            '/unrz228\.vpn\.rrze\.uni\-erlangen\.de/i',
+            '/unrz244\.vpn\.rrze\.uni\-erlangen\.de/i',
+            '/we53buko\.vpn\.rrze\.uni\-erlangen\.de/i'
+        ];
+         $knownhostadresses = [
+            '/^131\.188\.73/i',
+            '/^10\.188\.76/i',
+            '/^10\.11\.82/i',
+            '/^10\.11\.216/i',
+             '/^10\.11\.83\.208/i'
+        ];
+
+        $found = false;	  
+        $remip = $_SERVER['REMOTE_ADDR'];
+
+        foreach ($knownhostadresses as $regexp) {
+            if (preg_match($regexp,$remip)) {
+                $found = true;
+                break;
+            }
+        }
+
+        $remotehost = 	 $_SERVER['REMOTE_HOST']; 
+
+        foreach ($knownhostsuser as $regexp) {
+            if (preg_match($regexp,$remotehost)) {
+                $found = true;
+                break;
+            }
+        }
+
+        return $found;
+    }
+
 }

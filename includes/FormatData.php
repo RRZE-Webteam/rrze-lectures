@@ -1,14 +1,28 @@
 <?php
-
+/*
+ * Verschiedene Funktionen zur Sortierung, Gruppierung und 
+ * Übersetzung der Daten, die wir von DIP erhielten.
+ * 
+ * Diese Class übernimmt die vorherige Class Translator aus V2.0 und
+ * auch verschiende Sortierungsfunktionen der Daten, die bisher in
+ * Shortcode.php waren.
+ * Damit erreichen wir langfristig eine bessere Übersicht über die Funktionen
+ * und können Sie dann ausführen, wenn wir sie wirklich brauchen.
+ * So kann dann auch auf die Ausführung von umfangreichen RAM-belastenden
+ * Sortierungen verzichtet werden, wenn wir dafür gar keine Ausgaben 
+ * anzeigen.
+ * Ausserdem wollen wir mit dem Plugin zukünftig auch andere Dinge anzeigen
+ * als nur Lehrveranstaltungen, so daß wir auch dann die Funktionen
+ * gesondert aufrufen können müssen. 
+ */
 namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
 use function RRZE\Lectures\Config\getSanitizerMap;
 
-// class Translator extends \RecursiveIteratorIterator
-class Translator
-{
+
+class FormatData {
     protected $display_language;
     protected $display_language_fallback;
     protected $all_language_codes = [];
@@ -17,8 +31,7 @@ class Translator
     // protected $varFunc;
 
 
-    public function __construct(string $display_language)
-    {
+    public function __construct(string $display_language = 'de') {
         $this->display_language = $display_language;
 
         // Input values in Campo are made in GERMAN. There could also be other languages, but default = 'de'
@@ -31,9 +44,184 @@ class Translator
         }, \ResourceBundle::getLocales(''));
     }
 
+    
+    /*
+     * Gruppiere Daten nach Event-Typ
+     */ 
+    public function groupbyEventType(array $data): array {
+        // First find all event types and put them into together
+        $data_by_types = [];
+        foreach ($data as $nr => $aEntries) {
+                $id = $aEntries['identifier'];
+                $thistype = '_unset_type';
+                if (!empty($aEntries['providerValues']['event']['eventtype'])) {
+                    if (is_array($aEntries['providerValues']['event']['eventtype'])) {
+                        if (isset($aEntries['providerValues']['event']['eventtype']['de'])) {
+                            $thistype = $aEntries['providerValues']['event']['eventtype']['de'];
+                        } elseif (isset($aEntries['providerValues']['event']['eventtype']['en'])) { 
+                            $thistype = $aEntries['providerValues']['event']['eventtype']['en'];
+                        } else {
+                            $thisfirst = array_key_first($aEntries['providerValues']['event']['eventtype']);
+                            $thistype = $aEntries['providerValues']['event']['eventtype'][$thisfirst];
+                        }
+                    } elseif (is_string($aEntries['providerValues']['event']['eventtype'])) {
+                         $thistype  = $aEntries['providerValues']['event']['eventtype'];
+                    }
+                }
+                unset($aEntries['providerValues']['event']['eventtype']);
+                if (empty($aEntries['providerValues']['event'])) {
+                    unset($aEntries['providerValues']['event']);
+                }
+                unset($aEntries['identifier']);
+                
+                $data_by_types[$thistype][$id] = $aEntries;
+        }
+        return $data_by_types;
+    }
+    
+    /*
+     * Sortiere nach EventTypes
+     */
+    public function sortbyEventType(array $data, string $type): array {
+        $coll = collator_create('de_DE');
+
+        $aTmp = [];
+        if (!empty($type)) {
+            // sort in order of $this->atts['type']
+            $aGivenTypes = array_map('trim', explode(',', $type));
+
+            foreach ($aGivenTypes as $givenType) {
+                if (!empty($data[$givenType])) {
+                    $aTmp[$givenType] = $data[$givenType];
+                }
+            }
+            return $aTmp;
+        } else {
+            // sort alphabetically by group
+            $arrayKeys = array_keys($data);
+            collator_sort($coll, $arrayKeys);
+
+            foreach ($arrayKeys as $key) {
+                $aTmp[$key] = $data[$key];
+            }
+            return $aTmp;
+        }
+
+    }
+    
+    
+    /*
+     * Je nach Abfrage sind die Course Arrays mehrfach mit denselben Daten besetzt.
+     * Das macht keinen Sinn und macht unsere Sortierung und Folgebearbeitungen 
+     * unnötig langsam. Daher mergen wir Courses mit selben Daten.
+     * Notiz: Von der API kommen viele derartige scheinbar identische Couse
+     * deswegen, weil intern dort noch jeweils andere Zusatzdaten vorhanden wären. 
+     * Da wir diese aber nicht verwenden, sehen und brauchen wir das nicht.
+     */
+    public function removeDuplicateCourses(array $data): array {
+        foreach ($data as $eventtype => $events) {
+            foreach ($events as $id => $eventdata) {
+                if (!empty($eventdata['providerValues']['courses'])) {
+                    // Notiz: array_unique() ist nicht gedacht für 
+                    // mehrdimensionale arrays und kann daher hier nicht
+                    //  einfach eingesetzt werden.
+                    
+                    $courses = self::makearrayunique($eventdata['providerValues']['courses']);
+                    $data[$eventtype][$id]['providerValues']['courses'] = $courses;
+                }
+            }
+        }
+        return $data;
+    }
+    
+    private static function makearrayunique(array $input): array {
+        $result = [];
+        $dup = [];
+        
+        foreach ($input as $key => $value) {
+            if (isset($dup[$key])) {
+                break;
+            }
+            foreach ($input as $secondkey => $secondvalue) {
+                if ($key == $secondkey) {
+                    break;
+                }
+                
+                $same = true;
+                foreach ($value as $feld => $datensatz) {
+                    if ((!isset($secondvalue[$feld]) || ($secondvalue[$feld] !== $value[$feld]))) {
+                        // not same
+                         $same = false;
+                         break;
+                    }
+                }
+                if ($same) {
+                    // gleich, also weglassen
+                    $dup[$secondkey] = $key;
+                }
+            } 
+        }
+        foreach ($input as $key => $value) {
+            if (!empty($dup[$key])) {
+                break;
+            }
+            $result[$key] = $value;
+        }
+        return $result;
+    }
+    
+    
+    /*
+     * sortiere innerhalb der Courses
+     */
+    public function sortbyCourses(array $data): array {
+
+       
+        // sort entries
+        $iAllEntries = 0;
+        $aTmp = [];
+
+        foreach ($data as $group => $aDetails) {
+            $aTmp2 = [];
+            foreach ($aDetails as $identifier => $aEntries) {
+                $name = $aEntries['name'];
+                $aTmp2[$name] = $aEntries;
+                $aTmp3 = [];
+                foreach ($aEntries['providerValues']['courses'] as $nr => $aCourses){
+                    // BK 2023-06-28 : explicitely delete cancelled parallelgroups (API ignores this parameter sometimes)
+                    if ((isset($aCourses['cancelled']) && ($aCourses['cancelled'] == false))) {
+                        // sort by parallelgroup
+                        $parallelgroup = $aCourses['parallelgroup'];
+                        $aTmp3[$parallelgroup] = $aCourses;    
+                    }
+
+                }
+
+                $arrayKeys = array_keys($aTmp3);
+                if (count($arrayKeys) > 1){
+                    array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp3);
+                }else{
+                    $aTmp3[array_key_first($aTmp3)]['parallelgroup'] = '';
+                }
+
+                $aTmp2[$name]['providerValues']['courses'] = $aTmp3;
+                $aTmp3 = null;    
+            }
+
+            $arrayKeys = array_keys($aTmp2);
+            array_multisort($arrayKeys, SORT_NATURAL | SORT_FLAG_CASE, $aTmp2);
+            $iAllEntries += count($aTmp2);
+            $aTmp[$group] = $aTmp2;
+            // unset($aTmp2); // free memory
+            $aTmp2 = null;
+        }
+
+        return $aTmp;
+    }
+    
+    
     /* returns translations by language (given attribute and/or settings value) or '' */
-    private function getTranslation(string|array|null &$aIn): string|array|null
-    {
+    private function getTranslation(string|array|null &$aIn): string|array|null {
         if (!is_array($aIn)) {
             // DIP-Field is not a mulitlang-field (== string (and not array with language codes) (["en" => "english text", "de" => "deutscher Text"])
             return $aIn;
@@ -49,8 +237,7 @@ class Translator
     }
 
 
-    public function setTranslations(array &$aData)
-    {
+    public function setTranslations(array &$aData)  {
         foreach ($aData as $nr => $aLecture) {
             foreach ($aLecture as $fieldName => $field) {
 
