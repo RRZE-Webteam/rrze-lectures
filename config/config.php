@@ -340,6 +340,13 @@ function getShortcodeSettings()
                 // Studiengang
                 'type' => 'string',
             ],
+            'degree_key' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Degree Key', 'rrze-lectures'),
+                // Studiengang HIS Schlüssel, bspw. "65|079|-|-|H|2010|E|P|V|7|"
+                'type' => 'string',
+            ],
             'sem' => [
                 'default' => '',
                 'field_type' => 'text',

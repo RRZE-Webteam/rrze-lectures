@@ -43,7 +43,7 @@ class DIPAPI {
         }
     }
 
-     public function getDataCount(string $endpoint = 'educationEvents', array $atts): array {
+     public function getDataCount(string $endpoint = 'educationEvents', array $atts = []): array {
         $aRet = [
             'valid' => FALSE, 
             'content' => ''
@@ -208,9 +208,6 @@ class DIPAPI {
             ];   
         }
         
-        /*
-         * Please do not ask me for the reason for all these tests :) 
-         */
 
         return $aRet;
     }
@@ -308,11 +305,15 @@ class DIPAPI {
             
             // filter for degree
             if (!empty($atts['degree'])) {
-    //            $aLQ['providerValues.modules.module_cos.subject'] = $atts['degree'];
-                $aLQ['providerValues.modules.stud.subject'] = $atts['degree'];
-                
+               $aLQ['providerValues.modules.module_cos.subject'] = $atts['degree'];
+            //    $aLQ['providerValues.modules.stud.subject'] = $atts['degree'];
+            //    Nach Absprache vom 29.08.23 mit Stefan Roas nicht mehr providerValues.modules.stud.* verwenden, da dies
+            //    nur für den Raumplanungstool der TF entwickelt wurde und daher auch nicht alle Events zeigt. Soll aus der API entfernt werden
+            //
             }
-
+            if (!empty($atts['degree_key'])) {
+                   $aLQ['providerValues.modules.module_cos.his_key'] = $atts['degree_key'];
+            }
             // Filter for FAUOrg 
             if (!empty($atts['fauorgnr'])) {
                 $aLQ['providerValues.event_orgunit.fauorg'] = $atts['fauorgnr'];
@@ -327,7 +328,7 @@ class DIPAPI {
             $aLQ['providerValues.courses.semester'] = $atts['sem'];
 
             // type
-            if (!empty($this->atts['type'])) {
+            if (!empty($atts['type'])) {
                 $aLQ['providerValues.event.eventtypes'] = $atts['type'];
             }
 
@@ -377,7 +378,15 @@ class DIPAPI {
                     // see:
                     // use [or] to or value criteria
                     // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
-
+                } elseif (($dipField == 'providerValues.courses.cancelled') && ($attVal == 0)) {  
+                    
+                    if (!isset($aIn['providerValues.courses.semester'])) {
+                        $aLQ[] = 'providerValues.courses[em]=cancelled%3D0%3B';
+                    } else {
+                        $aLQ[] = 'providerValues.courses[em]=cancelled%3D0%3Bsemester%3D'.$aIn['providerValues.courses.semester'];
+                    }
+                } elseif (($dipField == 'providerValues.courses.semester') && ($aIn['providerValues.courses.cancelled'] == 0)) {
+                    continue;
                 } else {
                     $aTmp = array_map(function ($val) {
                         return rawurlencode(trim($val));

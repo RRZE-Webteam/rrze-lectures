@@ -39,7 +39,7 @@ class Cache  {
         $prefix = $this->constants['Transient_Prefix'];
         // bestandteile des Namen:
         // - fauorgnr        
-        // - degree|degree_his_identifier
+        // - degree|degree_key
         // - lecture_name|lecture_id
         // - lecturer_identifier| lecturer_idm,
         // für später auch:  
@@ -63,8 +63,8 @@ class Cache  {
             }
         }
         $degree = 'nd';
-        if (!empty($aAtts['degree_his_identifier'])) {
-            $degree = $aAtts['degree_his_identifier'];
+        if (!empty($aAtts['degree_key'])) {
+            $degree = $aAtts['degree_key'];
             $degree = preg_replace('/[^a-z0-9]+/i', '', $degree);
         } elseif (!empty($aAtts['degree'])) {
             $degree = $aAtts['degree'];

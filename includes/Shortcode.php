@@ -57,7 +57,7 @@ class Shortcode {
                 // Lehrveranstaltung(en)
             "lecturer_idm", "lecturer_identifier",
                 // Dozent(en)
-            "degree", "degree_his_identifier",
+            "degree", "degree_key",
                 // Ein oder mehrere Studiengänge
             "module_name", "module_id"
                 // Ein oder mehrere Module
@@ -134,7 +134,7 @@ class Shortcode {
 
         $this->normalize(shortcode_atts($atts_default, $atts));
         
-//        $debugmsg .= Debug::get_notice("Attributs:<br>".Debug::get_html_var_dump($this->atts));
+        $debugmsg .= Debug::get_notice("Attributs:<br>".Debug::get_html_var_dump($this->atts));
    
         $cache = new Cache();
         if (($this->use_cache) && ($this->Transient_Output==true)) {
@@ -244,6 +244,9 @@ class Shortcode {
             $datacount = $this->oDIP->getDataCount('educationEvents',$this->atts);
             if (!$datacount['valid']) {
                 $debugmsg .= Debug::get_notice("Invalid Response. Message: ".$datacount['content']."<br>Code: ".$datacount['code']);
+                if (!empty($datacount['request_string'])) {
+                     $debugmsg .= Debug::get_notice(Debug::get_html_uri_encoded($datacount['request_string']));              
+                }
                 $output = $debugmsg . Functions::getErrorMessage($datacount['code'],$this->atts['nodata']);
                 return $output;
             } else {
@@ -251,6 +254,9 @@ class Shortcode {
 
                     if (($datacount['content']['pagination']['total'] > $this->DPIAPI_totalentries_max)) {
                         $debugmsg .= Debug::get_notice("To much results: Total: ".$datacount['content']['pagination']['total']." (max: ".$this->DPIAPI_totalentries_max.")");
+                        if (!empty($datacount['request_string'])) {
+                            $debugmsg .= Debug::get_notice(Debug::get_html_uri_encoded($datacount['request_string']));              
+                        }
                         $output = $debugmsg . Functions::getErrorMessage('oversize',$this->atts['nodata']);
                         return $output;
                     }                       
@@ -473,6 +479,7 @@ class Shortcode {
     /*
      * Sanitize und normalisiere Attribute
      * Wenn nötig befülle diese mit Defaults
+     * TODO: Move in Sanitizer.php
      */
     private function normalize(array $atts): array  {
         // sanatize all fields
@@ -528,6 +535,9 @@ class Shortcode {
         }
 
         
+        if (!empty($atts['degree_key'])) {
+            $atts['degree_key'] = trim($atts['degree_key']);
+        }
         if (!empty($atts['degree'])) {
             $atts['degree'] = trim($atts['degree']);
         }
@@ -547,13 +557,13 @@ class Shortcode {
         if (empty($atts['sem'])) {
             $atts['sem'] = Functions::getSemester();
         } else {
-            if (preg_match("/(\d{4})([w|s])/", trim(strtolower($atts['sem'])), $matches)) {
+            if (preg_match("/(\d{4})([w|s])/i", trim(strtolower($atts['sem'])), $matches)) {
                 // YYYYs YYYYw YYYYS YYYYW
                 $atts['sem'] = ($matches[2] == 'w' ? 'WiSe' : 'SoSe') . $matches[1];
-            } elseif (preg_match("/(ss|ws)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
+            } elseif (preg_match("/(ss|ws)(\d{4})/i", trim(strtolower($atts['sem'])), $matches)) {
                 // wsYYYY ssYYYY WSYYYY SSYYYY
                 $atts['sem'] = ($matches[1] == 'ws' ? 'WiSe' : 'SoSe') . $matches[2];
-            } elseif (!preg_match("/(sose|wise)(\d{4})/", trim(strtolower($atts['sem'])), $matches)) {
+            } elseif (!preg_match("/(sose|wise)(\d{4})/i", trim(strtolower($atts['sem'])), $matches)) {
                 $aAllowedSem = ['-2', '-1', '+1', '1', '+2', '2'];
                 if (in_array($atts['sem'], $aAllowedSem)) {
                     $atts['sem'] = (int) $atts['sem'];
@@ -597,14 +607,14 @@ class Shortcode {
         $atts['format'] = (in_array($atts['format'], $this->aAllowedFormats) ? $atts['format'] : 'linklist');
         $atts['color'] = (in_array($atts['color'], $this->aAllowedColors) ? $atts['color'] : 'fau');
         
-        if (($atts['format']=='linklist') && (!empty($atts['degree']))) {
+        if (($atts['format']=='linklist') && (!empty($atts['degree'])) && (!empty($atts['degree_key']))) {
             $atts['format'] = 'degree-linklist';
         } 
         
         
         $atts['max'] = (!empty($atts['max']) && $atts['max'] < $this->DPIAPI_limit_max ? $atts['max'] : $this->DPIAPI_limit_max);
          // prevent HTTP 502 & too high loading time
-        if (empty($atts['degree']) && empty($atts['type'])){
+        if (empty($atts['degree']) && empty($atts['degree_key']) && empty($atts['type'])){
              $atts['max'] = ( $atts['max'] > $this->options['basic_limit_lv'] ? $this->options['basic_limit_lv'] :  $atts['max']);
         }
         

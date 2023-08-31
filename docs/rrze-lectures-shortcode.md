@@ -15,13 +15,15 @@ See below for a list of supported attributes.
 | `fauorgnr`      | Optional filter for FAU-ORG Nummer                | setting  | Comma-separated FAU-ORG Numbers     |
 | `sem`           | optional filter for semester                      |          | SoSe`YYYY`, WiSe`YYYY`              |
 | `type`          | filters the lists of educationalEvent types       |          | Comma-separated list below          |
-| `degree`        | filters the lists of educationalEvent by degrees  |          | Comma-separated list                |
+| `degree`        | filters the lists of educationalEvent by degrees  |          | Comma-separated list of string      |
+| `degree_key`    | filters the lists of educationalEvent by degrees  |          | HIS Key                             |
 | `lecture_name`  | filters by the name of the lecture event          |          | String                              |
 | `hide`          | hides fields in output                            |          | Comma-separated list below          |
 | `show`          | shows fields in output                            |          | module, orgunit                     |
 | `lecturer_idm`  | filters by responsible people with login          |          | Comma-separated list of login names |
 | `lecturer_identifier`  | filters by responsible people with id      |          | Comma-separated list of identifier  |
 | `guest`         | filters by events that are avaible for guests     |          | 1                                   |
+| `sortby`	  | Sorts lectures of a given type by an attribut     | title    | title, nextdate                     |  
 
 
 ## Special commands for developing purpose only

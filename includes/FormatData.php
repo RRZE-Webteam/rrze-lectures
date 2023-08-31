@@ -126,7 +126,7 @@ class FormatData {
                     // mehrdimensionale arrays und kann daher hier nicht
                     //  einfach eingesetzt werden.
                     
-                    $courses = self::makearrayunique($eventdata['providerValues']['courses']);
+                    $courses = self::makearrayunique($eventdata['providerValues']['courses'], true);
                     $data[$eventtype][$id]['providerValues']['courses'] = $courses;
                 }
             }
@@ -134,25 +134,33 @@ class FormatData {
         return $data;
     }
     
-    private static function makearrayunique(array $input): array {
+    private static function makearrayunique(array $input, bool $ignoreurl): array {
         $result = [];
         $dup = [];
         
         foreach ($input as $key => $value) {
             if (isset($dup[$key])) {
-                break;
+                continue;
             }
             foreach ($input as $secondkey => $secondvalue) {
                 if ($key == $secondkey) {
-                    break;
+                    continue;
+                }
+                if (isset($dup[$secondkey])) {
+                    continue;
                 }
                 
                 $same = true;
                 foreach ($value as $feld => $datensatz) {
-                    if ((!isset($secondvalue[$feld]) || ($secondvalue[$feld] !== $value[$feld]))) {
-                        // not same
-                         $same = false;
-                         break;
+                    if (($ignoreurl) && ($feld == 'url')) {                     
+                        continue;
+                    }
+                    if (isset($value[$feld]) && isset($secondvalue[$feld])) {
+                         if ($secondvalue[$feld] !== $value[$feld]) {
+                            // not same
+                             $same = false;
+                             break;
+                        }
                     }
                 }
                 if ($same) {
@@ -162,10 +170,10 @@ class FormatData {
             } 
         }
         foreach ($input as $key => $value) {
-            if (!empty($dup[$key])) {
-                break;
+            if (isset($dup[$key])) {
+                continue;
             }
-            $result[$key] = $value;
+            $result[] = $value;
         }
         return $result;
     }

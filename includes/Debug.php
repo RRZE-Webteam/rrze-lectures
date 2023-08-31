@@ -164,24 +164,25 @@ class Debug {
         ];
 
         $found = false;	  
-        $remip = $_SERVER['REMOTE_ADDR'];
+        if (isset($_SERVER['REMOTE_ADDR'])) {
+            $remip = $_SERVER['REMOTE_ADDR'];
 
-        foreach ($knownhostadresses as $regexp) {
-            if (preg_match($regexp,$remip)) {
-                $found = true;
-                break;
+            foreach ($knownhostadresses as $regexp) {
+                if (preg_match($regexp,$remip)) {
+                    $found = true;
+                    break;
+                }
             }
         }
-
-        $remotehost = 	 $_SERVER['REMOTE_HOST']; 
-
-        foreach ($knownhostsuser as $regexp) {
-            if (preg_match($regexp,$remotehost)) {
-                $found = true;
-                break;
+        if (isset($_SERVER['REMOTE_HOST'])) {
+            $remotehost = 	 $_SERVER['REMOTE_HOST']; 
+            foreach ($knownhostsuser as $regexp) {
+                if (preg_match($regexp,$remotehost)) {
+                    $found = true;
+                    break;
+                }
             }
         }
-
         return $found;
     }
 
