@@ -40,11 +40,55 @@ If `?debug` ist set, debug informations will also be piped into the JS console.
 
 ## List of types
 
-Valid types are:
-* `Vorlesung`
-* `Vorlesung mit Übung`
-* `Übung`
-
+Valid types are (as found on campo at 01.09.2023):
+    Vorlesung mit Übung  
+    Vorlesung  
+    Seminar  
+    Praktikum  
+    Kurs  
+    Online-Kurs  
+    Übung  
+    Einzelunterricht  
+    Kleingruppenunterricht  
+    interne Veranstaltung  
+    Anleitung zu wiss. Arbeiten  
+    Arbeitsgemeinschaft  
+    Aufbaukurs  
+    Aufbauseminar  
+    Begleitseminar  
+    Einführungskurs  
+    Examensseminar 
+    Exkursion  
+    Grundkurs  
+    Grundseminar  
+    Hauptseminar  
+    Hauptvorlesung  
+    Klausurenkurs  
+    Klinische Visite  
+    Kolleg  
+    Kolloquium  
+    Kombiseminar  
+    Masterseminar  
+    Mittelseminar  
+    Mittelseminar (Hauptseminar, PO 2020)  
+    Oberseminar  
+    Ober- und Hauptseminar  
+    PG Masterseminar  
+    Praktikum/Projekt  
+    Praxisseminar  
+    Projekt  
+    Projektseminar  
+    Propädeutische Übung  
+    Proseminar  
+    Proseminar (Mittelseminar, PO 2020)  
+    Repetitorium  
+    Seminar und Übung  
+    Sonstige Lehrveranstaltung  
+    Sprachhistorisches Seminar  
+    Theorieseminar  
+    Tutorium  
+    Übungsseminar  
+    Workshop 
 
 ## List for fields to `hide`
 

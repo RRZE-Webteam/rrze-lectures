@@ -81,32 +81,44 @@ class FormatData {
     
     /*
      * Sortiere nach EventTypes
+     * Diese Typen werden nicht nach Alphabet sortiert, sondern nach ihrer
+     * Bedeutung. Eine "Vorlesung" ist immer vor einem "Seminar" aufzuführen 
      */
-    public function sortbyEventType(array $data, string $type): array {
-        $coll = collator_create('de_DE');
-
-        $aTmp = [];
-        if (!empty($type)) {
-            // sort in order of $this->atts['type']
-            $aGivenTypes = array_map('trim', explode(',', $type));
-
-            foreach ($aGivenTypes as $givenType) {
-                if (!empty($data[$givenType])) {
-                    $aTmp[$givenType] = $data[$givenType];
-                }
-            }
-            return $aTmp;
-        } else {
-            // sort alphabetically by group
-            $arrayKeys = array_keys($data);
-            collator_sort($coll, $arrayKeys);
-
-            foreach ($arrayKeys as $key) {
-                $aTmp[$key] = $data[$key];
-            }
-            return $aTmp;
+    public function sortEventTypeArraybyEvent(array $array, $customOrder = []): array {
+        if (empty($array)) {
+            return [];
         }
+        if (count($array) == 1) {
+            // hier brauch ich nichts zu tun
+            return $array;
+        }
+                
+        if ((!isset($customOrder)) || (empty($customOrder))) {
+            $customOrder = ["Hauptvorlesung", "Vorlesung","Masterseminar", "Hauptseminar", "Seminar"];
+        }
+    
+        
+        uasort($array, function($a, $b) use ($customOrder) {
+            $aIndex = array_search(key($a), $customOrder);
+            $bIndex = array_search(key($b), $customOrder);
 
+            if ($aIndex === false && $bIndex === false) {
+                // Wenn beide Elemente nicht im $customOrder sind, alphabetisch sortieren
+                return strnatcmp(key($a), key($b));
+            } elseif ($aIndex === false) {
+                // Wenn nur $a nicht im $customOrder ist, $b zuerst platzieren
+                return 1;
+            } elseif ($bIndex === false) {
+                // Wenn nur $b nicht im $customOrder ist, $a zuerst platzieren
+                return -1;
+            } else {
+                // Wenn beide im $customOrder sind, nach der Reihenfolge im $customOrder sortieren
+                return $aIndex - $bIndex;
+            }
+        });
+
+        return $array;
+        
     }
     
     
@@ -179,6 +191,56 @@ class FormatData {
     }
     
     
+    /*
+     * Sortiert ein EventType-Array nach einem gegebenen Attribut 
+     * Das Attribut bezieht sich auf das erste Subelement des Arrays, nach dessen Key.
+     * Zum Beispiel 'name' (default). Dieses bezieht sich dann auf
+     *    $typename.(*.)name
+     * Wenn es sich auf ein Subelement beziehen soll, dann ist dieses via Punkt zu trennen:
+     *    providerValues.courses.title
+     * Dies bzeiht sich dann auf
+     *    $typename.*.providerValues.(*.)courses.(*.)title. 
+     */
+    public function sortEventTypeArraybyAttribut(array $data, string $attribut = 'name', string $order = 'asc'): array {
+        if ((empty($data)) || (empty($attribut))) {
+            return [];
+        }
+        
+        $searchparts = explode('.',trim($attribut));
+        $result = [];
+        $resultgroup = [];
+        if (count($searchparts)==1) {
+            foreach ($data as $groupid => $events) {
+                 $data[$groupid] = self::sortArrayByField($events,$attribut,$order);
+            }  
+            return $data;
+        } else {
+            // Not ready yet
+             return $data;
+        }
+    }
+    
+    
+    /*
+     * Allgemeine Sortierroutine
+     */
+    public static function sortArrayByField(array $inputArray, string $field, string $order = 'asc'): array {
+        $sortedArray = $inputArray;
+
+        uasort($sortedArray, function($a, $b) use ($field, $order) {
+            $stringA = preg_replace('/[^\p{L}\p{M}\s]/u', '', $a[$field]);
+            $stringB = preg_replace('/[^\p{L}\p{M}\s]/u', '', $b[$field]);
+        
+            
+            $result = strnatcmp($stringA, $stringB);
+            return ($order === 'asc') ? $result : -$result;
+        });
+
+        return $sortedArray;
+    }
+
+
+
     /*
      * sortiere innerhalb der Courses
      */

@@ -357,9 +357,14 @@ class Shortcode {
         $debugmsg .= Debug::get_notice("Duplicate Courses Removed:<br>".Debug::get_html_var_dump($data));
         
         // Sortiere nach den EventTypen
-       // $data = $formatData->sortbyEventType($data,$this->atts['type']);
-       // $debugmsg .= Debug::get_notice("Data sortet by type: ".$this->atts['type']."<br>".Debug::get_html_var_dump($data));
+        $data = $formatData->sortEventTypeArraybyEvent($data);
+        $debugmsg .= Debug::get_notice("Data sortet by type: <br>".Debug::get_html_var_dump($data));
 
+       // Sortiere innerhalb der EventTypen
+        $data = $formatData->sortEventTypeArraybyAttribut($data);
+        $debugmsg .= Debug::get_notice("Data sortet inner Events: <br>".Debug::get_html_var_dump($data));
+
+        
         
        
         Debug::console_log('Group by eventtype completed', $tsStart);
