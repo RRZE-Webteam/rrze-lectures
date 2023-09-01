@@ -147,7 +147,14 @@ class Debug {
     }
 
 
-    private static function isRRZEUser() {
+    private static function isRRZEUser() { 
+        if (class_exists('\RRZE\Settings\Helper')) {
+            // rrze-settings is used
+            return \RRZE\Settings\Helper::isRRZEAdmin();
+        } elseif (is_user_logged_in()) {
+            return true;
+        }
+
         $knownhostsuser = [
             '/unrz59\.vpn\.rrze\.uni\-erlangen\.de/i',
             '/zo95zofo\.vpn\.rrze\.uni\-erlangen\.de/i',

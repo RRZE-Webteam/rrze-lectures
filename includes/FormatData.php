@@ -196,6 +196,8 @@ class FormatData {
      * Das Attribut bezieht sich auf das erste Subelement des Arrays, nach dessen Key.
      * Zum Beispiel 'name' (default). Dieses bezieht sich dann auf
      *    $typename.(*.)name
+     * 
+     * TODO/NOT READY:
      * Wenn es sich auf ein Subelement beziehen soll, dann ist dieses via Punkt zu trennen:
      *    providerValues.courses.title
      * Dies bzeiht sich dann auf
