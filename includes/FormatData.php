@@ -94,17 +94,17 @@ class FormatData {
         }
                 
         if ((!isset($customOrder)) || (empty($customOrder))) {
-            $customOrder = ["Hauptvorlesung", "Vorlesung","Masterseminar", "Hauptseminar", "Seminar"];
+            $customOrder = ["Hauptvorlesung", "Vorlesung", "Vorlesung mit Übung", "Masterseminar", "Hauptseminar", "Seminar"];
         }
     
         
-        uasort($array, function($a, $b) use ($customOrder) {
-            $aIndex = array_search(key($a), $customOrder);
-            $bIndex = array_search(key($b), $customOrder);
+        uksort($array, function($a, $b) use ($customOrder) {
+            $aIndex = array_search($a, $customOrder);
+            $bIndex = array_search($b, $customOrder);
 
             if ($aIndex === false && $bIndex === false) {
                 // Wenn beide Elemente nicht im $customOrder sind, alphabetisch sortieren
-                return strnatcmp(key($a), key($b));
+                return strnatcmp($a, $b);
             } elseif ($aIndex === false) {
                 // Wenn nur $a nicht im $customOrder ist, $b zuerst platzieren
                 return 1;

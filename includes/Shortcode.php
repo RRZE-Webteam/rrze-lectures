@@ -354,7 +354,7 @@ class Shortcode {
 
         // Remove duplicate Courses
         $data = $formatData->removeDuplicateCourses($data);
-        $debugmsg .= Debug::get_notice("Duplicate Courses Removed:<br>".Debug::get_html_var_dump($data));
+    //    $debugmsg .= Debug::get_notice("Duplicate Courses Removed:<br>".Debug::get_html_var_dump($data));
         
         // Sortiere nach den EventTypen
         $data = $formatData->sortEventTypeArraybyEvent($data);
@@ -362,7 +362,7 @@ class Shortcode {
 
        // Sortiere innerhalb der EventTypen
         $data = $formatData->sortEventTypeArraybyAttribut($data);
-        $debugmsg .= Debug::get_notice("Data sortet inner Events: <br>".Debug::get_html_var_dump($data));
+  //      $debugmsg .= Debug::get_notice("Data sortet inner Events: <br>".Debug::get_html_var_dump($data));
 
         
         
@@ -459,7 +459,8 @@ class Shortcode {
         Debug::console_log('END rrze-lectures shortcodeLectures()', $tsStart);
         wp_enqueue_style('rrze-lectures');
         $output = $debugmsg ."\n".$content;
-        return $output;
+           return $output;
+//             return wpautop($output);
     }
 
     
