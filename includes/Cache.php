@@ -103,19 +103,19 @@ class Cache  {
             $module = $aAtts['modul_name'];
             $module = preg_replace('/[^a-z0-9]+/i', '', $module);
         }
-        $format = 'raw';
+        $cachetype = 'raw';
         if (!empty($aAtts['cachetype'])) {
-            $format = $aAtts['cachetype'];
-            $format = preg_replace('/[^a-z0-9]+/i', '', $format);
-        }
-        if ($format == 'html') {
-            // add the format-type in case someuse uses the same content for different views
-            if (!empty($aAtts['format'])) {
-                $format .= '-'.$aAtts['format'];
-            }
+            $cachetype = $aAtts['cachetype'];
+            $cachetype = preg_replace('/[^a-z0-9]+/i', '', $cachetype);
         }
         
-        return $prefix."-".$orgnr."-".$degree."-".$lecture."-".$dozent."-".$module."-".$format;
+        $format = 'list';
+        if (!empty($aAtts['format'])) {
+            $format = $aAtts['format'];
+            $format = preg_replace('/[^a-z0-9]+/i', '', $format);
+        }
+        
+        return $prefix."-".$orgnr."-".$degree."-".$lecture."-".$dozent."-".$module."-".$cachetype."-".$format;
     }
     
     public function get_cached_data(array $aAtts = []) {
