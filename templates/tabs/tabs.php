@@ -38,7 +38,7 @@
 {{atts_hide_lecture_name}}
     <meta itemprop="name" content="{{=name}}">
 {{:atts_hide_lecture_name}}
-    <h2><span itemprop="name">{{=name}}</span></h2>
+    <h2 itemprop="name">{{=name}}</h2>
 {{/atts_hide_lecture_name}}
 
     [tabs]

@@ -354,6 +354,7 @@ class DIPAPI {
             // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
             $dipParams = '?limit=' . $atts['max'];
             $dipParams .= '&lq=' . urlencode($this->makeLQ($aLQ));
+            $dipParams .= '&lf=' . urlencode($this->makeLF($aLQ));
    
             
             $attrs = $this->getAPIResponseArgs($atts);
@@ -365,6 +366,18 @@ class DIPAPI {
 
    } 
    
+   
+   // zusätzlicher Filter für den Fall, dass die API dann doch zu viele Daten liefert
+   // aufgrund von Fallbacks
+    private function makeLF(array $aIn): string {
+        $res = '';
+        if ($aIn['providerValues.courses.semester']) {
+            $res .= 'providerValues.courses.semester='.$aIn['providerValues.courses.semester'];
+        }
+        return $res;
+    }
+    
+    
     public function makeLQ(array $aIn): string  {
         $aLQ = [];
         foreach ($aIn as $dipField => $attVal) {

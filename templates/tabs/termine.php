@@ -17,9 +17,7 @@
          <tr><th><?php echo __('Responsible', 'rrze-lectures'); ?></th>
              <td>
             {{@_val.course_responsible}}
-            <span itemprop="provider" itemscope="" itemtype="http://schema.org/Person">
-                {{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{/_val.surname}}
-            </span><br>
+            <span itemprop="provider" itemscope="" itemtype="http://schema.org/Person">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{/_val.surname}}</span>
             {{/@_val.course_responsible}}
 
          </td></tr>
@@ -49,7 +47,8 @@
         {{/_val.attendee_minimum}}
 
 
-        {{_val.url}}[button link="{{=_val.url}}" width="full"]<?php echo __('Link to Campo', 'rrze-lectures'); ?>[/button]{{/_val.url}}
+        {{_val.url}}[button link="{{=_val.url}}" ]<?php echo __('Link to Campo', 'rrze-lectures'); ?>[/button]{{/_val.url}}
+        {{studon_url}}[button link="{{=studon_url}}" ]<?php echo __('Link to StudOn', 'rrze-lectures'); ?>[/button]{{/studon_url}}
         [/column]
 		[/columns]
         
@@ -58,35 +57,29 @@
         {{_val.planned_dates}}
         <table>
             <tr>
-                <th><?php echo __('Weekday', 'rrze-lectures'); ?></th>
-                <th><?php echo __('From - To', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Date and Time', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Cancellation date', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Start date - End date', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Exp. Att.', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Comment', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Lecturer(s)', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Comment', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Room', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Frequency', 'rrze-lectures'); ?></th>
             </tr>
             {{@_val.planned_dates}}
             <tr>              
-                <td>{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}}</td>
-                <td>{{_val.starttime}}{{=_val.starttime}}{{/_val.starttime}} - {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}</td>
+                <td>
+                    {{_val.rhythm}}{{=_val.rhythm}} {{/_val.rhythm}}{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}}{{_val.starttime}}, {{=_val.starttime}}{{/_val.starttime}} - {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}
+                </td>
                 <td>{{@_val.misseddates}}{{=_val}}<br>{{/@_val.misseddates}}</td>
                 <td>{{_val.startdate}}{{=_val.startdate}}{{/_val.startdate}} - {{_val.enddate}}{{=_val.enddate}}{{/_val.enddate}}</td>
-                <td>{{_val.expected_attendees_count}}{{=_val.expected_attendees_count}}{{/_val.expected_attendees_count}}</td>
-                <td>{{_val.comment}}{{=_val.comment}}{{/_val.comment}}</td>
                 <td>
                 {{_val.instructor}}
                 <ul>
-                {{@_val.instructor}}
-                    <li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{/_val.surname}}</li>
-                {{/@_val.instructor}}    
+                {{@_val.instructor}}<li itemprop="provider" itemscope="" itemtype="http://schema.org/Person">{{_val.prefixTitle}}<span itemprop="honorificPrefix">{{=_val.prefixTitle}}</span> {{/_val.prefixTitle}}{{_val.firstname}}<span itemprop="givenName">{{=_val.firstname}}</span> {{/_val.firstname}}{{_val.surname}}<span itemprop="familyName">{{=_val.surname}}</span>{{/_val.surname}}</li>{{/@_val.instructor}}    
                 </ul>
                 {{/_val.instructor}}
                 </td>
+                <td>{{_val.comment}}{{=_val.comment}}{{/_val.comment}}</td>
                 <td>{{_val.famos_code}}{{=_val.famos_code}}{{/_val.famos_code}}</td>
-                <td>{{_val.rhythm}}{{=_val.rhythm}}{{/_val.rhythm}}</td>
             </tr>
             {{/@_val.planned_dates}}
         </table>
