@@ -105,7 +105,9 @@ class Debug {
                 $output .=  '}</script>'."\n";
                 $output .=  '<style>.dump_container { border-left: 1px dotted #000 !important; border-bottom: 1px dotted #000 !important; margin-left: 0; padding-left: 2em;}'
                         . ' .dump_debug { display: inline; }'
-                        . ' .dump_fieldname { color:#dd8800; background-color: inherit;}'
+                        . ' .dump_fieldname_col {font-family: monospace; min-width: 150px; display: inline-block;}'
+                        . ' .dump_fieldname { padding: 0; font-family: monospace; color:#dd8800; background-color: inherit;}'
+                        . ' .dump_fieldname_indent { font-family: monospace; }'
                         . ' .dump_fieldname_numeric { color: darkgreen; font-style: italic; }'
                         . ' .dump_value { font-family: Courier, Monospace; font-weight: bold; white-space: pre; }'
                         . ' .dump_empty_array { color: #black; }'
@@ -187,7 +189,6 @@ class Debug {
 
                         if ($isTerminal) {
                             $output .=  "\n";
-    
                         }
     
                     }
@@ -199,12 +200,14 @@ class Debug {
                     if ($isTerminal) {
                         $output .=  "[" . $key . "] => ";
                     } else {
+                        $output .= "<span class=\"dump_fieldname_col\">";
                         if (is_numeric($key)) {
                             $output .= "[<code class=\"dump_fieldname dump_fieldname_numeric\"'>" . $key . "</code>]";
                         } else {
-                            $output .= "[\"<code class=\"dump_fieldname\"'>" . $key . "</code>\"]";
+                            $output .= "[\"<code class=\"dump_fieldname\"'>" . $key . "</code>\"]";                   
                         }
-                        $output .= "&nbsp;=>&nbsp;";
+                        $output .= '</span>';
+                        $output .= " &#8658; ";
                     }
 
                     $output .= call_user_func($recursive, $value, $level+1);
