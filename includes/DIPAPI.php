@@ -231,12 +231,18 @@ class DIPAPI {
                 case 'linklist':
                     $attrs = 'identifier;name;'
                         . 'providerValues.event.eventtype;'
-                        . 'providerValues.courses.title;'
-                        . 'providerValues.courses.shorttext;'
-                        . 'providerValues.courses.url;'
-                        . 'providerValues.courses.teaching_language;'
-                        . 'providerValues.courses.course_responsible.sortorder'
-                        . 'providerValues.courses.course_responsible.identifier';
+                        . 'providerValues.courses;';
+                    
+                    // TODO: Einschränken, wenn notwendig.
+                    // Aber vorher noch die anderen Sortierkriterien einbauen, insbes. 
+                    // nach Datum oder Leuten...
+                    
+//                        . 'providerValues.courses.title;'
+//                        . 'providerValues.courses.shorttext;'
+//                        . 'providerValues.courses.url;'
+//                        . 'providerValues.courses.teaching_language;'
+//                        . 'providerValues.courses.course_responsible.sortorder;'
+//                        . 'providerValues.courses.course_responsible.identifier';
                             // von den Personen holen wir nur noch die identifier
                             // um Berge an redundanten Daten bei jedem Kurs zu vermeiden
                             // Die Daten der Personen holen wir danach aus dem 

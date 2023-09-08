@@ -8,9 +8,8 @@
         
         [columns]
 		[column]
-       <table class="nobackground">
-           {{_val.parallelgroup}}<tr><th colspan="2">{{=_val.parallelgroup}}</th></tr>{{/_val.parallelgroup}}     
-        
+        {{_val.parallelgroup}}<h3>{{=_val.parallelgroup}}</h3>{{/_val.parallelgroup}}
+       <table class="nobackground metadata">        
            {{_val.hours_per_week}}<tr><th><?php echo __('Semester hours per week', 'rrze-lectures'); ?></th><td>{{=_val.hours_per_week}}</td></tr>{{/_val.hours_per_week}}
            {{_val.teaching_language_txt}}<tr><th><?php echo __('Teaching language', 'rrze-lectures'); ?></th><td>{{=_val.teaching_language_txt}}</td></tr>{{/_val.teaching_language_txt}}
          {{_val.course_responsible}}

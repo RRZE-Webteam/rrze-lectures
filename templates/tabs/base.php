@@ -48,6 +48,6 @@
 {{studon_url}}[button link="{{=studon_url}}"]<?php echo __('Link to StudOn', 'rrze-lectures'); ?>[/button]{{/studon_url}}
 [/column]
 [/columns]
-  {{providerValues.event.comment}}[alert style="info"]<strong><?php echo __('Comment', 'rrze-lectures'); ?></strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}
+  {{providerValues.event.comment}}{{=providerValues.event.comment}}{{/providerValues.event.comment}}
 
 [/tab]

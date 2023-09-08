@@ -210,9 +210,12 @@ class FormatData {
                     // Notiz: array_unique() ist nicht gedacht für 
                     // mehrdimensionale arrays und kann daher hier nicht
                     //  einfach eingesetzt werden.
-                    
-                    $courses = self::makearrayunique($eventdata['providerValues']['courses'], true);
-                    $data[$eventtype][$id]['providerValues']['courses'] = $courses;
+                    if ((is_array($eventdata['providerValues']['courses'])) && ((count($eventdata['providerValues']['courses']))==1)) {
+                        // tu nichts, keine duplicate moglich
+                    } else {
+                        $courses = self::makearrayunique($eventdata['providerValues']['courses'], true);
+                        $data[$eventtype][$id]['providerValues']['courses'] = $courses;
+                    }
                 }
             }
         }

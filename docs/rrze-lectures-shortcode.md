@@ -1,6 +1,5 @@
 # RRZE Lectures Shortcode
 
-* Plugin Version: 2.3.31
 * Public Documentation: https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
 
 

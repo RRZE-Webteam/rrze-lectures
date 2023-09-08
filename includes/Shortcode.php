@@ -337,7 +337,7 @@ class Shortcode {
         // sind vollständig und hoffentlich nutzbar.
         // Also machen wir was draus.
        
-     // $debugmsg .= Debug::get_notice("Data from API:<br>".Debug::get_html_var_dump($data));
+      $debugmsg .= Debug::get_notice("Data from API:<br>".Debug::get_html_var_dump($data));
       
         // Sanitize Data Fields to avoid surprising gifts from the api
         Sanitizer::sanitizeLectures($data, $this->aLanguages);
@@ -350,7 +350,7 @@ class Shortcode {
         
         // Group Data by Event-Types
         $data = $formatData->groupbyEventType($data);
-   //     $debugmsg .= Debug::get_notice("Data grouped by type:<br>".Debug::get_html_var_dump($data));
+        $debugmsg .= Debug::get_notice("Data grouped by type:<br>".Debug::get_html_var_dump($data));
 
         // Remove duplicate Courses
         $data = $formatData->removeDuplicateCourses($data);

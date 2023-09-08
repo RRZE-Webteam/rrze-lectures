@@ -17,8 +17,7 @@ const
 
 function css() {
     var plugins = [
-        autoprefixer(),
-        cssnano()
+        autoprefixer()
     ];
     return src([info.source.sass + 'rrze-lectures.scss'])
         .pipe(sass().on('error', sass.logError))
@@ -46,7 +45,7 @@ function js() {
 
 function patchPackageVersion() {
     var newVer = semver.inc(info.version, 'patch');
-    return src(['./package.json', './' + info.main, './docs/rrze-lectures-shordcode.md'])
+    return src(['./package.json', './' + info.main])
         .pipe(bump({
             version: newVer
         }))
@@ -55,7 +54,7 @@ function patchPackageVersion() {
 };
 function prereleasePackageVersion() {
     var newVer = semver.inc(info.version, 'prerelease');
-    return src(['./package.json', './' + info.main, './docs/rrze-lectures-shordcode.md'])
+    return src(['./package.json', './' + info.main])
         .pipe(bump({
             version: newVer
         }))
