@@ -17,6 +17,7 @@ See below for a list of supported attributes.
 | `type`          | filters the lists of educationalEvent types       |          | Comma-separated list below          |
 | `degree`        | filters the lists of educationalEvent by degrees  |          | Comma-separated list of string      |
 | `degree_key`    | filters the lists of educationalEvent by degrees  |          | HIS Key                             |
+| `orgunit`	  | filters the lists of educationalEvent by Orgunit  |          | String with the Orgunit from Campo  |
 | `lecture_name`  | filters by the name of the lecture event          |          | String                              |
 | `hide`          | hides fields in output                            |          | Comma-separated list below          |
 | `show`          | shows fields in output                            |          | module, orgunit                     |

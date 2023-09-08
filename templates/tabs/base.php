@@ -39,17 +39,13 @@
         <td>{{=providerValues.event.ects}}</td>
     </tr>
     {{/providerValues.event.ects}}
-    {{providerValues.event.link_studon}}
-    <tr>
-        <th><?php echo __('Link to StudOn course (login)', 'rrze-lectures'); ?></th>
-        <td><a href="{{=providerValues.event.link_studon}}"><?php echo __('Course in StudOn', 'rrze-lectures'); ?></a></td>
-    </tr>
-    {{/providerValues.event.link_studon}}
+   
     
 </table>
 [/column]
 [column]
-{{campo_url}}[button link="{{=campo_url}}" width="full"]<?php echo __('Link to Campo', 'rrze-lectures'); ?>[/button]{{/campo_url}}
+{{campo_url}}[button link="{{=campo_url}}"]<?php echo __('Link to Campo', 'rrze-lectures'); ?>[/button]{{/campo_url}} 
+{{studon_url}}[button link="{{=studon_url}}"]<?php echo __('Link to StudOn', 'rrze-lectures'); ?>[/button]{{/studon_url}}
 [/column]
 [/columns]
   {{providerValues.event.comment}}[alert style="info"]<strong><?php echo __('Comment', 'rrze-lectures'); ?></strong><br>{{=providerValues.event.comment}}[/alert]{{/providerValues.event.comment}}

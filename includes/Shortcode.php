@@ -350,7 +350,7 @@ class Shortcode {
         
         // Group Data by Event-Types
         $data = $formatData->groupbyEventType($data);
-        $debugmsg .= Debug::get_notice("Data grouped by type:<br>".Debug::get_html_var_dump($data));
+   //     $debugmsg .= Debug::get_notice("Data grouped by type:<br>".Debug::get_html_var_dump($data));
 
         // Remove duplicate Courses
         $data = $formatData->removeDuplicateCourses($data);
@@ -358,14 +358,15 @@ class Shortcode {
         
         // Sortiere nach den EventTypen
         $data = $formatData->sortEventTypeArraybyEvent($data);
-        $debugmsg .= Debug::get_notice("Data sortet by type: <br>".Debug::get_html_var_dump($data));
+  //      $debugmsg .= Debug::get_notice("Data sortet by type: <br>".Debug::get_html_var_dump($data));
 
        // Sortiere innerhalb der EventTypen
         $data = $formatData->sortEventTypeArraybyAttribut($data);
   //      $debugmsg .= Debug::get_notice("Data sortet inner Events: <br>".Debug::get_html_var_dump($data));
 
-        
-        
+        // Suche generische URLs für den Event aus den Coursedaten
+         $data = $formatData->searchPortalURLsforEvent($data);
+         $debugmsg .= Debug::get_notice("Data aufbereitet:<br>".Debug::get_html_var_dump($data));
        
         Debug::console_log('Group by eventtype completed', $tsStart);
 
@@ -403,12 +404,14 @@ class Shortcode {
                     
                     
                      // get Campo Link from first Course
-                   $first_course = array_key_first($aDetails['providerValues']['courses']);       
-                   if (isset($aDetails['providerValues']['courses'][$first_course]['url'])) {
-                        $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
-                   }
-                   $aDegree[$degree][$type][$title]['campo_url'] = $compo_link;
+      //             $first_course = array_key_first($aDetails['providerValues']['courses']);       
+      //             if (isset($aDetails['providerValues']['courses'][$first_course]['url'])) {
+      //                  $compo_link = $aDetails['providerValues']['courses'][$first_course]['url'];
+      //             }
+      //             $aDegree[$degree][$type][$title]['campo_url'] = $compo_link;
                     
+                   
+                   
                     $i++;
                     $first = false;
                     $iCnt++;

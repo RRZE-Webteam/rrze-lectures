@@ -46,6 +46,79 @@ class FormatData {
 
     
     /*
+     * Suche die Campo- und die StudOn URL aus den Course Einträgen und 
+     * fügt diese den Bereich der direkt unter der ID zu.
+     * Erwartet ein EventTypeArray und gibt das geänderte Array zurück
+     */
+    public function searchPortalURLsforEvent(array $data): array {
+        
+        foreach ($data as $eventtype => $events) {
+            foreach ($events as $id => $eventdata) {
+                
+                
+                if (!empty($eventdata['providerValues']['courses'])) {
+
+                      // get Campo Link from first Course
+                    $first_course = array_key_first($eventdata['providerValues']['courses']);       
+                    if (isset($eventdata['providerValues']['courses'][$first_course]['url'])) {
+                        $data[$eventtype][$id]['campo_url'] = $eventdata['providerValues']['courses'][$first_course]['url'];
+                    }
+
+
+                   
+                    
+                    if (isset($eventdata['providerValues']['event']['link_studon'])) {
+                        // schaue ob der Link zu STudOn in den Eventdaten drin ist
+                        $data[$eventtype][$id]['studon_url'] = $eventdata['providerValues']['event']['link_studon'];                
+                    } elseif (isset($eventdata['providerValues']['courses'][$first_course]['studon_url'])) {
+                        // schau ob es in ProviderValues eine StudOnURL gibt
+                        $data[$eventtype][$id]['studon_url'] = $eventdata['providerValues']['courses'][$first_course]['studon_url'];
+                    } else {
+                        // leider keine URL übergeben.
+                        // Daher suche ich nun in dem Beschreibungstext der Kurse. Nehme da den ersten
+                        // Treffer
+                        
+                        foreach ($eventdata['providerValues']['courses'] as $course => $coursedata) {
+                            if (!empty($coursedata['contents'])) {
+                                $studonurl = self::findStudOnURLinText($coursedata['contents']);
+                                if (!empty($studonurl)) {    
+                                    $data[$eventtype][$id]['studon_url'] = $studonurl;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                    }
+                    
+                    
+                   
+                }
+            }
+        }
+        return $data;
+
+    }
+    
+    // private Funktion für searchPortalURLsforEvent()
+    // Sucht in einem Text nach einer URL der Form
+    //       https://www.studon.fau.de/[a-z]+[0-9]+\.html
+    // und gibt den ersten Treffer zurück
+    private function findStudOnURLinText(string $content): string {
+        $result = '';
+        if (empty($content)) {
+            return $result;
+        }
+        preg_match_all('/https:\/\/www\.studon\.fau\.de\/[a-z]+[0-9]+\.html/i', $content, $output_array);
+        if (!empty($output_array)) {
+            if (isset($output_array[0][0])) {
+                return $output_array[0][0];
+            }
+        }
+        
+          return $result;
+    }
+    
+    /*
      * Gruppiere Daten nach Event-Typ
      */ 
     public function groupbyEventType(array $data): array {

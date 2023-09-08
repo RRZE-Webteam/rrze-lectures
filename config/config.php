@@ -115,12 +115,12 @@ function getConstants()
                      'module'  => [
                         'name'      => 'module',
                         'attribut'  => 'module',
-                        'default'   => true,                      
+                        'default'   => false,                      
                     ],
                     'orgunit'  => [
                         'name'      => 'orgunit',
                         'attribut'  => 'orgunit',
-                        'default'   => true,                      
+                        'default'   => false,                      
                     ]
                 ]
             ],
@@ -345,6 +345,12 @@ function getShortcodeSettings()
                 'field_type' => 'text',
                 'label' => __('Degree Key', 'rrze-lectures'),
                 // Studiengang HIS Schlüssel, bspw. "65|079|-|-|H|2010|E|P|V|7|"
+                'type' => 'string',
+            ],
+            'orgunit' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Filter für die Einschränkung der Veranstaltungen, die zu einer spezifischen Orgunit gehören', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'sem' => [

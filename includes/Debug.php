@@ -14,10 +14,11 @@ class Debug {
    
    // Gets an Variable, that can be an string, array or object and modifies its output in a more readable form 
    public static function get_html_var_dump($input) {
-//        $out = Debug::get_var_dump($input);
+
          $out = self::get_dump_debug($input);
         
         /*
+        $out = Debug::get_var_dump($input);
         $patterns_replacements = array( 
             '/=>[\r\n\s]+/'         => ' => ',            
             "/\s+bool\(true\)/"     => ' <span style="color:green">TRUE</span>,',
@@ -103,15 +104,16 @@ class Debug {
                 $output .=  'document.getElementById("container"+id).style.display = state == "block" ? "none" : "block";';
                 $output .=  'document.getElementById("plus"+id).style.display = state == "block" ? "inline" : "none";';
                 $output .=  '}</script>'."\n";
-                $output .=  '<style>.dump_container { border-left: 1px dotted #000 !important; border-bottom: 1px dotted #000 !important; margin-left: 0; padding-left: 2em;}'
+                $output .=  '<style>.dump_container { border-left: 1px dotted #000 !important; border-bottom: 1px dotted #000 !important; margin-left: 0; padding-left: 2em; overflow-x: auto;}'
                         . ' .dump_debug { display: inline; }'
-                        . ' .dump_fieldname_col {font-family: monospace; min-width: 150px; display: inline-block;}'
+                        . ' .dump_fieldname_col {font-family: monospace; min-width: 12em; display: inline-block;}'
                         . ' .dump_fieldname { padding: 0; font-family: monospace; color:#dd8800; background-color: inherit;}'
                         . ' .dump_fieldname_indent { font-family: monospace; }'
-                        . ' .dump_fieldname_numeric { color: darkgreen; font-style: italic; }'
+                        . ' .dump_fieldname_numeric { color: darkgreen !important; font-style: italic; }'
                         . ' .dump_value { font-family: Courier, Monospace; font-weight: bold; white-space: pre; }'
-                        . ' .dump_empty_array { color: #black; }'
-                        . ' .dump_typeinfo { margin-left: 2em; color:#666666; font-size:0.9em; font-style:italic;} </style>'."\n";
+                        . ' .dump_empty_array { color: blue !important;}'
+                        . ' .dump_nullvalue { color: blue !important; font-style: italic; }'
+                        . ' .dump_typeinfo { margin-left: 1em; color:#666666 !important; font-size:0.9em; font-style:italic;} </style>'."\n";
                 
             }
 
@@ -150,7 +152,8 @@ class Debug {
                     
 
                 case "NULL": 
-                    $type_length = 0; break;
+                    $type_length = 0; 
+                    break;
 
                 case "Array": 
                     $type_length = count($data);
@@ -170,7 +173,7 @@ class Debug {
                             $id = substr(md5(rand().":".$key.":".$level), 0, 8);
                             $output .=  '<div class="dump_debug">';
                             $output .=  "<a href=\"javascript:toggleDisplay('". $id ."');\" style=\"text-decoration:none\">";
-                            $output .=  "<strong style='color:#666666'>" . $type . ($type_length !== null ? "(" . $type_length . ")" : "") . "</strong>";
+                            $output .=  "<strong style='color:blue'>" . $type . ($type_length !== null ? "(" . $type_length . ")" : "") . "</strong>";
                             $output .=  "</a>";
                             $output .=  "<span id=\"plus". $id ."\" style=\"color: red; display: " . ($collapse ? "inline" : "none") . ";\">&nbsp;&#10549;</span>";
                             if ($collapse) {
@@ -236,11 +239,19 @@ class Debug {
                     } else {
                          $output .=  $isTerminal ? $type_data : "<span class=\"dump_value\" style='color:" . $type_color . "'>" . $type_data . "</span>";
                     }
-                   
-                }
-                $output .=  $isTerminal ? 
+                    $output .=  $isTerminal ? 
                         $type . ($type_length !== null ? "(" . $type_length . ")" : "") . "  " : 
                         " <span class=\"dump_typeinfo\">" . $type . ($type_length !== null ? "(" . $type_length . ")" : "") . "</span>";
+                } else {
+                    
+                    if ($isTerminal) {
+                         $output .=  "NULL"; 
+                    } else {
+                        $output .= '<span class="dump_nullvalue">NULL</span>';
+                    }
+                     
+                }
+              
 
                 
             }

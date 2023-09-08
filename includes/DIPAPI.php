@@ -318,6 +318,12 @@ class DIPAPI {
             if (!empty($atts['fauorgnr'])) {
                 $aLQ['providerValues.event_orgunit.fauorg'] = $atts['fauorgnr'];
             }
+           
+              // Filter for Orgunit String 
+            if (!empty($atts['orgunit'])) {
+                $aLQ['providerValues.event_orgunit.orgunit'] = $atts['orgunit'];
+            }
+            
             
             // Now all the other filters
             
@@ -344,10 +350,12 @@ class DIPAPI {
                 $aLQ['providerValues.courses.teaching_language'] = $atts['teaching_language'];
             }
 
+            
             // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
             $dipParams = '?limit=' . $atts['max'];
             $dipParams .= '&lq=' . urlencode($this->makeLQ($aLQ));
-
+   
+            
             $attrs = $this->getAPIResponseArgs($atts);
             if (!empty($attrs)) {
                 $dipParams .= '&attrs=' . urlencode($attrs);             
@@ -378,6 +386,11 @@ class DIPAPI {
                     // see:
                     // use [or] to or value criteria
                     // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
+                
+                    
+                } elseif (($dipField == 'providerValues.event_orgunit.orgunit')) {  
+                    $aLQ[] = 'providerValues.event_orgunit.orgunit.de[in]='.$aIn['providerValues.event_orgunit.orgunit'];
+                    
                 } elseif (($dipField == 'providerValues.courses.cancelled') && ($attVal == 0)) {  
                     
                     if (!isset($aIn['providerValues.courses.semester'])) {
