@@ -407,6 +407,8 @@ class DIPAPI {
                     // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
                 
                     
+                } elseif (($dipField == 'providerValues.modules.module_cos.subject')) {  
+                    $aLQ[] = 'providerValues.modules.module_cos.subject[ireg]='.$aIn['providerValues.modules.module_cos.subject'];    
                 } elseif (($dipField == 'providerValues.event_orgunit.orgunit')) {  
                     $aLQ[] = 'providerValues.event_orgunit.orgunit.de[in]='.$aIn['providerValues.event_orgunit.orgunit'];
                     

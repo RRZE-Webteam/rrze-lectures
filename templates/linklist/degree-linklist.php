@@ -1,12 +1,5 @@
 {{first}}
     <div class="rrze-lectures">
-        {{degree_title}}
-        {{atts_show_degree_title}}
-            <h{{=degree_hstart}}>{{=degree_title}}</h{{=degree_hstart}}>
-        {{:atts_show_degree_title}}
-            <br>&nbsp;<br>
-        {{/atts_show_degree_title}}
-        {{/degree_title}}
         {{atts_do_accordion}}
             [collapsibles hstart="{{=atts_hstart}}"]
         {{/atts_do_accordion}}

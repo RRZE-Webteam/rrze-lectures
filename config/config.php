@@ -141,7 +141,7 @@ function getConstants()
             '204'       => __('No matching entries found.', 'rrze-lectures'),
             '206'       => __('The server is delivering only part of the resource, therfor no matching entries was found.', 'rrze-lectures'),
             '403'       => __('The request contained valid data and was understood by the server, but the server is refusing action. This may be due to the user not having the necessary permissions for a resource or needing an account of some sort, or attempting a prohibited action.', 'rrze-lectures'),
-            '404'       => __('The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.', 'rrze-lectures'),
+            '404'       => __('No matching entries found.', 'rrze-lectures'),
             '503'       => __('Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>', 'rrze-lectures'),
             '504'       => __('The server did not receive a timely response.','rrze-lectures'),
         ]
@@ -214,13 +214,29 @@ function getFields()
             ],
             [
                 'name' => 'FAUOrgNr',
-                'label' => __('FAU Org Number', 'rrze-lectures'),
+                'label' => __('FAU.ORG Number', 'rrze-lectures'),
                 'desc' => __('To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr="123"]', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
                 'default' => '',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
+            [
+                'name' => 'AddFAUORG',
+                'label' => __('Use FAU.ORG Number', 'rrze-lectures'),
+                'desc' => __('Set if the  FAU.ORG number set above, is always added to any shortcode request or is only used if no other required parameter was given in the shortcode.', 'rrze-lectures'),
+                'placeholder' => 'add',
+                'type' => 'radio',
+                'default' => 'add',
+                'options'   => array(
+                    'add'  => __('Always add FAU.ORG number to query, unless the shortcode-parameter fauorg was filled', 'rrze-lectures'),
+                    'ifrequired'  => __('Add FAU.ORG number only if other required search fields are missing', 'rrze-lectures'),
+                ),
+                'sanitize_callback' => 'sanitize_text_field',
+            ],
+            
+            
+            
             [
                 'name' => 'limit_lv',
                 'label' => __('Maximum number of lectures', 'rrze-lectures'),
@@ -300,13 +316,13 @@ function getShortcodeSettings()
             'fauorgnr' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('FAU Org Nr', 'rrze-lectures'),
+                'label' => __('FAU.ORG Number', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lecture_name' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Lecture\'s name', 'rrze-lectures'),
+                'label' => __('Lectures name', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lecture_identifier' => [
@@ -330,7 +346,7 @@ function getShortcodeSettings()
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Type f.e. Lecture', 'rrze-lectures'),
+                'label' => __('Type of the event. For example: Vorlesung', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'degree' => [
@@ -343,32 +359,32 @@ function getShortcodeSettings()
             'degree_key' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Degree Key', 'rrze-lectures'),
+                'label' => __('Degree Key. Example: 65|079|-|-|H|2010|E|P|V|7| ', 'rrze-lectures'),
                 // Studiengang HIS Schlüssel, bspw. "65|079|-|-|H|2010|E|P|V|7|"
                 'type' => 'string',
             ],
             'orgunit' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Filter für die Einschränkung der Veranstaltungen, die zu einer spezifischen Orgunit gehören', 'rrze-lectures'),
+                'label' => __('Filter for Campo Orgunit', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'sem' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
+                'label' => __('Semester for example SoSe2023 or WiSe2024', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'teaching_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Teaching language (f.e. "en" or "de" or "en, de, fr"', 'rrze-lectures'),
+                'label' => __('Teaching language (for example "en" or "de" or "en, de, fr"', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Display language (f.e. "en" or "de" or "fr". If this attribute is not given, website\'s language is used. In every case fallback is "de".)', 'rrze-lectures'),
+                'label' => __('Display language (for example "en" or "de" or "fr". If this attribute is not given, websites language is used. In every case fallback is "de".)', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'guest' => [
@@ -379,7 +395,7 @@ function getShortcodeSettings()
                 'values' => [
                     [
                         'id' => '',
-                        'val' => __('don\'t filter', 'rrze-lectures'),
+                        'val' => __('do not filter', 'rrze-lectures'),
                     ],
                     [
                         'id' => 1,
@@ -406,7 +422,7 @@ function getShortcodeSettings()
             'hstart' => [
                 'default' => 2,
                 'field_type' => 'text',
-                'label' => __('Headline\'s size', 'rrze-lectures'),
+                'label' => __('Headlines size', 'rrze-lectures'),
                 'type' => 'number',
             ],
             'format' => [
@@ -437,27 +453,27 @@ function getShortcodeSettings()
                     ],
                     [
                         'id' => 'fau',
-                        'val' => __('FAU: Dunkelblau', 'rrze-lectures'),
+                        'val' => __('FAU', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'med',
-                        'val' => __('Med: Blau', 'rrze-lectures'),
+                        'val' => __('Med', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'nat',
-                        'val' => __('Nat: Meeresgrün', 'rrze-lectures'),
+                        'val' => __('Nat', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'phil',
-                        'val' => __('Phil: Ocker', 'rrze-lectures'),
+                        'val' => __('Phil', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'rw',
-                        'val' => __('RW: Bordeaurot', 'rrze-lectures'),
+                        'val' => __('RW', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'tf',
-                        'val' => __('TF: Silbern', 'rrze-lectures'),
+                        'val' => __('TF', 'rrze-lectures'),
                     ],
                 ],
             ],

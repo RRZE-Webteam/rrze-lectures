@@ -56,9 +56,9 @@
         {{_val.planned_dates}}
         <table>
             <tr>
-                <th><?php echo __('Date and Time', 'rrze-lectures'); ?></th>
-                <th><?php echo __('Cancellation date', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Date and Time', 'rrze-lectures'); ?></th>             
                 <th><?php echo __('Start date - End date', 'rrze-lectures'); ?></th>
+                <th><?php echo __('Cancellation date', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Lecturer(s)', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Comment', 'rrze-lectures'); ?></th>
                 <th><?php echo __('Room', 'rrze-lectures'); ?></th>
@@ -67,9 +67,9 @@
             <tr>              
                 <td>
                     {{_val.rhythm}}{{=_val.rhythm}} {{/_val.rhythm}}{{_val.weekday}}{{=_val.weekday}}{{/_val.weekday}}{{_val.starttime}}, {{=_val.starttime}}{{/_val.starttime}} - {{_val.endtime}}{{=_val.endtime}}{{/_val.endtime}}
-                </td>
-                <td>{{@_val.misseddates}}{{=_val}}<br>{{/@_val.misseddates}}</td>
+                </td>        
                 <td>{{_val.startdate}}{{=_val.startdate}}{{/_val.startdate}} - {{_val.enddate}}{{=_val.enddate}}{{/_val.enddate}}</td>
+                <td>{{@_val.misseddates}}{{=_val}}<br>{{/@_val.misseddates}}</td>
                 <td>
                 {{_val.instructor}}
                 <ul>

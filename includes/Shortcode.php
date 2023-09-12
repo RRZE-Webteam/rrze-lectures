@@ -213,6 +213,9 @@ class Shortcode {
                             $output = '';
                             $foundshow = false;
                             foreach ($aGivenDegrees as $searchdegree) {
+                                
+                                $output .= '<h2>'.$searchdegree.'</h2>';
+                                
                                 $shortcode = '[lectures';
                                 foreach ($atts as $name => $value) {
                                     if ($name !== 'degree') {
@@ -634,9 +637,19 @@ class Shortcode {
         // If required Paras are missing, but the backend settings contains 
         // a fauorg-value, we add this in the atts
         
-        if ((!$this->isRequiredExists()) && !empty($this->options['basic_FAUOrgNr'])) { 
+        
+        if ((!$this->isRequiredExists()) && !empty($this->options['basic_FAUOrgNr'])) {          
             $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
+        } elseif (!empty($this->options['basic_FAUOrgNr']) 
+            && $this->options['basic_AddFAUORG'] !== 'ifrequired'
+            && (empty($this->atts['fauorgnr']))) {
+               $this->atts['fauorgnr'] = $this->options['basic_FAUOrgNr'];
         }
+        if ($this->atts['fauorgnr'] == '-') {
+            $this->atts['fauorgnr'] = '';
+        }
+                
+        
 
         
         return $this->atts;
