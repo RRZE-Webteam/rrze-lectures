@@ -6,7 +6,7 @@
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
  * Version:         2.0.26
  * Requires at least: 6.3
- * Requires PHP:      8.1
+ * Requires PHP:      8.0
  * Author:          RRZE-Webteam
  * Author URI:      https://blogs.fau.de/webworking/
  * License:         GNU General Public License v3
@@ -43,7 +43,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-const RRZE_PHP_VERSION = '8.1';
+const RRZE_PHP_VERSION = '8.0';
 const RRZE_WP_VERSION = '6.3';
 $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], false);
 define("RRZE_PLUGIN_VERSION", $plugin_data['Version']); // f.e. to make javascript load on change during development
