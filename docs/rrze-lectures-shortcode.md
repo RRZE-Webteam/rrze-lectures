@@ -1,6 +1,6 @@
 # RRZE Lectures Shortcode
 
-* Public Documentation: https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
+Public Documentation: https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/
 
 
 To render the lectures, use the `[lectures]` shortcode.
@@ -26,17 +26,6 @@ See below for a list of supported attributes.
 | `sortby`	  | Sorts lectures of a given type by an attribut     | title    | title, nextdate                     |  
 
 
-## Special commands for developing purpose only
-
-Its possible to get debug informations by adding an URI Parameter.
-
-| URI-Parameter                | Description                                                          |
-|------------------------------|----------------------------------------------------------------------|
-| `debug=1`                    | shows the API request without AUTH Key                               |
-| `nocache=1`                  | deactivates the cache                                                |  
-
-
-If `?debug` ist set, debug informations will also be piped into the JS console.
 
 ## List of types
 
