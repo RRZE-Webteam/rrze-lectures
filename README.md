@@ -17,7 +17,7 @@ GNU General Public License (GPL) Version 3
 ## Dokumentation
 
 * Öffentliche Benutzerdokumentation: [WordPress RRZE: Lehrveranstaltungen einbinden](https://www.wordpress.rrze.fau.de/plugins/externe-daten-einbinden/lehrveranstaltungen/)
-* Markdown-Dokumentation: [Shortcode-Parameter](docs/rrze-lectures-shordcode.md)
+* Markdown-Dokumentation: [Shortcode-Parameter](docs/rrze-lectures-shortcode.md)
 
 ## Hinweise
 
