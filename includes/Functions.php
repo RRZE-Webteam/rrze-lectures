@@ -48,7 +48,7 @@ class Functions {
     /*
      * Gets the Errormessage from the config by the given errorkey/code
      */
-    public static function getErrorMessage(string|int $errorkey, string $userstring): string {
+    public static function getErrorMessage(string|int $errorkey, string $userstring = ''): string {
         if (isset($userstring) && (!empty($userstring))) {
             return $userstring;
         }
