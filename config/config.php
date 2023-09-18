@@ -60,7 +60,93 @@ function getConstants()
             "ru" => __('Russian', 'rrze-lectures'),
             "zh" => __('Chinese', 'rrze-lectures'),
         ],
+      	'Transient_Prefix' => 'rrze_lectures',
+        // Default Transient time
+        'Transient_Seconds' =>  3 * HOUR_IN_SECONDS,
+        // Transient Time for generated Outpzut. Smaller as all. 10 - 60 minutes would fit
+        'Transient_Seconds_Output' =>  15 * 60,
+        // Activate/Deactivate Template Cache. If tis is false, cache will only 
+        // used for DIP-Data, but not for the generated HTML
+        'Transient_Output' => false,
+        // Transient Time for raw data we got from the API
+        'Transient_Seconds_Rawdata' =>  6 * HOUR_IN_SECONDS,
+        // maximum number for limit at requesting data from api for one round
+        'DIPAPI_limit_max'  => 50,
+        // maximal number of total results
+        'DIPAPI_totalentries_max' => 250,
+        // maximal timeout in seconds we give the api
+        'DIPAPI_timeout'  => 5,
+        // maximum Btyes for the response
+        'DIPAPI_max_response_bytes' =>  1024 * 1024,
+        // Output Template Formats
+        'template_formats' => [
+            
+            'tabs'      => [
+                'name'  => 'tabs',
+                    // definiert das Verzeichnis des Templates und
+                    // den Filename der Basis-Template. Hier:  tabs/tabs.php
+                    // Die Basistempöate wird immer geladen und ausgeführt.
+                    
+                'contains'  => [
+                    // Wenn der Array nicht leer ist, kann man hier subtemplates 
+                    // definieren, die geladen und interpretiert werden und
+                    // deren Inhalt dann als Variable in dem Basistemplate 
+                    // eingefügt werden.
+                    'base'  => [
+                        'name'      => 'base',
+                            // definiert den Templatenamen im Verzeichnis
+                            // und auch wie dessen Inhalte dann mit {{=variable}}
+                            // in der darüber liegenden Template File addressiert 
+                            // werden
+                            // Darf nicht identisch sein mit dem Namen
+                            // des Verzeichnisses und der Haupt-Templatefile
+                        'attribut'  => 'base',
+                            // Attribut zum schalten via show/hide
+                            // Sollte nicht den selben Namen tragen wie andere Attribute
+                            // aus der API. Aber kann durchaus :) 
+                        'default'   => true,                      
+                            // Definiert ob per Default sichtbar oder nicht
+                    ],
+                    'termine'  => [
+                        'name'      => 'termine',
+                        'attribut'  => 'termine',
+                        'default'   => true,                      
+                    ],
+                     'module'  => [
+                        'name'      => 'module',
+                        'attribut'  => 'module',
+                        'default'   => false,                      
+                    ],
+                    'orgunit'  => [
+                        'name'      => 'orgunit',
+                        'attribut'  => 'orgunit',
+                        'default'   => false,                      
+                    ]
+                ]
+            ],
+            'linklist'  => [
+                'name'  => 'linklist',
+                'contains'  => []
+            ],
+            'degree-linklist'  => [
+                'name'  => 'degree-linklist',
+                'contains'  => []
+            ]  
+        ],
+        'errors'    => [
+            'default'   => __('No matching entries found.', 'rrze-lectures'),
+            'norequired'  => __('Required attributes mssing. Either enter the FAUOrg number it in the settings of rrze-lectures or use one of the shortcode attributes: fauorgnr, lecture_name, lecturer_idm or lecturer_identifier', 'rrze-lectures'),
+            'apikeymissing' => __('DIP API-Key Error! Um eine DIP API Key zu erhalten, rufen Sie bitte die Seite <code>https://gitos.rrze.fau.de/fauapi/keyman</code> auf und flgenden den dortigen Schritten.', 'rrze-lectures'),
+            'oversize'  => __('We got too much data from the API. Please narrow your search filter!', 'rrze-lectures'),
+            '204'       => __('No matching entries found.', 'rrze-lectures'),
+            '206'       => __('The server is delivering only part of the resource, therfor no matching entries was found.', 'rrze-lectures'),
+            '403'       => __('The request contained valid data and was understood by the server, but the server is refusing action. This may be due to the user not having the necessary permissions for a resource or needing an account of some sort, or attempting a prohibited action.', 'rrze-lectures'),
+            '404'       => __('No matching entries found.', 'rrze-lectures'),
+            '503'       => __('Die Schnittstelle zu Campo wird im Moment gewartet. In Kürze wird die Ausgabe wieder wie gewünscht erfolgen. Es ist keinerlei Änderung Ihrerseits nötig.<br><br><a href="https://www.campo.fau.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1">Hier ist das Vorlesungsverzeichnis auf Campo einsehbar.</a>', 'rrze-lectures'),
+            '504'       => __('The server did not receive a timely response.','rrze-lectures'),
+        ]
     );
+    
 
     $aTmp = getShortcodeSettings();
 
@@ -128,7 +214,7 @@ function getFields()
             ],
             [
                 'name' => 'FAUOrgNr',
-                'label' => __('FAU Org Number', 'rrze-lectures'),
+                'label' => __('FAU.ORG Number', 'rrze-lectures'),
                 'desc' => __('To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr="123"]', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
@@ -136,17 +222,60 @@ function getFields()
                 'sanitize_callback' => 'sanitize_text_field',
             ],
             [
+                'name' => 'AddFAUORG',
+                'label' => __('Use FAU.ORG Number', 'rrze-lectures'),
+                'desc' => __('Set if the  FAU.ORG number set above, is always added to any shortcode request or is only used if no other required parameter was given in the shortcode.', 'rrze-lectures'),
+                'placeholder' => 'add',
+                'type' => 'radio',
+                'default' => 'add',
+                'options'   => array(
+                    'add'  => __('Always add FAU.ORG number to query, unless the shortcode-parameter fauorg was filled', 'rrze-lectures'),
+                    'ifrequired'  => __('Add FAU.ORG number only if other required search fields are missing', 'rrze-lectures'),
+                ),
+                'sanitize_callback' => 'sanitize_text_field',
+            ],
+            
+            
+            
+            [
                 'name' => 'limit_lv',
                 'label' => __('Maximum number of lectures', 'rrze-lectures'),
-                'desc' => __('Warning! If you increase this > 25 be aware that the website\'s loading time will increase dramatically and might lead to an HTTP 502 error.', 'rrze-lectures'),
+                'desc' => __('Warning! If you increase this > 15 be aware that the website\'s loading time will increase dramatically and might lead to an HTTP 502 error.', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
-                'default' => '25',
+                'default' => '15',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
         ],
     ];
 
+    
+      /* 
+         *  Der untere Teil nun doch nach Überlegungen deaktiviert auch auch die Settings im Backend für Deutsch und Englishc weggemacht.
+         *   Erwägungsgründe:
+         *   - Wenn wir überall egal was ist, immer dieselbe Antwort im Fehlerfall geben, können wir
+         *     niht kenntlich machen, ob keine Daten kommen, weil es zu viele Daten waren, weil die Anfrage falsch war 
+         *     oder die API überlastet ist u.a. 
+         *     Der Webmaster hat somit keine einfache Möglichkeit den Shortcode zu reparieren oder die ANfrage zu verfeinern, 
+         *    wenn er nicht weiß´aus welcher Richtung das Problem kam.
+         *   - Wenn wir aber jeden Fehlerfall mit eigenen de/en - Fehlermeldungen anspeichern lassen, wird allein dadurch das
+         *     Setting voll und somit für den unbedarften Anwender erscheint das alles komplexer als es ist.
+         *     ZUdem sind das Fehlermeldungen, die normalerweise ohnehin nicht nach aussen sollten.
+         *   - Nach aussen hin, zum Leser der Website wäre in der Tat nur eine Meldung azseichend.
+         *     Aber diese kann durchaus so bleiben wie sie ist.
+         * 
+         * Daher:
+         *    Wir entfernen doch lieber die Settings aus dem Backend  
+         *    Es gibt verschiedene Fehlermeldungen die wir per Default vorgeben 
+         *    Wenn der Webmaster  für den Leser der Website eine eigene Meldung vorgeben möchte,
+         *     dann kann und soll er das individuell pro Shortcode machen.
+         *     Dann entfällt auch er AUfwand das zweisprachig zu sichern, denn jeder Shortcode wird ja 
+         *     bereits in einem definierten SPrachkontext geführt.
+         * 
+         * Unabhängig davon: Der vorherige Ansatz und die Lösung das mit den Settings so zu machen mit der
+         * Sprachabhängigkeit war genial und high sophisticated.
+
+      
     // generate fields for nodata by available languages
     $aNodata = [];
 
@@ -163,7 +292,7 @@ function getFields()
     }
 
     $aRet['basic'] = array_merge($aRet['basic'], $aNodata);
-
+   */
     return $aRet;
 }
 
@@ -187,13 +316,19 @@ function getShortcodeSettings()
             'fauorgnr' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('FAU Org Nr', 'rrze-lectures'),
+                'label' => __('FAU.ORG Number', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lecture_name' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Lecture\'s name', 'rrze-lectures'),
+                'label' => __('Lectures name', 'rrze-lectures'),
+                'type' => 'string',
+            ],
+            'lecture_identifier' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Lecture identifier', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lecturer_identifier' => [
@@ -211,7 +346,7 @@ function getShortcodeSettings()
             'type' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Type f.e. Lecture', 'rrze-lectures'),
+                'label' => __('Type of the event. For example: Vorlesung', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'degree' => [
@@ -221,22 +356,35 @@ function getShortcodeSettings()
                 // Studiengang
                 'type' => 'string',
             ],
+            'degree_key' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Degree Key. Example: 65|079|-|-|H|2010|E|P|V|7| ', 'rrze-lectures'),
+                // Studiengang HIS Schlüssel, bspw. "65|079|-|-|H|2010|E|P|V|7|"
+                'type' => 'string',
+            ],
+            'orgunit' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Filter for Campo Orgunit', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'sem' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Semester f.e. SoSe2023 or WiSe2024', 'rrze-lectures'),
+                'label' => __('Semester for example SoSe2023 or WiSe2024', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'teaching_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Teaching language (f.e. "en" or "de" or "en, de, fr"', 'rrze-lectures'),
+                'label' => __('Teaching language (for example "en" or "de" or "en, de, fr"', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'display_language' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Display language (f.e. "en" or "de" or "fr". If this attribute is not given, website\'s language is used. In every case fallback is "de".)', 'rrze-lectures'),
+                'label' => __('Display language (for example "en" or "de" or "fr". If this attribute is not given, websites language is used. In every case fallback is "de".)', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'guest' => [
@@ -247,7 +395,7 @@ function getShortcodeSettings()
                 'values' => [
                     [
                         'id' => '',
-                        'val' => __('don\'t filter', 'rrze-lectures'),
+                        'val' => __('do not filter', 'rrze-lectures'),
                     ],
                     [
                         'id' => 1,
@@ -265,10 +413,16 @@ function getShortcodeSettings()
                 'label' => __('Hide', 'rrze-lectures'),
                 'type' => 'string',
             ],
+            'show' => [
+                'default' => '',
+                'field_type' => 'text',
+                'label' => __('Show', 'rrze-lectures'),
+                'type' => 'string',
+            ],
             'hstart' => [
                 'default' => 2,
                 'field_type' => 'text',
-                'label' => __('Headline\'s size', 'rrze-lectures'),
+                'label' => __('Headlines size', 'rrze-lectures'),
                 'type' => 'number',
             ],
             'format' => [
@@ -299,41 +453,41 @@ function getShortcodeSettings()
                     ],
                     [
                         'id' => 'fau',
-                        'val' => __('FAU: Dunkelblau', 'rrze-lectures'),
+                        'val' => __('FAU', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'med',
-                        'val' => __('Med: Blau', 'rrze-lectures'),
+                        'val' => __('Med', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'nat',
-                        'val' => __('Nat: Meeresgrün', 'rrze-lectures'),
+                        'val' => __('Nat', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'phil',
-                        'val' => __('Phil: Ocker', 'rrze-lectures'),
+                        'val' => __('Phil', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'rw',
-                        'val' => __('RW: Bordeaurot', 'rrze-lectures'),
+                        'val' => __('RW', 'rrze-lectures'),
                     ],
                     [
                         'id' => 'tf',
-                        'val' => __('TF: Silbern', 'rrze-lectures'),
+                        'val' => __('TF', 'rrze-lectures'),
                     ],
                 ],
             ],
             'max' => [
                 'default' => '',
                 'min' => 1,
-                'max' => 100,
+                'max' => 10,
                 'step' => '1',
                 'field_type' => 'number',
             ],
             'nodata' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('Show', 'rrze-lectures'),
+                'label' => __('Own errormessage in case an error occurs', 'rrze-lectures'),
                 'type' => 'string',
             ],
         ],

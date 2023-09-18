@@ -2,18 +2,11 @@
 @import "icons/icons";
 
 
-#loading{
-    width: 50%;
-    margin: 0 auto;
+.rrze-lectures {
+    .course-contents {
+	white-space: pre-line;
+    }
+    table.metadata {
+	max-width: 95%;
+    }
 }
-
-.lectureSelect{
-    width: -webkit-fill-available !important;    
-}
-
-.lectureTab{
-    word-wrap: break-word !important;
-    width: -webkit-fill-available !important;    
-    margin: 0;
-}
-

@@ -73,6 +73,14 @@ class Sanitizer
         }
     }
 
+    
+    public function sanitizeSemester(string $value): string {
+        if (empty($value)) {
+            return Functions::getSemester();
+        }
+        $value = sanitize_text_field($value);
+        
+    }
 
     public static function sanitizeLectures(array &$data, array &$aLanguages)
     {

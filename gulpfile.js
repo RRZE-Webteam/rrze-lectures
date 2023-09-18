@@ -1,9 +1,8 @@
 'use strict';
 
 const
-    {src, dest, watch, series} = require('gulp'),
-    sass = require('gulp-sass'),
-    cleancss = require('gulp-clean-css'),
+    {src, dest, watch, series, parallel} = require('gulp'),
+    sass = require('gulp-sass')(require('sass')),
     postcss = require('gulp-postcss'),
     autoprefixer = require('autoprefixer'),
     uglify = require('gulp-uglify'),
@@ -15,23 +14,25 @@ const
     touch = require('gulp-touch-cmd')
 ;
 
+
 function css() {
-    return src('./src/sass/*.scss', {
-            sourcemaps: false
-        })
-        .pipe(sass())
-        .pipe(postcss([autoprefixer()]))
-        .pipe(cleancss())
-        .pipe(dest('./css'))
+    var plugins = [
+        autoprefixer()
+    ];
+    return src([info.source.sass + 'rrze-lectures.scss'])
+        .pipe(sass().on('error', sass.logError))
+        .pipe(postcss(plugins))
+        .pipe(dest(info.target.css))
 	.pipe(touch());
 }
 function cssdev() {
-    return src('./src/sass/*.scss', {
-            sourcemaps: true
-        })
-        .pipe(sass())
-        .pipe(postcss([autoprefixer()]))
-        .pipe(dest('./css'))
+    var plugins = [
+        autoprefixer()
+    ];
+    return src([info.source.sass + 'rrze-lectures.scss'])
+        .pipe(sass().on('error', sass.logError))
+        .pipe(postcss(plugins))
+        .pipe(dest(info.target.css))
 	.pipe(touch());
 }
 
