@@ -90,61 +90,40 @@ class Functions {
 
             switch ($iSem) {
                 case 1:
+                    // Next semester
                     switch ($curQuarter) {
                         case 1:
-                            $sem = 'SoSe';
-                            $year += 1;
-                            break;
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe'; // $year does not change
-                            break;
-                        // case 4: // neither $sem nor $year do change
-                    }
-                    break;
-                case 2:
-                    switch ($curQuarter) {
-                        case 1:
-                            $year += 1; // $sem does not change
-                            break;
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe'; // $year does not change
-                            break;
                         case 4:
                             $sem = 'SoSe';
                             $year += 1;
-
+                            break;
+                        case 2:
+                        case 3:
+                            $sem = 'WiSe'; // $year does not change
                             break;
                     }
                     break;
+                case 2:
+                    // Same semester, but next year
+                    $year +=1;
+                    break;
                 case -1:
+                    // previous semester
                     switch ($curQuarter) {
-                        // case 1: // neither $sem nor $year do change
                         case 2:
                         case 3:
                             $sem = 'WiSe';
                             $year -= 1;
                             break;
+                        case 1:
                         case 4:
                             $sem = 'SoSe'; // $year does not change
                             break;
                     }
                     break;
                 case -2:
-                    switch ($curQuarter) {
-                        case 1:
-                            $sem = 'SoSe'; // $year does not change
-                            break;
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe';
-                            $year -= 1;
-                            break;
-                        case 4: // $sem does not change
-                            $year -= 1;
-                            break;
-                    }
+                    // Same semester, b ut prevoius year
+                    $year +=-1;
                     break;
             }
             $ret = $sem . $year;
