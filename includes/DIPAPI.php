@@ -360,6 +360,7 @@ class DIPAPI {
             // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
             $dipParams = '?limit=' . $atts['max'];
             $dipParams .= '&lq=' . urlencode($this->makeLQ($aLQ));
+            $dipParams .= '&rq=' . urlencode($this->makeRQ($aLQ));
             $dipParams .= '&lf=' . urlencode($this->makeLF($aLQ));
    
             
@@ -383,20 +384,26 @@ class DIPAPI {
         return $res;
     }
     
-    
-    public function makeLQ(array $aIn): string  {
-        $aLQ = [];
+     // Zusätzliche RQ-Suche (nur diese kann OR-Bedingungen
+    private function makeRQ(array $aIn): string {
+        $aRQ = [];
         foreach ($aIn as $dipField => $attVal) {
             if (!empty($attVal) || $attVal == 0 ) {
                 if ($dipField == 'lecturerName') {
                     $aLecturers = array_map('trim', explode(';', $attVal));
                     foreach($aLecturers as $lectureName){
                         $aParts = array_map('trim', explode(',', $lectureName));
-                        $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
-                        // $aLQ[] = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '%5Bin%5D%3D' : '%3D') . rawurlencode($aParts[0]);
+                        
+                        
+                        $queryfield = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
+                        $queryfield .= '[or]providerValues.courses.planned_dates.instructor.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
+                        
+                        $aRQ[]  = $queryfield;
                         if (!empty($aParts[1])){
-                            $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[1]);
-                            // $aLQ[] = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '%5Bin%5D%3D' : '%3D') . rawurlencode($aParts[1]);
+                            $queryfield = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[1]);
+                            $queryfield .= '[or]providerValues.courses.planned_dates.instructor.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[1]);
+                            
+                            $aRQ[]  = $queryfield;
                         }
                     }
 
@@ -407,6 +414,41 @@ class DIPAPI {
                     // example value: givenName=in:Uwe;Thomas&gender=1&familyName=lte:Nacht&familyName=gte:Bach[and]lte:Wolf&birthdate=gte:1998-04-16T22:00:00Z[or]lte:1955-04-16T22:00:00Z&gender=1
                 
                     
+               
+                } elseif ($dipField == 'providerValues.courses.course_responsible.identifier') {
+                    $aTmp = array_map(function ($val) {
+                        return rawurlencode(trim($val));
+                    }, explode(',', $attVal));
+
+                    // check if 10 figures hex 
+                    foreach ($aTmp as $nr => $val) {
+                        if (!(ctype_xdigit($val) && strlen($val) == 10)) {
+                            unset($aTmp[$nr]);
+                        }
+                    }
+
+                    $queryfield  = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
+                    $queryfield .= '[or]providerValues.courses.planned_dates.instructor.identifier' .(count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
+
+                    $aRQ[] = $queryfield;
+
+                }
+            }
+        }
+
+        // return implode('%26', $aLQ);
+        return implode('&', $aRQ);
+    }
+    
+    
+    public function makeLQ(array $aIn): string  {
+        $aLQ = [];
+        foreach ($aIn as $dipField => $attVal) {
+            if (!empty($attVal) || $attVal == 0 ) {
+                if ($dipField == 'lecturerName') {
+                    // do nothing as LQ, cause moved to RQ-Request
+                } elseif (($dipField == 'providerValues.courses.course_responsible.identifier')) {  
+                    // do nothing as LQ, cause moved to RQ-Request
                 } elseif (($dipField == 'providerValues.modules.module_cos.subject')) {  
                     $aLQ[] = 'providerValues.modules.module_cos.subject[ireg]='.$aIn['providerValues.modules.module_cos.subject'];    
                 } elseif (($dipField == 'providerValues.event_orgunit.orgunit')) {  
@@ -426,14 +468,7 @@ class DIPAPI {
                         return rawurlencode(trim($val));
                     }, explode(',', $attVal));
 
-                    // check if 10 figures hex 
-                    if ($dipField == 'providerValues.courses.course_responsible.identifier') {
-                        foreach ($aTmp as $nr => $val) {
-                            if (!(ctype_xdigit($val) && strlen($val) == 10)) {
-                                unset($aTmp[$nr]);
-                            }
-                        }
-                    }
+                   
 
                     // $aLQ[] = $dipField . (count($aTmp) > 1 ? '%5Bin%5D%3D' : '%3D') . implode('%3B', $aTmp);
                     $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
