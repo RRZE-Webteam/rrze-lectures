@@ -103,7 +103,7 @@ class Functions {
                     // previous semester
                     switch ($sem) {
                         case $WS:
-                            $sem = $SS
+                            $sem = $SS;
                             break;
                         case $SS:
                             $sem = $WS;
