@@ -62,95 +62,63 @@ class Functions {
     
     
     public static function getSemester(int $iSem = 0): string  {
-        // Bei Campo ist das Sommersemester immer vom 01.04. bis zum 30.09. des Jahres. 
-        // Das Wintersemester entsprechend vom 01.10. des Jahres bis zum 31.03. des folgenden Jahres
-        $today = date('Y-m-d');
-        $curMonth = date('m');
-        $curQuarter = ceil($curMonth / 3);
+        // Bei Campo ist das Sommersemester immer im zweiten und dritten Quartal des Jahres. (1.4.-30.9.)
+        // Das Wintersemester entsprechend im vierten des Jahres und ersten Quartal des folgenden Jahres. (1.10.-31.3.)
+        $SS = 'SoSe';
+        $WS = 'WiSe';
+        $curQuarter = ceil(date('m') / 3);
         $year = date('Y');
-        $sem = 'SoSe';
-        $ret = '';
+        $sem = $SS;
 
-        $soseStart = date('Y-m-d', strtotime($year . '-04-01'));
-        $soseEnd = date('Y-m-d', strtotime($year . '-09-30'));
 
-        if (($today >= $soseStart) && ($today <= $soseEnd)) {
-            $ret = $sem . $year;
-        } else {
-            if ($curQuarter == 1) {
+        switch ($curQuarter) {
+            case 1:
                 $year -= 1;
-            }
-            $sem = 'WiSe';
-            $ret = $sem . $year;
+            case 4:
+                $sem = $WS;
+            // 2 and 3 => SoSe and currYear, therefore no changes.
         }
 
         if ($iSem) {
             // check if -2, -1, 1 or 2 and casting to int is already done in Shortcode->normalize()
-            $curQuarter = ceil($curMonth / 3);
 
             switch ($iSem) {
                 case 1:
-                    switch ($curQuarter) {
-                        case 1:
-                            $sem = 'SoSe';
+                    // Next semester
+                    switch ($sem) {
+                        case $WS:
+                            $sem = $SS;
                             $year += 1;
                             break;
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe'; // $year does not change
+                        case $SS:
+                            $sem = $WS; // $year does not change
                             break;
-                        // case 4: // neither $sem nor $year do change
                     }
                     break;
                 case 2:
-                    switch ($curQuarter) {
-                        case 1:
-                            $year += 1; // $sem does not change
-                            break;
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe'; // $year does not change
-                            break;
-                        case 4:
-                            $sem = 'SoSe';
-                            $year += 1;
-
-                            break;
-                    }
+                    // Same semester, but next year
+                    $year +=1;
                     break;
                 case -1:
-                    switch ($curQuarter) {
-                        // case 1: // neither $sem nor $year do change
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe';
-                            $year -= 1;
+                    // previous semester
+                    switch ($sem) {
+                        case $WS:
+                            $sem = $SS
                             break;
-                        case 4:
-                            $sem = 'SoSe'; // $year does not change
+                        case $SS:
+                            $sem = $WS;
+                            $year -= 1;
                             break;
                     }
                     break;
                 case -2:
-                    switch ($curQuarter) {
-                        case 1:
-                            $sem = 'SoSe'; // $year does not change
-                            break;
-                        case 2:
-                        case 3:
-                            $sem = 'WiSe';
-                            $year -= 1;
-                            break;
-                        case 4: // $sem does not change
-                            $year -= 1;
-                            break;
-                    }
+                    // Same semester, but previous year
+                    $year -= 1;
                     break;
             }
-            $ret = $sem . $year;
         }
 
-        return $ret;
+        return $sem . $year;
     }
 
     public static function isLastElement(array $aArr): bool {
