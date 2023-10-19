@@ -131,7 +131,6 @@ class Shortcode {
                 $atts_default[$k] = $v['default'];
             }
         }
-
         $this->normalize(shortcode_atts($atts_default, $atts));
         
         $debugmsg .= Debug::get_notice("Attributs:<br>".Debug::get_html_var_dump($this->atts));

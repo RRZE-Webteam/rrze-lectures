@@ -359,11 +359,20 @@ class DIPAPI {
             
             // we cannot use API parameter "sort" because it sorts per page not the complete dataset -> 2DO: check again, API has changed
             $dipParams = '?limit=' . $atts['max'];
-            $dipParams .= '&lq=' . urlencode($this->makeLQ($aLQ));
-            $dipParams .= '&rq=' . urlencode($this->makeRQ($aLQ));
+            
+            //  Umsetzungshinweis zur API:
+            //  Die Suche nach rq > lq > q erfolgt nach der Reihenfolge. 
+            //  Es wird nur eine Form der Suche ausgeführt, nicht in Kombination!
+            //  Wenn z.B. rq angegeben wurde, wird rq ausgführt, aber lq und q 
+            //  dann nicht mehr.
+
+            $dipParams .= '&lq=' . urlencode($this->makeLQRQ($aLQ));
+            
+            // Filter auf die Suchergebnisse
             $dipParams .= '&lf=' . urlencode($this->makeLF($aLQ));
    
             
+            // etwaige EInschränkung der Rückgabewerte zur Performanceverbesserung
             $attrs = $this->getAPIResponseArgs($atts);
             if (!empty($attrs)) {
                 $dipParams .= '&attrs=' . urlencode($attrs);             
@@ -384,8 +393,8 @@ class DIPAPI {
         return $res;
     }
     
-     // Zusätzliche RQ-Suche (nur diese kann OR-Bedingungen
-    private function makeRQ(array $aIn): string {
+     //  RQ-Suche (nur diese kann OR-Bedingungen
+    private function makeLQRQ(array $aIn): string {
         $aRQ = [];
         foreach ($aIn as $dipField => $attVal) {
             if (!empty($attVal) || $attVal == 0 ) {
@@ -396,12 +405,10 @@ class DIPAPI {
                         
                         
                         $queryfield = 'providerValues.courses.course_responsible.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
-                        $queryfield .= '[or]providerValues.courses.planned_dates.instructor.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[0]);
                         
                         $aRQ[]  = $queryfield;
                         if (!empty($aParts[1])){
                             $queryfield = 'providerValues.courses.course_responsible.firstname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[1]);
-                            $queryfield .= '[or]providerValues.courses.planned_dates.instructor.surname' . (count($aLecturers) > 1 ? '[in]=' : '=') . rawurlencode($aParts[1]);
                             
                             $aRQ[]  = $queryfield;
                         }
@@ -428,38 +435,19 @@ class DIPAPI {
                     }
 
                     $queryfield  = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
-                    $queryfield .= '[or]providerValues.courses.planned_dates.instructor.identifier' .(count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
-
                     $aRQ[] = $queryfield;
 
-                }
-            }
-        }
-
-        // return implode('%26', $aLQ);
-        return implode('&', $aRQ);
-    }
-    
-    
-    public function makeLQ(array $aIn): string  {
-        $aLQ = [];
-        foreach ($aIn as $dipField => $attVal) {
-            if (!empty($attVal) || $attVal == 0 ) {
-                if ($dipField == 'lecturerName') {
-                    // do nothing as LQ, cause moved to RQ-Request
-                } elseif (($dipField == 'providerValues.courses.course_responsible.identifier')) {  
-                    // do nothing as LQ, cause moved to RQ-Request
                 } elseif (($dipField == 'providerValues.modules.module_cos.subject')) {  
-                    $aLQ[] = 'providerValues.modules.module_cos.subject[ireg]='.$aIn['providerValues.modules.module_cos.subject'];    
+                    $aRQ[] = 'providerValues.modules.module_cos.subject[ireg]='.$aIn['providerValues.modules.module_cos.subject'];    
                 } elseif (($dipField == 'providerValues.event_orgunit.orgunit')) {  
-                    $aLQ[] = 'providerValues.event_orgunit.orgunit.de[in]='.$aIn['providerValues.event_orgunit.orgunit'];
+                    $aRQ[] = 'providerValues.event_orgunit.orgunit.de[in]='.$aIn['providerValues.event_orgunit.orgunit'];
                     
                 } elseif (($dipField == 'providerValues.courses.cancelled') && ($attVal == 0)) {  
                     
                     if (!isset($aIn['providerValues.courses.semester'])) {
-                        $aLQ[] = 'providerValues.courses[em]=cancelled%3D0%3B';
+                        $aRQ[] = 'providerValues.courses[em]=cancelled%3D0%3B';
                     } else {
-                        $aLQ[] = 'providerValues.courses[em]=cancelled%3D0%3Bsemester%3D'.$aIn['providerValues.courses.semester'];
+                        $aRQ[] = 'providerValues.courses[em]=cancelled%3D0%3Bsemester%3D'.$aIn['providerValues.courses.semester'];
                     }
                 } elseif (($dipField == 'providerValues.courses.semester') && ($aIn['providerValues.courses.cancelled'] == 0)) {
                     continue;
@@ -471,12 +459,15 @@ class DIPAPI {
                    
 
                     // $aLQ[] = $dipField . (count($aTmp) > 1 ? '%5Bin%5D%3D' : '%3D') . implode('%3B', $aTmp);
-                    $aLQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
+                    $aRQ[] = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
                 }
             }
         }
 
         // return implode('%26', $aLQ);
-        return implode('&', $aLQ);
+        return implode('&', $aRQ);
     }
+    
+    
+   
 }
