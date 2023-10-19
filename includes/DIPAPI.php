@@ -313,7 +313,7 @@ class DIPAPI {
             if (!empty($atts['degree'])) {
                $aLQ['providerValues.modules.module_cos.subject'] = $atts['degree'];
             //    $aLQ['providerValues.modules.stud.subject'] = $atts['degree'];
-            //    Nach Absprache vom 29.08.23 mit Stefan Roas nicht mehr providerValues.modules.stud.* verwenden, da dies
+            //    Nach Absprache vom 29.08.23 mit DIP-Team nicht mehr providerValues.modules.stud.* verwenden, da dies
             //    nur für den Raumplanungstool der TF entwickelt wurde und daher auch nicht alle Events zeigt. Soll aus der API entfernt werden
             //
             }
