@@ -1,7 +1,7 @@
 {{providerValues.modules}}
 [tab title="<?php echo __('Modules', 'rrze-lectures'); ?>"]   
     
-<table >
+<table>
     <tr>
         <th><?php echo __('Module', 'rrze-lectures'); ?></th>
         <th><?php echo __('Degrees', 'rrze-lectures'); ?></th>
@@ -19,6 +19,6 @@
                
         </tr>
         {{/@providerValues.modules}}
-<table>    
+</table>    
 [/tab]
 {{/providerValues.modules}}
