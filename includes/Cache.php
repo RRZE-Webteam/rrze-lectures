@@ -42,9 +42,8 @@ class Cache  {
         // - degree|degree_key
         // - lecture_name|lecture_id
         // - lecturer_identifier| lecturer_idm,
-        // für später auch:  
         // - modul_name|modul_id ,
-        
+        // - semester
         
         // Note: Der Transient Name darf nicht länger als 172 Zeichen sein. 
         // Wenn der Transientenname länger als 172 Zeichen ist, wird er in 
@@ -103,6 +102,13 @@ class Cache  {
             $module = $aAtts['modul_name'];
             $module = preg_replace('/[^a-z0-9]+/i', '', $module);
         }
+        
+        $semester = 'nosem';
+        if (!empty($aAtts['sem'])) {
+            $semester = $aAtts['sem'];
+            $semester = preg_replace('/[^a-z0-9]+/i', '', $semester);     
+        }
+        
         $cachetype = 'raw';
         if (!empty($aAtts['cachetype'])) {
             $cachetype = $aAtts['cachetype'];
@@ -115,7 +121,7 @@ class Cache  {
             $format = preg_replace('/[^a-z0-9]+/i', '', $format);
         }
         
-        return $prefix."-".$orgnr."-".$degree."-".$lecture."-".$dozent."-".$module."-".$cachetype."-".$format;
+        return $prefix."-".$orgnr."-".$degree."-".$lecture."-".$dozent."-".$module."-".$semester."-".$cachetype."-".$format;
     }
     
     public function get_cached_data(array $aAtts = []) {
