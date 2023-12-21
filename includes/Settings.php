@@ -12,8 +12,7 @@ use function RRZE\Lectures\Config\getSections;
 /**
  * Settings-Klasse
  */
-class Settings
-{
+class Settings {
     /**
      * Der vollständige Pfad- und Dateiname der Plugin-Datei.
      * @var string
@@ -37,6 +36,13 @@ class Settings
      * @var array
      */
     protected $settingsMenu;
+    
+    
+    /**
+     * Settings-Bereiche
+     * @var array
+     */
+    protected $optionsPage;
 
     /**
      * Settings-Bereiche
@@ -102,8 +108,7 @@ class Settings
      * Er wird ausgeführt, sobald die Klasse instanziiert wird.
      * @return void
      */
-    public function onLoaded()
-    {
+    public function onLoaded() {
         $this->setMenu();
         $this->setSections();
         $this->setFields();
@@ -125,16 +130,14 @@ class Settings
         add_action('wp_ajax_nopriv_GetLectureData', [$this, 'ajaxGetLectureData']);
     }
 
-    protected function setMenu()
-    {
+    protected function setMenu() {
         $this->settingsMenu = getmenuSettings();
     }
 
     /**
      * Einstellungsbereiche einstellen.
      */
-    protected function setSections()
-    {
+    protected function setSections()  {
         $this->settingsSections = getSections();
     }
 
@@ -142,16 +145,14 @@ class Settings
      * Einen einzelnen Einstellungsbereich hinzufügen.
      * @param array   $section
      */
-    protected function addSection($section)
-    {
+    protected function addSection($section)  {
         $this->settingsSections[] = $section;
     }
 
     /**
      * Einstellungsfelder einstellen.
      */
-    protected function setFields()
-    {
+    protected function setFields()  {
         $this->settingsFields = getFields();
     }
 
@@ -160,8 +161,7 @@ class Settings
      * @param [type] $section [description]
      * @param [type] $field   [description]
      */
-    protected function addField($section, $field)
-    {
+    protected function addField($section, $field)  {
         $defaults = array(
             'name' => '',
             'label' => '',
@@ -177,8 +177,7 @@ class Settings
      * Gibt die Standardeinstellungen zurück.
      * @return array
      */
-    protected function defaultOptions()
-    {
+    protected function defaultOptions()  {
         $options = [];
 
         foreach ($this->settingsFields as $section => $field) {
@@ -196,8 +195,7 @@ class Settings
      * Gibt die Einstellungen zurück.
      * @return array
      */
-    public function getOptions()
-    {
+    public function getOptions() {
         $defaults = $this->defaultOptions();
 
         $options = (array) get_option($this->optionName);
@@ -214,8 +212,7 @@ class Settings
      * @param string  $default default text if it's not found
      * @return string
      */
-    public function getOption($section, $name, $default = '')
-    {
+    public function getOption($section, $name, $default = '')  {
         $option = $section . '_' . $name;
 
         if (isset($this->options[$option])) {
@@ -229,8 +226,7 @@ class Settings
      * Sanitize-Callback für die Optionen.
      * @return mixed
      */
-    public function sanitizeOptions($options)
-    {
+    public function sanitizeOptions($options) {
         if (!$options) {
             return $options;
         }
@@ -251,8 +247,7 @@ class Settings
      * @param string $key Option-Key
      * @return mixed string oder (bool) false
      */
-    protected function getSanitizeCallback($key = '')
-    {
+    protected function getSanitizeCallback($key = '')  {
         if (empty($key)) {
             return false;
         }
@@ -274,8 +269,7 @@ class Settings
      * Einstellungsbereiche als Registerkarte anzeigen.
      * Zeigt alle Beschriftungen der Einstellungsbereiche als Registerkarte an.
      */
-    public function showTabs()
-    {
+    public function showTabs()  {
         $html = '<h1>' . $this->settingsMenu['title'] . '</h1>' . PHP_EOL;
 
         if (count($this->settingsSections) < 2) {
@@ -304,8 +298,7 @@ class Settings
      * Anzeigen der Einstellungsbereiche.
      * Zeigt für jeden Einstellungsbereich das entsprechende Formular an.
      */
-    public function showSections()
-    {
+    public function showSections()  {
         foreach ($this->settingsSections as $section) {
             if ($this->settingsPrefix . $section['id'] != $this->currentTab) {
                 continue;
@@ -326,8 +319,7 @@ class Settings
     /**
      * Optionen Seitenausgabe
      */
-    public function pageOutput()
-    {
+    public function pageOutput()  {
         echo '<div class="wrap">', PHP_EOL;
         $this->showTabs();
         $this->showSections();
@@ -338,8 +330,7 @@ class Settings
     /**
      * Initialisierung und Registrierung der Bereiche und Felder.
      */
-    public function adminInit()
-    {
+    public function adminInit() {
         // Hinzufügen von Einstellungsbereichen
         foreach ($this->settingsSections as $section) {
             if (isset($section['desc']) && !empty($section['desc'])) {

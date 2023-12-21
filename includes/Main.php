@@ -19,13 +19,18 @@ class Main
      */
     protected $pluginFile;
 
+    /* Settings 
+    * @var Object    
+    */
+    protected $settings;
+    
+    
     public function __construct($pluginFile)
     {
         $this->pluginFile = $pluginFile;
     }
 
-    public function onLoaded()
-    {
+    public function onLoaded() {
         $functions = new Functions($this->pluginFile);
         $functions->onLoaded();
 
@@ -44,8 +49,7 @@ class Main
         $shortcode->onLoaded();
     }
 
-    public static function getThemeGroup()
-    {
+    public static function getThemeGroup() {
         $constants = getConstants();
         $ret = '';
         $active_theme = wp_get_theme();

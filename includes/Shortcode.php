@@ -25,12 +25,20 @@ class Shortcode {
     protected $options;
     protected $atts;
     protected $oDIP;
+    protected $Transient_Output;
+    protected $DPIAPI_limit_max;
+    protected $DPIAPI_totalentries_max;
+    protected $RequiredAttributs;
+    
+    public $use_cache;
+    
     private $settings = '';
     private $aAllowedColors = [];
     private $aAllowedFormats = [];
 
     private $aLanguages = [];
-
+    
+     
 
     /**
      * Variablen Werte zuweisen.
