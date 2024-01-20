@@ -9,7 +9,8 @@ defined('ABSPATH') || exit;
  * Define Template
  */
 class Template {
-    
+    public $template_cache;
+    public $formatlist;
     
     public function __construct()  {       
            $constants = getConstants();

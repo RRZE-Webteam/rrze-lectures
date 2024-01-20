@@ -12,7 +12,7 @@ See below for a list of supported attributes.
 |-----------------|---------------------------------------------------|----------|-------------------------------------|
 | `format`        | Sets the output view                              | linklist | linklist, tabs                      |
 | `fauorgnr`      | Optional filter for FAU-ORG Nummer                | setting  | Comma-separated FAU-ORG Numbers or "-" to not search with a FAU.ORG number |
-| `sem`           | optional filter for semester                      |          | SoSe`YYYY`, WiSe`YYYY`, -1, ein Semester zurück, -2, zwei Semester zurück, 1 aktuelles Semester              |
+| `sem`           | optional filter for semester                      |          | SoSe`YYYY`, WiSe`YYYY`, -1, ein Semester zurück, -2, zwei Semester zurück  |
 | `type`          | filters the lists of educationalEvent types       |          | Comma-separated list below          |
 | `degree`        | filters the lists of educationalEvent by degrees  |          | Title of a degree      |
 | `degree_key`    | filters the lists of educationalEvent by degrees  |          | HIS Key                             |

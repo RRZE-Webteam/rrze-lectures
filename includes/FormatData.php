@@ -37,11 +37,9 @@ class FormatData {
         // Input values in Campo are made in GERMAN. There could also be other languages, but default = 'de'
         $this->display_language_fallback = 'de';
 
-        // set $this->all_language_codes to 2-letters only (example: ['de', 'en', 'fr'])
-        // we need $this->all_language_codes to find out, which API-field is multilingual (API does not provide an explicit key for languages. Keys are the languagecodes f.e. "de" or "en")
-        $this->all_language_codes = array_map(function ($val) {
-            return substr($val, 0, 2);
-        }, \ResourceBundle::getLocales(''));
+        // Keep it simple, stupid!!
+        $this->all_language_codes = ['de', 'en'];
+
     }
 
     
