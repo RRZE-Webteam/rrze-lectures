@@ -24,7 +24,7 @@ See below for a list of supported attributes.
 | `lecturer_identifier`  | filters by responsible people with id      |          | Comma-separated list of identifier  |
 | `guest`         | filters by events that are avaible for guests     |          | 1                                   |
 | `sortby`	  | Sorts lectures of a given type by an attribut     | title    | title, nextdate                     |  
-
+| `nodata`	  | Replacement error code                            |          | String                              |
 
 
 ## List of types

@@ -300,7 +300,7 @@ class Shortcode {
                 
 
                 if ((is_array($response['content'])) && (isset($response['content']['pagination'])) && (isset($response['content']['pagination']['remaining']))) {
-                    $countentries = $this->atts['max'];
+                    $countentries = intval($this->atts['max']);
                     if ($response['content']['pagination']['remaining'] > 0) {
 
 
@@ -311,7 +311,7 @@ class Shortcode {
                             
                             if (isset($response['content']['data'])) {
                                 $data = array_merge($response['content']['data'], $data);
-                                $countentries +=  $response['content']['pagination']['count'];
+                                $countentries +=  intval($response['content']['pagination']['count']);
 
                             }
                         }
