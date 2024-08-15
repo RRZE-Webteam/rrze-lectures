@@ -197,7 +197,7 @@ class Functions {
         }, $_POST['data']);
 
         $aFieldnames = [
-            __('FAU Org Number', 'rrze-lectures'),
+            __('FAUorg Number', 'rrze-lectures'),
             __('Name of organization', 'rrze-lectures')
         ];
 

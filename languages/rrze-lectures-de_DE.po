@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: RRZE Lectures\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-13 13:53+0000\n"
-"PO-Revision-Date: 2023-09-12 15:46+0000\n"
+"PO-Revision-Date: 2024-08-15 07:52+0000\n"
 "Last-Translator: \n"
 "Language-Team: Deutsch\n"
 "Language: de_DE\n"
@@ -15,35 +15,37 @@ msgstr ""
 "X-Loco-Version: 2.6.3; wp-6.1.1\n"
 "X-Domain: rrze-lectures"
 
-#: includes/Functions.php:346, includes/Shortcode.php:677
+#: includes/Functions.php:314, includes/Shortcode.php:684
 msgid "-- All --"
 msgstr "-- Alle --"
 
-#: includes/Shortcode.php:755
+#: includes/Shortcode.php:762
 msgid "-- Current semester --"
 msgstr "-- Aktuelles Semester --"
 
 #: config/config.php:233
-msgid "Add FAU.ORG number only if other required search fields are missing"
+#| msgid "Add FAU.ORG number only if other required search fields are missing"
+msgid "Add FAUorg number only if other required search fields are missing"
 msgstr ""
-"Füge die FAU.ORG zur Suche nach Veranstaltungen nur dann hinzu, wenn alle "
-"anderen notwendigen Mindestangaben fehlen."
+"Füge die FAUorg Nummer zur Suche nach Veranstaltungen nur dann hinzu, wenn "
+"alle anderen notwendigen Mindestangaben fehlen."
 
 #: config/config.php:232
+#| msgid ""
+#| "Always add FAU.ORG number to query, unless the shortcode-parameter fauorg "
+#| "was filled"
 msgid ""
-"Always add FAU.ORG number to query, unless the shortcode-parameter fauorg "
-"was filled"
+"Always add FAUorg number to query, unless the shortcode-parameter fauorg was "
+"filled"
 msgstr ""
-"Füge die FAU.ORG Nummer immer zur Suche hinzu, ausser der Shortcode-"
-"Parameter fauorgnr wurde verwendet und eine andere Nummer wurde dort "
-"eingegeben."
+"Füge die FAUorg Nummer immer zur Suche hinzu, ausser der Shortcode-Parameter "
+"fauorgnr wurde verwendet und eine andere Nummer wurde dort eingegeben."
 
 #: templates/tabs/base.php:1
 msgid "Basic data"
 msgstr "Grunddaten"
 
 #: includes/Plugin.php:189
-#, php-format
 msgid "Call to undefined method %1$s::%2$s"
 msgstr "Aufruf einer nicht definierten Methode: %1$s::%2$s"
 
@@ -67,7 +69,7 @@ msgstr "Bemerkung"
 msgid "Course type"
 msgstr "Veranstaltungsart"
 
-#: includes/Functions.php:489
+#: includes/Functions.php:457
 msgid "Date"
 msgstr "Datum"
 
@@ -150,7 +152,7 @@ msgstr "Englisch"
 msgid "Examination regulations"
 msgstr "Prüfungsordnung"
 
-#: includes/Settings.php:896
+#: includes/Settings.php:889
 msgid "Family name"
 msgstr "Nachname"
 
@@ -158,15 +160,12 @@ msgstr "Nachname"
 msgid "FAU"
 msgstr "FAU"
 
-#: includes/Functions.php:232
-msgid "FAU Org Number"
-msgstr "FAU Org Nummer"
+#: config/config.php:217, config/config.php:319, includes/Functions.php:200
+#| msgid "FAU Org Number"
+msgid "FAUorg Number"
+msgstr "FAUorg Nummer"
 
-#: config/config.php:217, config/config.php:319
-msgid "FAU.ORG Number"
-msgstr "FAU.ORG Nummer"
-
-#: includes/Settings.php:889
+#: includes/Settings.php:882
 msgid ""
 "Fill in one or more of the following fields. A search by given name only is "
 "not possible."
@@ -186,7 +185,7 @@ msgstr "Format"
 msgid "French"
 msgstr "Französisch"
 
-#: includes/Functions.php:181
+#: includes/Functions.php:149
 msgid "Fri"
 msgstr "Fr"
 
@@ -194,7 +193,7 @@ msgstr "Fr"
 msgid "German"
 msgstr "Deutsch"
 
-#: includes/Settings.php:902
+#: includes/Settings.php:895
 msgid "Given name"
 msgstr "Vorname"
 
@@ -207,11 +206,11 @@ msgstr "Größe der Überschrift"
 msgid "Hide"
 msgstr "Ausblenden"
 
-#: includes/Functions.php:489
+#: includes/Functions.php:457
 msgid "ICS"
 msgstr "ICS"
 
-#: includes/Functions.php:288
+#: includes/Functions.php:256
 msgid "Identifier"
 msgstr "Identifier"
 
@@ -222,15 +221,15 @@ msgstr ""
 "Wenn Sie das CMS-Angebot von RRZE nutzen, müssen Sie den DIP-API-Schlüssel "
 "nicht eingeben."
 
-#: includes/Functions.php:489
+#: includes/Functions.php:457
 msgid "import to calendar"
 msgstr "Kalender importieren"
 
-#: includes/Shortcode.php:751
+#: includes/Shortcode.php:758
 msgid "Language"
 msgstr "Sprache"
 
-#: includes/Shortcode.php:745
+#: includes/Shortcode.php:752
 msgid "Lecture"
 msgstr "Lehrveranstaltung"
 
@@ -299,16 +298,16 @@ msgstr "Turnus des Angebots"
 msgid "Modules"
 msgstr "Module"
 
-#: includes/Functions.php:169
+#: includes/Functions.php:137
 msgid "Mon"
 msgstr "Mo"
 
-#: includes/Functions.php:289
+#: includes/Functions.php:257
 msgid "Name"
 msgstr "Name"
 
-#: includes/Functions.php:233, includes/Functions.php:290,
-#: includes/Settings.php:865
+#: includes/Functions.php:201, includes/Functions.php:258,
+#: includes/Settings.php:856
 msgid "Name of organization"
 msgstr "Name der Organisation"
 
@@ -354,7 +353,7 @@ msgstr ""
 msgid "Parallel groups / dates"
 msgstr "Parallelgruppen / Termine"
 
-#: includes/Shortcode.php:722
+#: includes/Shortcode.php:729
 msgid "Person"
 msgstr "Person"
 
@@ -364,7 +363,6 @@ msgstr "Phil"
 
 #. translators: 1: The plugin name, 2: The error string.
 #: rrze-lectures.php:163
-#, php-format
 msgid "Plugins: %1$s: %2$s"
 msgstr "Plugins:  %1$s: %2$s"
 
@@ -410,23 +408,24 @@ msgstr "Russisch"
 msgid "RW"
 msgstr "RW"
 
-#: includes/Functions.php:184
+#: includes/Functions.php:152
 msgid "Sat"
 msgstr "Sa"
 
-#: includes/Settings.php:872, includes/Settings.php:909
+#: includes/Settings.php:863, includes/Settings.php:902
 msgid "Search"
 msgstr "Suche"
 
-#: includes/Settings.php:858
-msgid "Search for FAU Org Number"
-msgstr "Suche nach FAU Org Nummer"
+#: includes/Settings.php:849
+#| msgid "Search for FAU Org Number"
+msgid "Search for FAUorg Number"
+msgstr "Suche nach FAUorg Nummer"
 
-#: includes/Settings.php:886
+#: includes/Settings.php:879
 msgid "Search for identifier"
 msgstr "Suche nach Identifier"
 
-#: includes/Shortcode.php:755
+#: includes/Shortcode.php:762
 msgid "Semester"
 msgstr "Semester"
 
@@ -440,12 +439,16 @@ msgid "Semester hours per week"
 msgstr "Semesterwochenstunden"
 
 #: config/config.php:227
+#| msgid ""
+#| "Set if the  FAU.ORG number set above, is always added to any shortcode "
+#| "request or is only used if no other required parameter was given in the "
+#| "shortcode."
 msgid ""
-"Set if the  FAU.ORG number set above, is always added to any shortcode "
+"Set if the  FAUorg number set above, is always added to any shortcode "
 "request or is only used if no other required parameter was given in the "
 "shortcode."
 msgstr ""
-"Definiere wie die oben angegebene FAU.ORG Nummer bei der Suche nach "
+"Definiere wie die oben angegebene FAUorg Nummer bei der Suche nach "
 "Veranstaltungen verwendet wird."
 
 #: templates/tabs/base.php:14
@@ -460,7 +463,7 @@ msgstr "Anzeigen"
 msgid "Spanish"
 msgstr "Spanisch"
 
-#: includes/Shortcode.php:765
+#: includes/Shortcode.php:772
 msgid "SS"
 msgstr "SS"
 
@@ -472,7 +475,7 @@ msgstr "Startdatum - Enddatum"
 msgid "Suitable for visiting students"
 msgstr "Für Gaststudierende geeignet"
 
-#: includes/Functions.php:187
+#: includes/Functions.php:155
 msgid "Sun"
 msgstr "So"
 
@@ -512,7 +515,6 @@ msgstr ""
 "unvollständig oder fehlerhaft."
 
 #: rrze-lectures.php:73
-#, php-format
 msgid ""
 "The server is running PHP version %1$s. The Plugin requires at least PHP "
 "version %2$s."
@@ -521,7 +523,6 @@ msgstr ""
 "die PHP Version %2$s."
 
 #: rrze-lectures.php:75
-#, php-format
 msgid ""
 "The server is running WordPress version %1$s. The Plugin requires at least "
 "WordPress version %2$s."
@@ -529,7 +530,7 @@ msgstr ""
 "Der Server verwendet WordPress in der Version %1$s. Das Plugin verlangt "
 "jedoch mindestens die WordPress Version %2$s."
 
-#: includes/Functions.php:178
+#: includes/Functions.php:146
 msgid "Thu"
 msgstr "Do"
 
@@ -538,19 +539,22 @@ msgid "Title"
 msgstr "Titel"
 
 #: config/config.php:218
+#| msgid ""
+#| "To receive lectures from another department use the attribute <strong>"
+#| "fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr=\"123\"]"
 msgid ""
 "To receive lectures from another department use the attribute <strong>"
-"fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr=\"123\"]"
+"fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr=\"1513001700\"]"
 msgstr ""
 "Um Lehrveranstaltungen einer anderen Organisation auszugeben, können Sie das "
-"Attribut <strong>fauorgnr</strong> im Shortcode verwenden. z.B. [lectures "
-"fauorgnr=\"123\"]"
+"Attribut <strong>fauorgnr</strong> im Shortcode verwenden. Zum Beispiel "
+"[lectures fauorgnr=\"1513001700\"]"
 
-#: includes/Functions.php:172
+#: includes/Functions.php:140
 msgid "Tue"
 msgstr "Di"
 
-#: includes/Shortcode.php:748
+#: includes/Shortcode.php:755
 msgid "Type"
 msgstr "Typ"
 
@@ -559,8 +563,9 @@ msgid "Type of the event. For example: Vorlesung"
 msgstr "Typ der Veranstaltung. Beispiel: Vorlesung"
 
 #: config/config.php:226
-msgid "Use FAU.ORG Number"
-msgstr "FAU.ORG Nummer verwenden"
+#| msgid "Use FAU.ORG Number"
+msgid "Use FAUorg Number"
+msgstr "FAUorg Nummer verwenden"
 
 #: config/config.php:393
 msgid "Visiting students"
@@ -584,10 +589,10 @@ msgstr ""
 "Die Suche ergab zu viele Treffer. Bitte verfeinern Sie die Suche durch "
 "weitere Suchfilter."
 
-#: includes/Functions.php:175
+#: includes/Functions.php:143
 msgid "Wed"
 msgstr "Mi"
 
-#: includes/Shortcode.php:766
+#: includes/Shortcode.php:773
 msgid "WS"
 msgstr "WS"
