@@ -214,8 +214,8 @@ function getFields()
             ],
             [
                 'name' => 'FAUOrgNr',
-                'label' => __('FAU.ORG Number', 'rrze-lectures'),
-                'desc' => __('To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr="123"]', 'rrze-lectures'),
+                'label' => __('FAUorg Number', 'rrze-lectures'),
+                'desc' => __('To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr="1513001700"]', 'rrze-lectures'),
                 'placeholder' => '',
                 'type' => 'text',
                 'default' => '',
@@ -223,14 +223,14 @@ function getFields()
             ],
             [
                 'name' => 'AddFAUORG',
-                'label' => __('Use FAU.ORG Number', 'rrze-lectures'),
-                'desc' => __('Set if the  FAU.ORG number set above, is always added to any shortcode request or is only used if no other required parameter was given in the shortcode.', 'rrze-lectures'),
+                'label' => __('Use FAUorg Number', 'rrze-lectures'),
+                'desc' => __('Set if the  FAUorg number set above, is always added to any shortcode request or is only used if no other required parameter was given in the shortcode.', 'rrze-lectures'),
                 'placeholder' => 'add',
                 'type' => 'radio',
                 'default' => 'add',
                 'options'   => array(
-                    'add'  => __('Always add FAU.ORG number to query, unless the shortcode-parameter fauorg was filled', 'rrze-lectures'),
-                    'ifrequired'  => __('Add FAU.ORG number only if other required search fields are missing', 'rrze-lectures'),
+                    'add'  => __('Always add FAUorg number to query, unless the shortcode-parameter fauorg was filled', 'rrze-lectures'),
+                    'ifrequired'  => __('Add FAUorg number only if other required search fields are missing', 'rrze-lectures'),
                 ),
                 'sanitize_callback' => 'sanitize_text_field',
             ],
@@ -316,7 +316,7 @@ function getShortcodeSettings()
             'fauorgnr' => [
                 'default' => '',
                 'field_type' => 'text',
-                'label' => __('FAU.ORG Number', 'rrze-lectures'),
+                'label' => __('FAUorg Number', 'rrze-lectures'),
                 'type' => 'string',
             ],
             'lecture_name' => [

@@ -1,4 +1,4 @@
-# Copyright (C) 2023 rrze-lectures
+# Copyright (C) 2024 rrze-lectures
 # This file is distributed under the same license as the rrze-lectures package.
 msgid ""
 msgstr ""
@@ -7,7 +7,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: RRZE-Webteam <webmaster@fau.de>\n"
-"POT-Creation-Date: 2023-09-12 15:41+0000\n"
+"POT-Creation-Date: 2024-08-15 07:46+0000\n"
 "Report-Msgid-Bugs-To: https://github.com/RRZE-Webteam/rrze-lectures/issues\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -105,28 +105,28 @@ msgstr ""
 msgid "If you use the CMS offer by RRZE, you do not need to enter the DIP API key."
 msgstr ""
 
-#: config/config.php:217, config/config.php:319
-msgid "FAU.ORG Number"
+#: config/config.php:217, config/config.php:319, includes/Functions.php:200
+msgid "FAUorg Number"
 msgstr ""
 
 #: config/config.php:218
-msgid "To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr=\"123\"]"
+msgid "To receive lectures from another department use the attribute <strong>fauorgnr</strong> in the shortcode. F.e. [lectures fauorgnr=\"1513001700\"]"
 msgstr ""
 
 #: config/config.php:226
-msgid "Use FAU.ORG Number"
+msgid "Use FAUorg Number"
 msgstr ""
 
 #: config/config.php:227
-msgid "Set if the  FAU.ORG number set above, is always added to any shortcode request or is only used if no other required parameter was given in the shortcode."
+msgid "Set if the  FAUorg number set above, is always added to any shortcode request or is only used if no other required parameter was given in the shortcode."
 msgstr ""
 
 #: config/config.php:232
-msgid "Always add FAU.ORG number to query, unless the shortcode-parameter fauorg was filled"
+msgid "Always add FAUorg number to query, unless the shortcode-parameter fauorg was filled"
 msgstr ""
 
 #: config/config.php:233
-msgid "Add FAU.ORG number only if other required search fields are missing"
+msgid "Add FAUorg number only if other required search fields are missing"
 msgstr ""
 
 #: config/config.php:242
@@ -249,63 +249,59 @@ msgstr ""
 msgid "Own errormessage in case an error occurs"
 msgstr ""
 
-#: includes/Functions.php:169
+#: includes/Functions.php:137
 msgid "Mon"
 msgstr ""
 
-#: includes/Functions.php:172
+#: includes/Functions.php:140
 msgid "Tue"
 msgstr ""
 
-#: includes/Functions.php:175
+#: includes/Functions.php:143
 msgid "Wed"
 msgstr ""
 
-#: includes/Functions.php:178
+#: includes/Functions.php:146
 msgid "Thu"
 msgstr ""
 
-#: includes/Functions.php:181
+#: includes/Functions.php:149
 msgid "Fri"
 msgstr ""
 
-#: includes/Functions.php:184
+#: includes/Functions.php:152
 msgid "Sat"
 msgstr ""
 
-#: includes/Functions.php:187
+#: includes/Functions.php:155
 msgid "Sun"
 msgstr ""
 
-#: includes/Functions.php:232
-msgid "FAU Org Number"
-msgstr ""
-
-#: includes/Functions.php:233, includes/Functions.php:290, includes/Settings.php:865
+#: includes/Functions.php:201, includes/Functions.php:258, includes/Settings.php:856
 msgid "Name of organization"
 msgstr ""
 
-#: includes/Functions.php:288
+#: includes/Functions.php:256
 msgid "Identifier"
 msgstr ""
 
-#: includes/Functions.php:289
+#: includes/Functions.php:257
 msgid "Name"
 msgstr ""
 
-#: includes/Functions.php:346, includes/Shortcode.php:677
+#: includes/Functions.php:314, includes/Shortcode.php:684
 msgid "-- All --"
 msgstr ""
 
-#: includes/Functions.php:489
+#: includes/Functions.php:457
 msgid "ICS"
 msgstr ""
 
-#: includes/Functions.php:489
+#: includes/Functions.php:457
 msgid "Date"
 msgstr ""
 
-#: includes/Functions.php:489
+#: includes/Functions.php:457
 msgid "import to calendar"
 msgstr ""
 
@@ -317,59 +313,59 @@ msgstr ""
 msgid "or"
 msgstr ""
 
-#: includes/Settings.php:858
-msgid "Search for FAU Org Number"
+#: includes/Settings.php:849
+msgid "Search for FAUorg Number"
 msgstr ""
 
-#: includes/Settings.php:872, includes/Settings.php:909
+#: includes/Settings.php:863, includes/Settings.php:902
 msgid "Search"
 msgstr ""
 
-#: includes/Settings.php:886
+#: includes/Settings.php:879
 msgid "Search for identifier"
 msgstr ""
 
-#: includes/Settings.php:889
+#: includes/Settings.php:882
 msgid "Fill in one or more of the following fields. A search by given name only is not possible."
 msgstr ""
 
-#: includes/Settings.php:896
+#: includes/Settings.php:889
 msgid "Family name"
 msgstr ""
 
-#: includes/Settings.php:902
+#: includes/Settings.php:895
 msgid "Given name"
 msgstr ""
 
-#: includes/Shortcode.php:722
+#: includes/Shortcode.php:729
 msgid "Person"
 msgstr ""
 
-#: includes/Shortcode.php:745
+#: includes/Shortcode.php:752
 msgid "Lecture"
 msgstr ""
 
-#: includes/Shortcode.php:748
+#: includes/Shortcode.php:755
 msgid "Type"
 msgstr ""
 
-#: includes/Shortcode.php:751
+#: includes/Shortcode.php:758
 msgid "Language"
 msgstr ""
 
-#: includes/Shortcode.php:755
+#: includes/Shortcode.php:762
 msgid "Semester"
 msgstr ""
 
-#: includes/Shortcode.php:755
+#: includes/Shortcode.php:762
 msgid "-- Current semester --"
 msgstr ""
 
-#: includes/Shortcode.php:765
+#: includes/Shortcode.php:772
 msgid "SS"
 msgstr ""
 
-#: includes/Shortcode.php:766
+#: includes/Shortcode.php:773
 msgid "WS"
 msgstr ""
 

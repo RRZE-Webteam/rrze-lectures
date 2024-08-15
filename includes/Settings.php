@@ -846,7 +846,7 @@ class Settings {
         <br><hr><br>
         <div class="wrap">
         <h3>
-                <?php echo __('Search for FAU Org Number', 'rrze-lectures'); ?>
+                <?php echo __('Search for FAUorg Number', 'rrze-lectures'); ?>
             </h3>
             <form method="post" id="search-fauorgnr-form">
                 <table class="form-table" role="presentation" class="striped">
@@ -871,6 +871,8 @@ class Settings {
             </form>
         </div>
         <div id="search-fauorgnr-result"></div>
+        
+        <!-- 
         <br><hr><br>
         <div class="wrap">
             <h3>
@@ -908,7 +910,7 @@ class Settings {
             </form>
         </div>
         <div id="search-identifier-result"></div>
-
+        -->
     <?php
     }
 
