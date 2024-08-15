@@ -18,7 +18,9 @@ class DIPAPI {
     protected $lectureParam;
     protected $sem;
     protected $gast;
-
+    protected $api_timeout;
+    protected $api_maxbytes;
+    
     // public function __construct($api, $orgID, $atts)
     public function __construct() {
         $this->api = 'https://api.fau.de/pub/v2/vz/';

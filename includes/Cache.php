@@ -12,6 +12,7 @@ use function RRZE\Lectures\Config\getConstants;
 class Cache  {
     protected $pluginFile;
     private $settings = '';
+    protected $constants;
     
     public function __construct() {
         $this->constants = getConstants();
