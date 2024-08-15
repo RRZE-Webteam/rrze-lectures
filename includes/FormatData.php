@@ -52,44 +52,64 @@ class FormatData {
         
         foreach ($data as $eventtype => $events) {
             foreach ($events as $id => $eventdata) {
+                $studonurl = '';
                 
-                
-                if (!empty($eventdata['providerValues']['courses'])) {
-
-                      // get Campo Link from first Course
-                    $first_course = array_key_first($eventdata['providerValues']['courses']);       
-                    if (isset($eventdata['providerValues']['courses'][$first_course]['url'])) {
-                        $data[$eventtype][$id]['campo_url'] = $eventdata['providerValues']['courses'][$first_course]['url'];
-                    }
-
-
-                   
+                if (!empty($eventdata['description'])) {
                     
-                    if (isset($eventdata['providerValues']['event']['link_studon'])) {
-                        // schaue ob der Link zu STudOn in den Eventdaten drin ist
-                        $data[$eventtype][$id]['studon_url'] = $eventdata['providerValues']['event']['link_studon'];                
-                    } elseif (isset($eventdata['providerValues']['courses'][$first_course]['studon_url'])) {
-                        // schau ob es in ProviderValues eine StudOnURL gibt
-                        $data[$eventtype][$id]['studon_url'] = $eventdata['providerValues']['courses'][$first_course]['studon_url'];
+                    if (!is_array($eventdata['description'])) {
+                        $studonurl = self::findStudOnURLinText($eventdata['description']);
                     } else {
-                        // leider keine URL übergeben.
-                        // Daher suche ich nun in dem Beschreibungstext der Kurse. Nehme da den ersten
-                        // Treffer
-                        
-                        foreach ($eventdata['providerValues']['courses'] as $course => $coursedata) {
-                            if (!empty($coursedata['contents'])) {
-                                $studonurl = self::findStudOnURLinText($coursedata['contents']);
-                                if (!empty($studonurl)) {    
-                                    $data[$eventtype][$id]['studon_url'] = $studonurl;
-                                    break;
+                        if (!empty($eventdata['description']['de'])) {
+                            $studonurl = self::findStudOnURLinText($eventdata['description']['de']);
+                        }
+                        if (empty($studonurl) && (!empty($eventdata['description']['en']))) {
+                             $studonurl = self::findStudOnURLinText($eventdata['description']['en']); 
+                        }
+                    }
+                }
+                
+                
+                if (!empty($studonurl)) {    
+                     $data[$eventtype][$id]['studon_url'] = $studonurl;
+                } else {
+                
+                    if (!empty($eventdata['providerValues']['courses'])) {
+
+                          // get Campo Link from first Course
+                        $first_course = array_key_first($eventdata['providerValues']['courses']);       
+                        if (isset($eventdata['providerValues']['courses'][$first_course]['url'])) {
+                            $data[$eventtype][$id]['campo_url'] = $eventdata['providerValues']['courses'][$first_course]['url'];
+                        }
+
+
+
+
+                        if (isset($eventdata['providerValues']['event']['link_studon'])) {
+                            // schaue ob der Link zu STudOn in den Eventdaten drin ist
+                            $data[$eventtype][$id]['studon_url'] = $eventdata['providerValues']['event']['link_studon'];                
+                        } elseif (isset($eventdata['providerValues']['courses'][$first_course]['studon_url'])) {
+                            // schau ob es in ProviderValues eine StudOnURL gibt
+                            $data[$eventtype][$id]['studon_url'] = $eventdata['providerValues']['courses'][$first_course]['studon_url'];
+                        } else {
+                            // leider keine URL übergeben.
+                            // Daher suche ich nun in dem Beschreibungstext der Kurse. Nehme da den ersten
+                            // Treffer
+
+                            foreach ($eventdata['providerValues']['courses'] as $course => $coursedata) {
+                                if (!empty($coursedata['contents'])) {
+                                    $studonurl = self::findStudOnURLinText($coursedata['contents']);
+                                    if (!empty($studonurl)) {    
+                                        $data[$eventtype][$id]['studon_url'] = $studonurl;
+                                        break;
+                                    }
                                 }
                             }
+
                         }
-                        
+
+
+
                     }
-                    
-                    
-                   
                 }
             }
         }
