@@ -4,7 +4,7 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         2.0.33
+ * Version:         2.0.34
  * Requires at least: 6.3
  * Requires PHP:      8.0
  * Author:          RRZE-Webteam
@@ -48,6 +48,9 @@ const RRZE_WP_VERSION = '6.3';
 $plugin_data = get_file_data(__FILE__, ['Version' => 'Version'], false);
 define("RRZE_PLUGIN_VERSION", $plugin_data['Version']); // f.e. to make javascript load on change during development
 
+
+// Load the plugin's text domain for localization.
+add_action('init', fn() => load_plugin_textdomain('rrze-lectures', false, dirname(plugin_basename(__FILE__)) . '/languages'));
 // Registriert die Plugin-Funktion, die bei Aktivierung des Plugins ausgeführt werden soll.
 register_activation_hook(__FILE__, __NAMESPACE__ . '\activation');
 // Registriert die Plugin-Funktion, die ausgeführt werden soll, wenn das Plugin deaktiviert wird.
@@ -55,13 +58,7 @@ register_deactivation_hook(__FILE__, __NAMESPACE__ . '\deactivation');
 // Wird aufgerufen, sobald alle aktivierten Plugins geladen wurden.
 add_action('plugins_loaded', __NAMESPACE__ . '\loaded');
 
-/**
- * Einbindung der Sprachdateien.
- */
-function loadTextDomain()
-{
-    load_plugin_textdomain('rrze-lectures', false, sprintf('%s/languages/', dirname(plugin_basename(__FILE__))));
-}
+
 
 /**
  * Überprüft die Systemvoraussetzungen.
@@ -93,10 +90,7 @@ function setFAUOrgNr(){
 /**
  * Wird nach der Aktivierung des Plugins ausgeführt.
  */
-function activation()
-{
-    // Sprachdateien werden eingebunden.
-    loadTextDomain();
+function activation() {
 
     // Überprüft die minimal erforderliche PHP- u. WP-Version.
     // Wenn die Überprüfung fehlschlägt, dann wird das Plugin automatisch deaktiviert.
@@ -120,8 +114,7 @@ function activation()
 /**
  * Wird durchgeführt, nachdem das Plugin deaktiviert wurde.
  */
-function deactivation()
-{
+function deactivation() {
     // Hier können die Funktionen hinzugefügt werden, die
     // bei der Deaktivierung des Plugins aufgerufen werden müssen.
     // Bspw. delete_option, wp_clear_scheduled_hook, flush_rewrite_rules, etc.
@@ -144,10 +137,8 @@ function plugin() {
  * Wird durchgeführt, nachdem das WP-Grundsystem hochgefahren
  * und alle Plugins eingebunden wurden.
  */
-function loaded()
-{
-    // Sprachdateien werden eingebunden.
-    loadTextDomain();
+function loaded() {
+
     plugin()->onLoaded();
 
     if ($error = systemRequirements()) {
