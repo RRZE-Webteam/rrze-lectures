@@ -1,10 +1,12 @@
 # RRZE Lectures
 
+[![Aktuelle Version](https://img.shields.io/github/package-json/v/rrze-webteam/rrze-lectures/main?label=Version)](https://github.com/RRZE-Webteam/rrze-lectures)
+[![Release Version](https://img.shields.io/github/v/release/rrze-webteam/rrze-lectures?label=Release+Version)](https://github.com/RRZE-Webteam/rrze-lectures/releases/)
+[![GitHub License](https://img.shields.io/github/license/rrze-webteam/rrze-lectures)](https://github.com/RRZE-Webteam/rrze-lectures)
+[![GitHub issues](https://img.shields.io/github/issues/RRZE-Webteam/rrze-lectures)](https://github.com/RRZE-Webteam/rrze-lectures/issues)
+
 Plugin zur Darstellung von Lehrveranstaltungen der FAU aus dem HISInOne System [Campo](https://campo.fau.de).
 
-## Download
-
-GITHub-Repo: https://github.com/RRZE-Webteam/rrze-lectures
 
 ## Autor
 
