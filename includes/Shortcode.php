@@ -568,8 +568,8 @@ class Shortcode {
         if (!empty($atts['lecture_name'])) {
             $atts['lecture_name'] = trim($atts['lecture_name']);
         }
-        if (!empty($atts['lecture_identifier'])) {
-            $atts['lecture_identifier'] = trim($atts['lecture_identifier']);
+        if (!empty($atts['lecturer_identifier'])) {
+            $atts['lecturer_identifier'] = trim($atts['lecturer_identifier']);
         }
 
         // sem
