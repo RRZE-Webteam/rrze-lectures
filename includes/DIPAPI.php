@@ -438,7 +438,9 @@ class DIPAPI {
 
                     $queryfield  = $dipField . (count($aTmp) > 1 ? '[in]=' : '=') . implode(urlencode(';'), $aTmp);
                     $aRQ[] = $queryfield;
-
+                    
+                } elseif (($dipField == 'names')) {  
+                    $aRQ[] = 'names[ireg]='.$aIn['names'];    
                 } elseif (($dipField == 'providerValues.modules.module_cos.subject')) {  
                     $aRQ[] = 'providerValues.modules.module_cos.subject[ireg]='.$aIn['providerValues.modules.module_cos.subject'];    
                 } elseif (($dipField == 'providerValues.event_orgunit.orgunit')) {  
