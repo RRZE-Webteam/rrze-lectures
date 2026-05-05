@@ -1,1 +1,0 @@
-createBlock(lecturesConfig);

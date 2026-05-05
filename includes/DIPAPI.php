@@ -1,15 +1,8 @@
 <?php
 
 namespace RRZE\Lectures;
-use function RRZE\Lectures\Config\getConstants;
 defined('ABSPATH') || exit;
 
-if (!function_exists('__')) {
-    function __($txt, $domain)
-    {
-        return $txt;
-    }
-}
 
 class DIPAPI {
 
@@ -24,7 +17,7 @@ class DIPAPI {
     // public function __construct($api, $orgID, $atts)
     public function __construct() {
         $this->api = 'https://api.fau.de/pub/v2/vz/';
-        $constants = getConstants();
+        $constants = Config::getConstants();
         $this->api_timeout = $constants['DIPAPI_timeout'];
         $this->api_maxbytes = $constants['DIPAPI_max_response_bytes'];
         
@@ -133,7 +126,7 @@ class DIPAPI {
         return $aRet;    
      }
 
-    public function getResponse(string $endpoint = 'educationEvents', string $sParam = NULL): array {
+    public function getResponse(string $endpoint = 'educationEvents', ?string $sParam = null): array {
         $aRet = [
             'valid' => FALSE, 
             'content' => ''

@@ -3,7 +3,6 @@
 namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
-use function RRZE\Lectures\Config\getConstants;
 
 
 /**
@@ -15,7 +14,7 @@ class Cache  {
     protected $constants;
     
     public function __construct() {
-        $this->constants = getConstants();
+        $this->constants = Config::getConstants();
     }
 
     public function onLoaded() {
@@ -165,6 +164,37 @@ class Cache  {
 
         set_transient( $transient_name, $content, $cachetime);
         return true;
+    }
+
+    public static function clearApiTransients(): int {
+        global $wpdb;
+
+        $constants = Config::getConstants();
+        $prefix = $constants['Transient_Prefix'] . '-';
+        $transientLike = $wpdb->esc_like('_transient_' . $prefix) . '%';
+
+        $optionNames = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $transientLike
+            )
+        );
+
+        if (empty($optionNames)) {
+            return 0;
+        }
+
+        $deleted = 0;
+
+        foreach ($optionNames as $optionName) {
+            $transientName = substr($optionName, strlen('_transient_'));
+
+            if (delete_transient($transientName)) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
     }
     
 }

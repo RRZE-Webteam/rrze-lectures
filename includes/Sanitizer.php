@@ -4,7 +4,6 @@ namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
-use function RRZE\Lectures\Config\getSanitizerMap;
 
 class Sanitizer
 {
@@ -17,7 +16,7 @@ class Sanitizer
 
     public function onLoaded()
     {
-        $this->aMap = getSanitizerMap();
+        $this->aMap = Config::getSanitizerMap();
     }
 
     public static function wp_kses_custom(string $str): string

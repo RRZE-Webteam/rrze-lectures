@@ -4,11 +4,9 @@
  * Plugin Name:     RRZE Lectures
  * Plugin URI:      https://github.com/RRZE-Webteam/rrze-lectures
  * Description:     Anzeige aufbereitete Daten zu Lehrveranstaltungen von DIP
- * Version:         2.0.35
- * Requires at least: 6.3
- * Requires PHP:      8.0
+ * Version:         2.0.36
  * Author:          RRZE-Webteam
- * Author URI:      https://blogs.fau.de/webworking/
+ * Author URI:      https://www.wp.rrze.fau.de/
  * License:         GNU General Public License v3
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.html
  * Domain Path:     /languages
@@ -20,9 +18,6 @@ namespace RRZE\Lectures;
 defined('ABSPATH') || exit;
 
 use RRZE\Lectures\Main;
-
-// Laden der Konfigurationsdatei
-require_once __DIR__ . '/config/config.php';
 
 // Automatische Laden von Klassen.
 // Autoloader (PSR-4)
@@ -50,7 +45,7 @@ define("RRZE_PLUGIN_VERSION", $plugin_data['Version']); // f.e. to make javascri
 
 
 // Load the plugin's text domain for localization.
-add_action('init', fn() => load_plugin_textdomain('rrze-lectures', false, dirname(plugin_basename(__FILE__)) . '/languages'));
+add_action('init', __NAMESPACE__ . '\loadTextdomain');
 // Registriert die Plugin-Funktion, die bei Aktivierung des Plugins ausgeführt werden soll.
 register_activation_hook(__FILE__, __NAMESPACE__ . '\activation');
 // Registriert die Plugin-Funktion, die ausgeführt werden soll, wenn das Plugin deaktiviert wird.
@@ -72,6 +67,10 @@ function systemRequirements(): string
         $error = sprintf(__('The server is running WordPress version %1$s. The Plugin requires at least WordPress version %2$s.', 'rrze-lectures'), $GLOBALS['wp_version'], RRZE_WP_VERSION);
     }
     return $error;
+}
+
+function loadTextdomain() {
+    load_plugin_textdomain('rrze-lectures', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 
 function setFAUOrgNr(){

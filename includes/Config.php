@@ -1,8 +1,10 @@
 <?php
 
-namespace RRZE\Lectures\Config;
+namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
+
+class Config {
 
 
 
@@ -10,13 +12,11 @@ defined('ABSPATH') || exit;
  * Gibt der Name der Option zurück.
  * @return array [description]
  */
-function getOptionName()
-{
+public static function getOptionName() {
     return 'rrze-lectures';
 }
 
-function getAvailableLanguages()
-{
+public static function getAvailableLanguages() {
     if (class_exists('\RRZE\Multilang\Locale')) {
         // rrze-multilang is used
         return \RRZE\Multilang\Locale::getAvailableLanguages();
@@ -35,8 +35,7 @@ function getAvailableLanguages()
 
 
 // getLanguageNativeName
-function getConstants()
-{
+public static function getConstants() {
     $options = array(
         'fauthemes' => [
             'FAU-Einrichtungen',
@@ -148,7 +147,7 @@ function getConstants()
     );
     
 
-    $aTmp = getShortcodeSettings();
+    $aTmp = self::getShortcodeSettings();
 
     foreach ($aTmp['lectures']['color']['values'] as $aVals) {
         if (!empty($aVals['id'])) {
@@ -168,8 +167,7 @@ function getConstants()
  * Gibt die Einstellungen des Menus zurück.
  * @return array [description]
  */
-function getMenuSettings()
-{
+public static function getMenuSettings() {
     return [
         'page_title' => __('RRZE Lectures', 'rrze-lectures'),
         'menu_title' => __('RRZE Lectures', 'rrze-lectures'),
@@ -184,8 +182,7 @@ function getMenuSettings()
  * Gibt die Einstellungen der Optionsbereiche zurück.
  * @return array [description]
  */
-function getSections()
-{
+public static function getSections() {
     return [
         [
             'id' => 'basic',
@@ -199,8 +196,7 @@ function getSections()
  * Gibt die Einstellungen der Optionsfelder zurück.
  * @return array [description]
  */
-function getFields()
-{
+public static function getFields() {
     $aRet = [
         'basic' => [
             [
@@ -246,53 +242,19 @@ function getFields()
                 'default' => '15',
                 'sanitize_callback' => 'sanitize_text_field',
             ],
+            [
+                'name' => 'LogLevel',
+                'label' => __('Debug messages', 'rrze-lectures'),
+                'desc' => __('Controls whether debug messages are sent to the RRZE log.', 'rrze-lectures'),
+                'type' => 'select',
+                'default' => '',
+                'options' => self::getLogLevels(),
+                'sanitize_callback' => [self::class, 'sanitizeLogLevel'],
+            ],
         ],
     ];
 
-    
-      /* 
-         *  Der untere Teil nun doch nach Überlegungen deaktiviert auch auch die Settings im Backend für Deutsch und Englishc weggemacht.
-         *   Erwägungsgründe:
-         *   - Wenn wir überall egal was ist, immer dieselbe Antwort im Fehlerfall geben, können wir
-         *     niht kenntlich machen, ob keine Daten kommen, weil es zu viele Daten waren, weil die Anfrage falsch war 
-         *     oder die API überlastet ist u.a. 
-         *     Der Webmaster hat somit keine einfache Möglichkeit den Shortcode zu reparieren oder die ANfrage zu verfeinern, 
-         *    wenn er nicht weiß´aus welcher Richtung das Problem kam.
-         *   - Wenn wir aber jeden Fehlerfall mit eigenen de/en - Fehlermeldungen anspeichern lassen, wird allein dadurch das
-         *     Setting voll und somit für den unbedarften Anwender erscheint das alles komplexer als es ist.
-         *     ZUdem sind das Fehlermeldungen, die normalerweise ohnehin nicht nach aussen sollten.
-         *   - Nach aussen hin, zum Leser der Website wäre in der Tat nur eine Meldung azseichend.
-         *     Aber diese kann durchaus so bleiben wie sie ist.
-         * 
-         * Daher:
-         *    Wir entfernen doch lieber die Settings aus dem Backend  
-         *    Es gibt verschiedene Fehlermeldungen die wir per Default vorgeben 
-         *    Wenn der Webmaster  für den Leser der Website eine eigene Meldung vorgeben möchte,
-         *     dann kann und soll er das individuell pro Shortcode machen.
-         *     Dann entfällt auch er AUfwand das zweisprachig zu sichern, denn jeder Shortcode wird ja 
-         *     bereits in einem definierten SPrachkontext geführt.
-         * 
-         * Unabhängig davon: Der vorherige Ansatz und die Lösung das mit den Settings so zu machen mit der
-         * Sprachabhängigkeit war genial und high sophisticated.
 
-      
-    // generate fields for nodata by available languages
-    $aNodata = [];
-
-    foreach (getAvailableLanguages() as $local => $lang) {
-        $aNodata[] = [
-            'name' => 'nodata_' . substr($local, 0, 2),
-            'label' => __('No data', 'rrze-lectures') . ' (' . trim(preg_replace('/\((.+?)\)/', '', $lang)) . ')',
-            'desc' => __('This sentence will be returned by default if shortcode couldn\'t find any data. You can use different messages in each shortcode by using the attribute nodata. F.e. [lectures nodata="No lectures found."]', 'rrze-lectures'),
-            'placeholder' => '',
-            'type' => 'text',
-            'default' => __('No matching entries found.', 'rrze-lectures'),
-            'sanitize_callback' => 'sanitize_text_field',
-        ];
-    }
-
-    $aRet['basic'] = array_merge($aRet['basic'], $aNodata);
-   */
     return $aRet;
 }
 
@@ -301,8 +263,7 @@ function getFields()
  * @return array [description]
  */
 
-function getShortcodeSettings()
-{
+public static function getShortcodeSettings() {
     return [
         'lectures' => [
             'block' => [
@@ -311,7 +272,6 @@ function getShortcodeSettings()
                 'title' => 'RRZE-Lectures',
                 'category' => 'widgets',
                 'icon' => 'bank',
-                'tinymce_icon' => 'paste',
             ],
             'fauorgnr' => [
                 'default' => '',
@@ -494,12 +454,61 @@ function getShortcodeSettings()
     ];
 }
 
-function getSanitizerMap()
-{
+public static function getSanitizerMap() {
     return [
         'startdate' => 'date',
         'enddate' => 'date',
         'starttime' => 'time',
         'endtime' => 'time',
     ];
+}
+
+public static function getLogLevels(): array {
+    return [
+        '' => __('No messages', 'rrze-lectures'),
+        'info' => __('From info', 'rrze-lectures'),
+        'notice' => __('From notice', 'rrze-lectures'),
+        'warning' => __('From warning', 'rrze-lectures'),
+        'error' => __('Only error', 'rrze-lectures'),
+    ];
+}
+
+public static function sanitizeLogLevel(string $level): string {
+    $level = sanitize_key($level);
+    $levels = self::getLogLevels();
+
+    if (!array_key_exists($level, $levels)) {
+        return '';
+    }
+
+    return $level;
+}
+
+public static function getLogLevel(): string {
+    $options = (array) get_option(self::getOptionName());
+    $level = $options['basic_LogLevel'] ?? '';
+
+    return self::sanitizeLogLevel((string) $level);
+}
+
+public static function shouldLog(string $level): bool {
+    $threshold = self::getLogLevel();
+
+    if ($threshold === '') {
+        return false;
+    }
+
+    $weights = [
+        'info' => 0,
+        'notice' => 1,
+        'warning' => 2,
+        'error' => 3,
+    ];
+
+    if (!array_key_exists($level, $weights)) {
+        return false;
+    }
+
+    return $weights[$level] >= $weights[$threshold];
+}
 }

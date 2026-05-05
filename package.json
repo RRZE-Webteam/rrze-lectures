@@ -1,58 +1,60 @@
 {
-    "name": "rrze-lectures",
-    "version": "2.0.35",
-    "description": "Anzeige aufbereiteter Daten zu Lehrveranstaltungen von Campo über DIP",
-    "main": "rrze-lectures.php",
-    "textdomain": "rrze-lectures",
-    "maincss": "rrze-lectures.css",
-    "mainjs": "rrze-lectures.js",
-    "source": {
-        "js": "./src/js/",
-        "sass": "./src/sass/"
-    },
-    "target": {
-        "js": "./js/",
-        "css": "./css/"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/RRZE-Webteam/rrze-lectures",
-        "issues": "https://github.com/RRZE-Webteam/rrze-lectures/issues",
-        "clone": "git+https://github.com/RRZE-Webteam/rrze-lectures.git"
-    },
-    "browserslist": [
-        "last 3 years"
-    ],
-    "supports": {
-        "email": "webmaster@fau.de",
-        "docs": "https://www.wordpress.rrze.fau.de/plugins/fau-und-rrze-plugins/rrze-lectures/"
-    },
-    "author": {
-        "name": "RRZE-Webteam <webmaster@fau.de>",
-        "url": "https://www.wordpress.rrze.fau.de/person/webmaster"
-    },
-    "license": "GNU General Public License v3",
-    "devDependencies": {
-        "@babel/core": "^7.12.10",
-        "@babel/preset-env": "^7.12.11",
-        "@babel/register": "^7.12.10",
-        "autoprefixer": "^10.2.3",
-        "cssnano": "^5.0.13",
-        "gulp": "^4.0.2",
-        "gulp-babel": "^8.0.0",
-        "gulp-bump": "^3.2.0",
-        "gulp-concat": "^2.6.1",
-        "gulp-dart-sass": "^1.0.2",
-        "gulp-postcss": "^9.0.0",
-        "gulp-sass": "^5.0.0",
-        "gulp-touch-cmd": "0.0.1",
-        "gulp-uglify": "^3.0.2",
-        "gulp-wp-pot": "^2.5.0",
-        "sass": "^1.42.1",
-        "semver": "^7.3.4",
-        "yargs": "^16.2.0"
-    }
+  "name": "rrze-lectures",
+  "title": "RRZE Lectures",
+  "version": "2.0.36",
+  "description": "Anzeige aufbereiteter Daten zu Lehrveranstaltungen von Campo über DIP",
+  "main": "rrze-lectures.php",
+  "textdomain": "rrze-lectures",
+  "textDomain": "rrze-lectures",
+  "private": true,
+  "scripts": {
+    "readme": "node scripts/build-readme.js",
+    "version:dev": "node scripts/build-version.js dev",
+    "version:prod": "node scripts/build-version.js prod",
+    "version:release": "node scripts/build-version.js release",
+    "dev": "node scripts/build-assets.js dev && npm run version:dev && npm run readme",
+    "build": "node scripts/build-assets.js prod && npm run version:prod && npm run readme",
+    "prod": "npm run build",
+    "release": "node scripts/build-assets.js prod && npm run version:release && npm run readme",
+    "watch": "node scripts/build-assets.js dev --watch"
+  },
+  "compatibility": {
+    "wprequires": "6.3",
+    "wptestedup": "6.9.4",
+    "phprequires": "8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RRZE-Webteam/rrze-lectures",
+    "issues": "https://github.com/RRZE-Webteam/rrze-lectures/issues",
+    "clone": "git+https://github.com/RRZE-Webteam/rrze-lectures.git"
+  },
+  "browserslist": [
+    "last 3 years"
+  ],
+  "supports": {
+    "email": "webmaster@fau.de",
+    "docs": "https://www.wp.rrze.fau.de/plugins/fau-und-rrze-plugins/rrze-lectures/"
+  },
+  "author": {
+    "name": "RRZE-Webteam <webmaster@fau.de>",
+    "url": "https://www.wp.rrze.fau.de/"
+  },
+  "source": {
+    "js": "./src/js/",
+    "css": "./src/sass/"
+  },
+  "target": {
+    "js": "./js/",
+    "css": "./css/"
+  },
+  "license": "GNU General Public License v3",
+  "licenseurl": "http://www.gnu.org/licenses/gpl-3.0.html",
+  "tags": "Plugin, WordPress, Lectures, RRZE, FAU",
+  "devDependencies": {
+    "sass": "^1.94.2"
+  },
+  "dependencies": {
+    "esbuild": "^0.27.3"
+  }
 }

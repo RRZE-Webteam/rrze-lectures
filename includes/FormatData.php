@@ -19,7 +19,6 @@ namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
-use function RRZE\Lectures\Config\getSanitizerMap;
 
 
 class FormatData {

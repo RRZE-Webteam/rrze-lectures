@@ -4,10 +4,6 @@ namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
-use function RRZE\Lectures\Config\getFields;
-use function RRZE\Lectures\Config\getMenuSettings;
-use function RRZE\Lectures\Config\getOptionName;
-use function RRZE\Lectures\Config\getSections;
 
 /**
  * Settings-Klasse
@@ -114,10 +110,10 @@ class Settings {
         $this->setFields();
         $this->setTabs();
 
-        $this->optionName = getOptionName();
+        $this->optionName = Config::getOptionName();
         $this->options = $this->getOptions();
 
-        // Save options if they haven't been saved at least once because we need them for ICS (see https://github.com/RRZE-Webteam/rrze-lectures/issues/180)
+        // Save options if they haven't been saved at least once.
         $storedOptions = get_option('rrze-lectures');
         if (empty($storedOptions)) {
             update_option('rrze-lectures', $this->options);
@@ -125,20 +121,19 @@ class Settings {
 
         add_action('admin_init', [$this, 'adminInit']);
         add_action('admin_menu', [$this, 'adminMenu']);
+        add_action('admin_post_rrze_lectures_clear_cache', [$this, 'clearTransientCache']);
         add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
-        add_action('wp_ajax_GetLectureData', [$this, 'ajaxGetLectureData']);
-        add_action('wp_ajax_nopriv_GetLectureData', [$this, 'ajaxGetLectureData']);
     }
 
     protected function setMenu() {
-        $this->settingsMenu = getmenuSettings();
+        $this->settingsMenu = Config::getMenuSettings();
     }
 
     /**
      * Einstellungsbereiche einstellen.
      */
     protected function setSections()  {
-        $this->settingsSections = getSections();
+        $this->settingsSections = Config::getSections();
     }
 
     /**
@@ -153,7 +148,7 @@ class Settings {
      * Einstellungsfelder einstellen.
      */
     protected function setFields()  {
-        $this->settingsFields = getFields();
+        $this->settingsFields = Config::getFields();
     }
 
     /**
@@ -321,9 +316,32 @@ class Settings {
      */
     public function pageOutput()  {
         echo '<div class="wrap">', PHP_EOL;
+        $this->showCacheNotice();
         $this->showTabs();
         $this->showSections();
         echo '</div>', PHP_EOL;
+    }
+
+    public function showCacheNotice(): void {
+        if (!isset($_GET['rrze-lectures-cache-cleared'])) {
+            return;
+        }
+
+        $deleted = isset($_GET['deleted']) ? absint($_GET['deleted']) : 0;
+        $message = sprintf(
+            _n(
+                '%d transient cache entry deleted.',
+                '%d transient cache entries deleted.',
+                $deleted,
+                'rrze-lectures'
+            ),
+            $deleted
+        );
+
+        printf(
+            '<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+            esc_html($message)
+        );
     }
 
 
@@ -419,8 +437,7 @@ class Settings {
 
     public function adminEnqueueScripts()
     {
-        wp_register_script('wp-color-picker-settings', plugins_url('js/wp-color-picker.js', plugin_basename($this->pluginFile)));
-        wp_register_script('wp-media-settings', plugins_url('js/wp-media.js', plugin_basename($this->pluginFile)));
+        return;
     }
 
     /**
@@ -431,7 +448,6 @@ class Settings {
     {
         wp_enqueue_style('wp-color-picker');
         wp_enqueue_script('wp-color-picker');
-        wp_enqueue_script('wp-color-picker-settings');
         wp_enqueue_script('jquery');
     }
 
@@ -442,7 +458,6 @@ class Settings {
     public function fileEnqueueScripts()
     {
         wp_enqueue_media();
-        wp_enqueue_script('wp-media-settings');
         wp_enqueue_script('jquery');
     }
 
@@ -871,47 +886,43 @@ class Settings {
             </form>
         </div>
         <div id="search-fauorgnr-result"></div>
-        
-        <!-- 
         <br><hr><br>
         <div class="wrap">
-            <h3>
-                <?php echo __('Search for identifier', 'rrze-lectures'); ?>
-            </h3>
-            <p>
-                <?php echo __('Fill in one or more of the following fields. A search by given name only is not possible.', 'rrze-lectures'); ?>
-            </p>
-            <form method="post" id="search-identifier-form">
-                <table class="form-table" role="presentation" class="striped">
-                    <tbody>
-                    <tr>
-                            <th scope="row">
-                                <?php echo __('Family name', 'rrze-lectures'); ?>
-                            </th>
-                            <td><input type="text" name="familyName" id="familyName" value=""></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <?php echo __('Given name', 'rrze-lectures'); ?>
-                            </th>
-                            <td><input type="text" name="givenName" id="givenName" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="button" id="search-identifier-button" class="button button-primary"
-                                    value="<?php echo __('Search', 'rrze-lectures'); ?>">
-                            </td>
-                            <td>
-                                <div id="search-identifier-loading"><i class="fa fa-refresh fa-spin fa-2x aligncenter"></i></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <h3><?php echo esc_html__('Transient cache', 'rrze-lectures'); ?></h3>
+            <p><?php echo esc_html__('Delete cached API query results so lectures data will be requested again.', 'rrze-lectures'); ?></p>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="rrze_lectures_clear_cache">
+                <?php wp_nonce_field('rrze_lectures_clear_cache'); ?>
+                <?php submit_button(__('Delete transient cache', 'rrze-lectures'), 'secondary', 'submit', false); ?>
             </form>
         </div>
-        <div id="search-identifier-result"></div>
-        -->
     <?php
+    }
+
+    public function clearTransientCache(): void {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You are not allowed to perform this action.', 'rrze-lectures'));
+        }
+
+        check_admin_referer('rrze_lectures_clear_cache');
+
+        $deleted = Cache::clearApiTransients();
+        $redirect = wp_get_referer();
+
+        if (empty($redirect)) {
+            $redirect = admin_url('options-general.php?page=' . $this->settingsMenu['menu_slug']);
+        }
+
+        $redirect = add_query_arg(
+            [
+                'rrze-lectures-cache-cleared' => 1,
+                'deleted' => $deleted,
+            ],
+            $redirect
+        );
+
+        wp_safe_redirect($redirect);
+        exit;
     }
 
 }

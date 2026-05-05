@@ -82,3 +82,7 @@ function createBlock(blockConfig) {
 		}
 	} );
 }
+
+if (typeof lecturesConfig !== 'undefined') {
+	createBlock(lecturesConfig);
+}

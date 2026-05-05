@@ -2,7 +2,6 @@
 
 namespace RRZE\Lectures;
 
-use function RRZE\Lectures\Config\getConstants;
 defined('ABSPATH') || exit;
 
 /**
@@ -11,9 +10,9 @@ defined('ABSPATH') || exit;
 class Template {
     public $template_cache;
     public $formatlist;
-    
-    public function __construct()  {       
-           $constants = getConstants();
+
+    public function __construct()  {
+           $constants = Config::getConstants();
            $this->formatlist = $constants['template_formats'];
            $this->template_cache = [];
             // we dont want to load the same templates thousand times,
@@ -24,10 +23,10 @@ class Template {
         return true;
     }
 
-   
+
     /*
      * Parses a Template Setting by its name
-     * A Template Setting can contain also subtemplates and is defined in 
+     * A Template Setting can contain also subtemplates and is defined in
      * the config
      *
      * Beispiel einer Format-Setting in der Config:
@@ -36,62 +35,62 @@ class Template {
                     // definiert das Verzeichnis des Templates und
                     // den Filename der Basis-Template. Hier:  tabs/tabs.php
                     // Die Basistempöate wird immer geladen und ausgeführt.
-                    
+
                 'contains'  => [
-                    // Wenn der Array nicht leer ist, kann man hier subtemplates 
+                    // Wenn der Array nicht leer ist, kann man hier subtemplates
                     // definieren, die geladen und interpretiert werden und
-                    // deren Inhalt dann als Variable in dem Basistemplate 
+                    // deren Inhalt dann als Variable in dem Basistemplate
                     // eingefügt werden.
                     'base'  => [
                         'name'      => 'base',
                             // definiert den Templatenamen im Verzeichnis
                             // und auch wie dessen Inhalte dann mit {{=subtemplate_base}}
-                            // in der darüber liegenden Template File addressiert 
+                            // in der darüber liegenden Template File addressiert
                             // werden
                             // Darf nicht identisch sein mit dem Namen
                             // des Verzeichnisses und der Haupt-Templatefile
                         'attribut'  => 'base',
                             // Attribut zum schalten via show/hide
                             // Sollte nicht den selben Namen tragen wie andere Attribute
-                            // aus der API. Aber kann durchaus :) 
-                        'default'   => true,                      
+                            // aus der API. Aber kann durchaus :)
+                        'default'   => true,
                             // Definiert ob per Default sichtbar oder nicht
                     ]
                 ]
             ],
      */
-    
-    public function parseSetting(string $template_name, array $data, array $atts): string { 
+
+    public function parseSetting(string $template_name, array $data, array $atts): string {
         if ((empty($template_name)) || (!isset($this->formatlist[$template_name]))) {
             return '';
         }
-        
+
         $dir = $this->formatlist[$template_name]['name'];
         $content = '';
         $parser = new Parser();
-        
-        // Also add $atts to $data 
+
+        // Also add $atts to $data
         foreach ($atts as $name => $value) {
             $attvarname = "atts_".$name;
             $data[$attvarname] = $value;
-        }    
-        
+        }
+
         // Generate special atts
-        $data['atts_show_degree_title'] = (empty($atts['hide_degree'])? true : false);  
+        $data['atts_show_degree_title'] = (empty($atts['hide_degree'])? true : false);
         $data['atts_do_accordion'] = !($atts['hide_degree_accordion'] && $atts['hide_type_accordion']);
         $data['atts_do_type_accordion'] = !$atts['hide_type_accordion'];
         $data['atts_do_degree_accordion'] = !$atts['hide_degree_accordion'];
-        
 
-        
+
+
         if (!empty($this->formatlist[$template_name]['contains'])) {
             // Enthält Sub-Template
             foreach ($this->formatlist[$template_name]['contains'] as $subtemplate) {
                 $attname = $subtemplate['attribut'];
-                
+
                 if ((($subtemplate['default'] == true) && (!isset($atts['hide_'.$attname])))
                  || (($subtemplate['default'] == false) && (isset($atts['show_'.$attname])))) {
-                    
+
                     $subtemplate_file = $dir.'/'.$subtemplate['name'].'.php';
                     $cachename = $dir.'/'.$subtemplate['name'];
                     if ((!isset($this->template_cache[$cachename])) || (empty($this->template_cache[$cachename]))) {
@@ -102,22 +101,21 @@ class Template {
                     } else {
                         $subcontent = $this->template_cache[$cachename];
                     }
-                    
+
                     if (!empty($subcontent)) {
-             //           $content .= Debug::get_notice("Parsing Subtemplate ".$subtemplate['name']." with file ".$subtemplate_file);      
                         $parsed_subcontent = $parser->parse($subcontent, $data);
-                    
+
                         if (!empty($parsed_subcontent)) {
                             $data["subtemplate_".$subtemplate['name']] = $parsed_subcontent;
                         }
                     }
- 
+
                 }
 
             }
 
         }
-        $basetemplate = $dir.'/'.$dir.'.php';  
+        $basetemplate = $dir.'/'.$dir.'.php';
         $cachename = $dir.'/'.$dir;
         if ((!isset($this->template_cache[$cachename])) || (empty($this->template_cache[$cachename]))) {
             $base_content = self::getTemplate($basetemplate);
@@ -127,18 +125,17 @@ class Template {
         } else {
             $base_content = $this->template_cache[$cachename];
         }
-       
-   //     $content .= Debug::get_notice("Base Template: $template_name in $basetemplate ");      
+
         if (!empty($base_content)) {
-           $content .= $parser->parse($base_content, $data); 
+           $content .= $parser->parse($base_content, $data);
         }
 
         return $content;
     }
-        
-    
-       
-    
+
+
+
+
     public static function getContent(string $template = '', array &$data = []): string
     {
         return self::parseContent($template, $data);
@@ -172,9 +169,8 @@ class Template {
             include($templateFile);
             $content = ob_get_contents();
             @ob_end_clean();
-        } else{
-            Debug::log('warn','warning',$templateFile . ' not readable');
-
+        } else {
+            Functions::log('warning', $templateFile . ' not readable', ['template_file' => $templateFile]);
         }
         return $content;
     }

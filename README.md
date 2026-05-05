@@ -24,15 +24,4 @@ GNU General Public License (GPL) Version 3
 ## Hinweise
 
 Dieses Plugin kann sowohl mit dem WordPress Classic Editor als auch mit dem Block Editor verwendet werden.
-Zur Nutzung auf Eigeninstallationen ist die Beantragung eines API-Keys für den [FAU API Service](https://api.fau.de/) notwendig. 
-
-## Debugging
-
-Use
-
-```
- ?debug=1&nocache=1
-```
-
-for debugging purpose on allowed hosts or as multisite superadmin.
-
+Zur Nutzung auf Eigeninstallationen ist die Beantragung eines API-Keys für den [FAU API Service](https://api.fau.de/) notwendig.

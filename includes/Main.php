@@ -4,7 +4,6 @@ namespace RRZE\Lectures;
 
 defined('ABSPATH') || exit;
 
-// use function RRZE\Lectures\Config\getConstants;
 use RRZE\Lectures\Settings;
 use RRZE\Lectures\Shortcode;
 
@@ -50,7 +49,7 @@ class Main
     }
 
     public static function getThemeGroup() {
-        $constants = getConstants();
+        $constants = Config::getConstants();
         $ret = '';
         $active_theme = wp_get_theme();
         $active_theme = $active_theme->get('Name');
