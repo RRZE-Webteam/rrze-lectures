@@ -8,6 +8,7 @@ function createBlock(blockConfig) {
 	const { serverSideRender } = wp;
     
     registerBlockType( blockConfig.block.blocktype, {
+		apiVersion: 3,
 		title: blockConfig.block.title,
 		category: blockConfig.block.category,
 		icon: blockConfig.block.icon,

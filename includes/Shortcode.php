@@ -815,6 +815,7 @@ class Shortcode {
             register_block_type(
                 $settings['block']['blocktype'],
                 array(
+                    'api_version' => 3,
                     'editor_script' => $editor_script,
                     'render_callback' => [$this, 'shortcodeOutput'],
                     'attributes' => $settings,
